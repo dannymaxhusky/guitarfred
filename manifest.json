@@ -1,6 +1,6 @@
 {
-  "name": "GuitarFred",
-  "short_name": "GuitarFred",
+  "name": "GuitarFret",
+  "short_name": "GuitarFret",
   "description": "吉他指板、和弦识别和和弦地图工具",
   "start_url": "./index.html",
   "scope": "./",

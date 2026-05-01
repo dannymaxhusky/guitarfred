@@ -2,15 +2,15 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#17201b">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="GuitarFred">
+  <meta name="apple-mobile-web-app-title" content="GuitarFret">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon.svg">
-  <title>GuitarFred - 和弦指板 Guide</title>
+  <title>GuitarFret - 和弦指板 Guide</title>
   <style>
     :root {
       color-scheme: light;
@@ -44,6 +44,18 @@
       color: var(--ink);
       min-height: 100vh;
       overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: env(safe-area-inset-top);
+      background: var(--bg);
+      pointer-events: none;
+      z-index: 100;
     }
 
     button,
@@ -990,9 +1002,31 @@
       }
 
       .layout,
-      header,
-      .toolbar {
+      header {
         grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+      }
+
+      .root-picker,
+      .quality-picker {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+      }
+
+      .root-picker::-webkit-scrollbar,
+      .quality-picker::-webkit-scrollbar {
+        display: none;
+      }
+
+      .root-picker button,
+      .quality-picker button {
+        flex: 0 0 auto;
       }
 
       .layout {
@@ -1055,11 +1089,16 @@
 
       .toolbar {
         padding: 8px;
+        gap: 8px;
+        grid-template-columns: 1fr;
       }
 
       .root-picker,
       .quality-picker {
         gap: 5px;
+        flex-wrap: wrap;
+        overflow-x: visible;
+        padding-bottom: 0;
       }
 
       .root-picker button,
@@ -1080,7 +1119,6 @@
         min-width: 0;
       }
 
-      .voicing-list,
       .song-strip,
       .notes,
       .anchor-grid,
@@ -1089,6 +1127,24 @@
       .drill-actions {
         grid-template-columns: 1fr;
       }
+
+      .voicing-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .voicing-card {
+        min-height: 58px;
+        padding: 8px;
+      }
+
+      .voicing-card strong {
+        font-size: 14px;
+      }
+
+      .voicing-card span:last-child {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -1096,7 +1152,7 @@
   <main class="app">
     <header>
       <div>
-        <h1>GuitarFred</h1>
+        <h1>GuitarFret</h1>
         <p class="subtitle">把“看谱弹”拆成可理解的指板地图：根音在哪里、这个把位为什么成立、同一个和弦还能去哪里、下一和弦怎样移动最省力。</p>
       </div>
       <nav class="practice-switch" aria-label="练习模式">
