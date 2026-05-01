@@ -1,0 +1,19 @@
+{
+  "name": "GuitarFred",
+  "short_name": "GuitarFred",
+  "description": "吉他指板、和弦识别和和弦地图工具",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f2ea",
+  "theme_color": "#17201b",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

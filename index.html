@@ -1,0 +1,2414 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17201b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="GuitarFred">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <title>GuitarFred - 和弦指板 Guide</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17201b;
+      --muted: #66746d;
+      --line: #d8ded8;
+      --panel: #ffffff;
+      --bg: #f5f2ea;
+      --wood: #c98d55;
+      --wood-dark: #8d5730;
+      --root: #d94d38;
+      --third: #1b7f79;
+      --fifth: #6f5aa7;
+      --seventh: #d18916;
+      --ghost: #eef1ee;
+      --focus: #174f8a;
+      --shadow: 0 14px 38px rgba(38, 30, 18, .12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(180deg, rgba(245, 242, 234, .94), rgba(245, 242, 234, .98)),
+        radial-gradient(circle at 20% 10%, rgba(217, 77, 56, .13), transparent 30%),
+        radial-gradient(circle at 82% 12%, rgba(27, 127, 121, .12), transparent 24%);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 8px;
+      min-height: 38px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    button:hover,
+    button:focus-visible,
+    select:focus-visible {
+      outline: 2px solid rgba(23, 79, 138, .22);
+      border-color: var(--focus);
+    }
+
+    .app {
+      width: min(1220px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 12px 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 18px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 3vw, 40px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 740px;
+      line-height: 1.45;
+    }
+
+    .practice-switch {
+      display: flex;
+      gap: 8px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .72);
+      border-radius: 10px;
+    }
+
+    .practice-switch button {
+      border: 0;
+      background: transparent;
+      min-width: 84px;
+    }
+
+    .practice-switch button.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(320px, .85fr);
+      gap: 12px;
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .board-column,
+    .side {
+      min-height: 0;
+      overflow: hidden;
+      scrollbar-gutter: stable;
+    }
+
+    .toolbar,
+    .panel {
+      background: rgba(255, 255, 255, .86);
+      border: 1px solid rgba(216, 222, 216, .9);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.35fr .85fr;
+      gap: 12px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .control-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .control-group > span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .root-picker,
+    .quality-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .root-picker button,
+    .quality-picker button {
+      min-height: 36px;
+      padding: 6px 9px;
+      font-weight: 900;
+      background: #fff;
+    }
+
+    .root-picker button.active,
+    .quality-picker button.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    select {
+      width: 100%;
+      min-height: 40px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 10px;
+    }
+
+    .fretboard-panel {
+      padding: 12px;
+      min-height: 100%;
+    }
+
+    .board-sticky {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      background: rgba(255, 255, 255, .92);
+      border-radius: 8px;
+      padding-bottom: 8px;
+      z-index: 8;
+    }
+
+    .selected-title {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .selected-title h2 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #eef1ee;
+      color: #35433c;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .fretboard-wrap {
+      position: relative;
+      overflow-x: auto;
+      padding: 6px 0 12px;
+    }
+
+    .fretboard {
+      position: relative;
+      min-width: 760px;
+      height: 248px;
+      display: grid;
+      grid-template-columns: 54px repeat(13, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      background: linear-gradient(90deg, #f2c78a, #bd7e44);
+      border: 2px solid var(--wood-dark);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .24);
+    }
+
+    .fretboard.vertical {
+      min-width: 0;
+      width: 100%;
+      height: min(58vh, 520px);
+      grid-template-columns: 32px repeat(6, 1fr);
+      grid-template-rows: 46px repeat(13, 1fr);
+    }
+
+    .nut {
+      grid-row: 1 / 7;
+      grid-column: 1;
+      background: #efe5d2;
+      border-right: 4px solid #534338;
+      z-index: 1;
+    }
+
+    .fretboard.vertical .nut {
+      grid-row: 1;
+      grid-column: 2 / 8;
+      border-right: 0;
+      border-bottom: 4px solid #534338;
+    }
+
+    .cell {
+      position: relative;
+      border-right: 2px solid rgba(82, 59, 41, .48);
+      border-left: 0;
+      border-top: 0;
+      border-bottom: 0;
+      border-radius: 0;
+      min-height: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    .fretboard.vertical .cell {
+      border-right: 0;
+      border-bottom: 2px solid rgba(82, 59, 41, .48);
+    }
+
+    .string-wire {
+      content: "";
+      position: relative;
+      align-self: center;
+      justify-self: stretch;
+      background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(130,136,135,.78) 42%, rgba(52,56,55,.72) 58%, rgba(255,255,255,.38));
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, .35),
+        0 2px 3px rgba(45, 31, 18, .25);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .fretboard.vertical .string-wire {
+      align-self: stretch;
+      justify-self: center;
+      width: 2px;
+      height: auto !important;
+      background: linear-gradient(90deg, rgba(255,255,255,.88), rgba(130,136,135,.78) 42%, rgba(52,56,55,.72) 58%, rgba(255,255,255,.38));
+    }
+
+    .fretboard.vertical .string-wire.wound {
+      background:
+        repeating-linear-gradient(180deg, rgba(255,255,255,.22) 0 2px, rgba(82,69,53,.18) 2px 4px),
+        linear-gradient(90deg, #d7c9a2, #8a795a 45%, #3e372b 58%, #c7b889);
+    }
+
+    .string-wire.wound {
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.22) 0 2px, rgba(82,69,53,.18) 2px 4px),
+        linear-gradient(180deg, #d7c9a2, #8a795a 45%, #3e372b 58%, #c7b889);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, .42),
+        0 2px 4px rgba(48, 32, 18, .32);
+    }
+
+    .string-label {
+      display: grid;
+      place-items: center;
+      color: #4b3c32;
+      font-weight: 900;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255, 255, 255, .18);
+      z-index: 2;
+      cursor: pointer;
+    }
+
+    .fretboard.vertical .string-label {
+      border-bottom: 0;
+      border-right: 1px solid rgba(255, 255, 255, .18);
+    }
+
+    .string-label:hover {
+      background: rgba(255, 255, 255, .38);
+    }
+
+    .string-label.muted {
+      color: #8e3328;
+      background: rgba(255, 255, 255, .72);
+      font-size: 23px;
+    }
+
+    .string-label.open-string {
+      color: var(--focus);
+      box-shadow: inset 0 0 0 2px rgba(23, 79, 138, .22);
+    }
+
+    .fret-number {
+      position: relative;
+      align-self: end;
+      justify-self: center;
+      bottom: 5px;
+      color: rgba(51, 38, 27, .62);
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .fretboard.vertical .fret-number {
+      align-self: center;
+      justify-self: start;
+      bottom: auto;
+      left: 4px;
+    }
+
+    .marker {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 30px;
+      width: 30px;
+      min-height: 0;
+      padding: 0;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      border: 2px solid rgba(255, 255, 255, .82);
+      box-shadow: 0 8px 18px rgba(50, 33, 20, .26);
+      z-index: 3;
+    }
+
+    .marker.root { background: var(--root); }
+    .marker.third { background: var(--third); }
+    .marker.fifth { background: var(--fifth); }
+    .marker.seventh { background: var(--seventh); }
+
+    .all-note-marker {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 22px;
+      width: 22px;
+      min-height: 0;
+      padding: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .74);
+      border: 2px solid var(--focus);
+      color: var(--focus);
+      font-size: 10px;
+      font-weight: 900;
+      z-index: 2;
+    }
+
+    .all-note-marker.open {
+      width: 28px;
+      height: 28px;
+    }
+
+    .root-anchor-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 46px;
+      height: 40px;
+      width: 40px;
+      border-radius: 50%;
+      border: 4px solid var(--ink);
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, .65);
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .input-fret-marker {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 3px solid #10231a;
+      background: rgba(255, 255, 255, .88);
+      color: #10231a;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(30, 20, 12, .25);
+      z-index: 5;
+      padding: 0;
+      min-height: 0;
+    }
+
+    .muted-string {
+      display: grid;
+      place-items: center;
+      color: #5b332a;
+      font-size: 18px;
+      font-weight: 900;
+      z-index: 4;
+    }
+
+    .voicing-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .voicing-card {
+      text-align: left;
+      min-height: 76px;
+      padding: 9px;
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .voicing-card.active {
+      border-color: var(--ink);
+      box-shadow: inset 0 0 0 1px var(--ink);
+    }
+
+    .voicing-card strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+    .voicing-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.28;
+    }
+
+    .side {
+      display: grid;
+      gap: 10px;
+      grid-auto-rows: min-content;
+      overflow: hidden;
+    }
+
+    .panel {
+      padding: 12px;
+    }
+
+    .panel h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .song-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .song-chord {
+      min-height: 58px;
+      padding: 9px;
+      text-align: left;
+      background: #fff;
+    }
+
+    .song-chord.active {
+      border-color: var(--root);
+      box-shadow: inset 0 0 0 1px var(--root);
+    }
+
+    .song-chord strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .song-chord small {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .answer {
+      margin: 0;
+      color: #2f3b35;
+      line-height: 1.62;
+      font-size: 15px;
+      max-height: 96px;
+      overflow: auto;
+    }
+
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .note-pill {
+      padding: 9px;
+      border-radius: 8px;
+      color: #fff;
+      min-height: 58px;
+      min-height: 52px;
+      border: 2px solid transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .note-pill b {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
+    .note-pill.root { background: var(--root); }
+    .note-pill.third { background: var(--third); }
+    .note-pill.fifth { background: var(--fifth); }
+    .note-pill.seventh { background: var(--seventh); }
+    .note-pill.active {
+      border-color: var(--ink);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .85);
+    }
+
+    .note-map-status {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .mode-panel {
+      display: none;
+    }
+
+    .mode-panel.active {
+      display: block;
+    }
+
+    .recognizer {
+      display: grid;
+      gap: 8px;
+    }
+
+    .fingering-input-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+    }
+
+    .fingering-input-row input {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+      font-weight: 800;
+    }
+
+    .analysis-result {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .mute-row {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .mute-row button {
+      min-height: 32px;
+      padding: 5px 4px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .analysis-card {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px;
+      min-height: 58px;
+    }
+
+    .analysis-card strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+    .analysis-card span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .anchor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .anchor-button {
+      text-align: left;
+      padding: 8px;
+      background: #fff;
+      min-height: 58px;
+    }
+
+    .anchor-button.active {
+      border-color: var(--ink);
+      box-shadow: inset 0 0 0 1px var(--ink);
+    }
+
+    .anchor-button strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .anchor-button span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .anchor-summary {
+      margin: 0 0 10px;
+      color: #2f3b35;
+      line-height: 1.58;
+      font-size: 15px;
+    }
+
+    .nearby-tones {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .nearby-tone {
+      display: grid;
+      gap: 2px;
+      min-height: 58px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .nearby-tone b {
+      font-size: 16px;
+    }
+
+    .nearby-tone span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .caged-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .caged-button {
+      min-width: 0;
+      padding: 6px;
+      font-weight: 900;
+      background: #fff;
+      text-align: left;
+    }
+
+    .caged-button.active {
+      border-color: var(--ink);
+      box-shadow: inset 0 0 0 1px var(--ink);
+    }
+
+    .caged-button.missing {
+      color: #98a19c;
+      background: #f6f7f5;
+    }
+
+    .caged-button-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 7px;
+    }
+
+    .caged-letter {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: var(--ghost);
+      color: var(--ink);
+    }
+
+    .caged-button.active .caged-letter {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .caged-range {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .caged-mini-board {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(6, 8px);
+      min-height: 50px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: linear-gradient(90deg, #f0c180, #cb8c4e);
+    }
+
+    .caged-mini-cell {
+      border-right: 1px solid rgba(82, 59, 41, .34);
+      border-bottom: 1px solid rgba(82, 59, 41, .22);
+    }
+
+    .caged-root-dot {
+      align-self: center;
+      justify-self: center;
+      display: grid;
+      place-items: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--root);
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, .82);
+      font-size: 10px;
+      line-height: 1;
+      z-index: 2;
+    }
+
+    .caged-string-hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+      line-height: 1.35;
+      display: none;
+    }
+
+    .caged-summary {
+      margin: 0;
+      color: #2f3b35;
+      line-height: 1.58;
+      font-size: 15px;
+    }
+
+    .caged-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .caged-meta span {
+      display: inline-flex;
+      min-height: 28px;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--ghost);
+      color: #3f4d46;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .interval-card {
+      display: grid;
+      gap: 12px;
+    }
+
+    .interval-summary {
+      margin: 0;
+      color: #2f3b35;
+      line-height: 1.58;
+      font-size: 15px;
+    }
+
+    .letter-steps,
+    .chromatic-steps {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .letter-step,
+    .chromatic-step {
+      display: inline-grid;
+      place-items: center;
+      min-width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .letter-step.active,
+    .chromatic-step.active {
+      background: var(--third);
+      border-color: var(--third);
+      color: #fff;
+    }
+
+    .step-link {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .interval-rule {
+      display: grid;
+      gap: 7px;
+    }
+
+    .interval-rule strong {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .drill {
+      display: grid;
+      gap: 10px;
+    }
+
+    .prompt {
+      padding: 12px;
+      background: #f7f8f6;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      line-height: 1.55;
+      min-height: 78px;
+    }
+
+    .drill-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .feedback {
+      min-height: 24px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        height: auto;
+        min-height: 100vh;
+        width: min(100vw - 16px, 1220px);
+        padding: calc(10px + env(safe-area-inset-top)) 0 calc(12px + env(safe-area-inset-bottom));
+      }
+
+      .layout,
+      header,
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .layout {
+        overflow: visible;
+      }
+
+      .board-column,
+      .side {
+        overflow: visible;
+      }
+
+      .board-sticky {
+        position: static;
+      }
+
+      .practice-switch {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .practice-switch button {
+        flex: 1;
+        min-width: 72px;
+      }
+
+      .voicing-list,
+      .song-strip,
+      .notes,
+      .anchor-grid,
+      .nearby-tones,
+      .caged-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app {
+        width: min(100vw - 12px, 1220px);
+      }
+
+      header {
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      h1 {
+        font-size: 32px;
+        margin-bottom: 4px;
+      }
+
+      .subtitle {
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .toolbar,
+      .panel {
+        box-shadow: 0 8px 20px rgba(38, 30, 18, .08);
+      }
+
+      .toolbar {
+        padding: 8px;
+      }
+
+      .root-picker,
+      .quality-picker {
+        gap: 5px;
+      }
+
+      .root-picker button,
+      .quality-picker button {
+        min-height: 34px;
+        padding: 5px 8px;
+      }
+
+      .fretboard-panel {
+        padding: 8px;
+      }
+
+      .fretboard-wrap {
+        overflow-x: visible;
+      }
+
+      .fretboard {
+        min-width: 0;
+      }
+
+      .voicing-list,
+      .song-strip,
+      .notes,
+      .anchor-grid,
+      .nearby-tones,
+      .caged-grid,
+      .drill-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>GuitarFred</h1>
+        <p class="subtitle">把“看谱弹”拆成可理解的指板地图：根音在哪里、这个把位为什么成立、同一个和弦还能去哪里、下一和弦怎样移动最省力。</p>
+      </div>
+      <nav class="practice-switch" aria-label="练习模式">
+        <button class="active" data-mode="input">识别</button>
+        <button data-mode="map">地图</button>
+        <button data-mode="anchor">根音</button>
+        <button data-mode="caged">CAGED</button>
+        <button data-mode="voice">连接</button>
+        <button data-mode="quiz">问答</button>
+      </nav>
+    </header>
+
+    <section class="toolbar">
+      <div class="control-group">
+        <span>根音</span>
+        <div class="root-picker" id="rootPicker"></div>
+      </div>
+      <div class="control-group">
+        <span>和弦类型</span>
+        <div class="quality-picker" id="qualityPicker"></div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="board-column">
+        <section class="panel fretboard-panel">
+          <div class="board-sticky">
+            <div class="selected-title">
+              <h2 id="voicingTitle">Am7</h2>
+              <span class="badge" id="shapeBadge">6 弦根音 / Em7 movable shape</span>
+            </div>
+            <div class="fretboard-wrap">
+              <div class="fretboard" id="fretboard" aria-label="吉他指板图"></div>
+            </div>
+            <div class="legend">
+              <span><i class="dot" style="background: var(--root)"></i>根音</span>
+              <span><i class="dot" style="background: var(--third)"></i>小三度</span>
+              <span><i class="dot" style="background: var(--fifth)"></i>五度</span>
+              <span><i class="dot" style="background: var(--seventh)"></i>小七度</span>
+            </div>
+            <div class="note-map-status" id="noteMapStatus"></div>
+          </div>
+          <div class="voicing-list" id="voicingList"></div>
+        </section>
+      </div>
+
+      <aside class="side">
+        <section class="panel mode-panel active" data-panel="input">
+          <h3>输入指法识别</h3>
+          <div class="recognizer">
+            <div class="fingering-input-row">
+              <input id="fingeringInput" type="text" value="x-x-x-x-x-x" aria-label="输入六弦到一弦的指法" placeholder="例如 x-5-7-5-6-5">
+              <button id="analyzeFingering" type="button">识别</button>
+              <button id="clearFingering" type="button">清空</button>
+            </div>
+            <div class="mute-row" id="muteRow" aria-label="设置某根弦不发音"></div>
+            <div class="analysis-result" id="analysisResult"></div>
+          </div>
+        </section>
+
+        <section class="panel mode-panel" data-panel="map">
+          <h3 id="whyTitle">为什么 Am7 可以在五品弹？</h3>
+          <p class="answer" id="whyText"></p>
+        </section>
+
+        <section class="panel">
+          <h3>这个和弦由什么组成</h3>
+          <div class="notes" id="notes"></div>
+        </section>
+
+        <section class="panel mode-panel" data-panel="anchor">
+          <h3 id="anchorTitle">从一个根音长出和弦</h3>
+          <div class="anchor-grid" id="anchorGrid"></div>
+          <p class="anchor-summary" id="anchorSummary"></p>
+          <div class="nearby-tones" id="nearbyTones"></div>
+        </section>
+
+        <section class="panel mode-panel" data-panel="caged">
+          <h3 id="cagedTitle">CAGED 视角</h3>
+          <div class="caged-grid" id="cagedButtons"></div>
+          <p class="caged-summary" id="cagedSummary"></p>
+          <div class="caged-meta" id="cagedMeta"></div>
+        </section>
+
+        <section class="panel mode-panel" data-panel="voice">
+          <h3 id="intervalTitle">为什么 A 到 C 是小三度？</h3>
+          <div class="interval-card">
+            <p class="interval-summary" id="intervalSummary"></p>
+            <div class="interval-rule">
+              <strong>先看字母名：数到目标音是几度</strong>
+              <div class="letter-steps" id="letterSteps"></div>
+            </div>
+            <div class="interval-rule">
+              <strong>再看半音数：决定是大还是小</strong>
+              <div class="chromatic-steps" id="chromaticSteps"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel mode-panel" id="drillPanel" data-panel="quiz">
+          <h3>小练习</h3>
+          <div class="drill">
+            <div class="prompt" id="prompt"></div>
+            <div class="drill-actions">
+              <button id="reveal" type="button">显示答案</button>
+              <button id="newPrompt" type="button">换一题</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const strings = [
+      { number: 1, note: "E", pitch: 4, midi: 64 },
+      { number: 2, note: "B", pitch: 11, midi: 59 },
+      { number: 3, note: "G", pitch: 7, midi: 55 },
+      { number: 4, note: "D", pitch: 2, midi: 50 },
+      { number: 5, note: "A", pitch: 9, midi: 45 },
+      { number: 6, note: "E", pitch: 4, midi: 40 }
+    ];
+    const pitchClasses = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const pitchDisplay = {
+      "C#": "C#/Db",
+      "D#": "D#/Eb",
+      "F#": "F#/Gb",
+      "G#": "G#/Ab",
+      "A#": "A#/Bb"
+    };
+    const noteToPitch = {
+      C: 0,
+      "C#": 1,
+      Db: 1,
+      D: 2,
+      "D#": 3,
+      Eb: 3,
+      E: 4,
+      F: 5,
+      "F#": 6,
+      Gb: 6,
+      G: 7,
+      "G#": 8,
+      Ab: 8,
+      A: 9,
+      "A#": 10,
+      Bb: 10,
+      B: 11,
+      "B#": 0,
+      Cb: 11,
+      "E#": 5,
+      Fb: 4
+    };
+    const noteLetters = ["C", "D", "E", "F", "G", "A", "B"];
+    const fretCount = 13;
+    const fretWidths = Array.from({ length: fretCount }, (_, index) => {
+      const nearNut = Math.pow(2, -index / 12);
+      const nearBridge = Math.pow(2, -(index + 1) / 12);
+      return nearNut - nearBridge;
+    });
+    const roleClass = { "1": "root", "b3": "third", "3": "third", "5": "fifth", "b7": "seventh", "7": "seventh" };
+    const roleText = { "1": "根音", "b3": "小三度", "3": "大三度", "5": "五度", "b7": "小七度", "7": "大七度" };
+    const intervalBySemitones = { 3: "小三度", 4: "大三度", 7: "五度", 10: "小七度", 11: "大七度" };
+    const cagedOrder = ["C", "A", "G", "E", "D"];
+    const cagedInfo = {
+      C: "C 形家族常用 5 弦和 2 弦附近的根音做定位，适合把开放 C 的骨架搬到别的根音上。",
+      A: "A 形家族以 5 弦根音最直观。看到 5 弦上的根音，就可以在附近展开三度、五度和七度。",
+      G: "G 形家族横跨范围大，更多用来连接相邻区域，而不是初学时完整按下整个形状。",
+      E: "E 形家族以 6 弦根音最直观。比如 6 弦五品是 A，所以 E 形小七骨架搬到五品就是 Am7。",
+      D: "D 形家族集中在高音弦，适合旋律音在上方时使用，也适合练习只看高音区的和弦片段。"
+    };
+    const cagedAnchors = {
+      C: [
+        { stringNumber: 2, label: "2弦根音" },
+        { stringNumber: 5, label: "5弦根音" }
+      ],
+      A: [
+        { stringNumber: 5, label: "5弦根音" }
+      ],
+      G: [
+        { stringNumber: 1, label: "1弦根音" },
+        { stringNumber: 3, label: "3弦根音" },
+        { stringNumber: 6, label: "6弦根音" }
+      ],
+      E: [
+        { stringNumber: 1, label: "1弦根音" },
+        { stringNumber: 6, label: "6弦根音" }
+      ],
+      D: [
+        { stringNumber: 2, label: "2弦根音" },
+        { stringNumber: 4, label: "4弦根音" }
+      ]
+    };
+    const rootChoices = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+    const qualityTemplates = {
+      major: {
+        label: "大三和弦",
+        suffix: "",
+        tones: [
+          { role: "1", semitones: 0, degree: 1 },
+          { role: "3", semitones: 4, degree: 3 },
+          { role: "5", semitones: 7, degree: 5 }
+        ]
+      },
+      m: {
+        label: "小三和弦",
+        suffix: "m",
+        tones: [
+          { role: "1", semitones: 0, degree: 1 },
+          { role: "b3", semitones: 3, degree: 3 },
+          { role: "5", semitones: 7, degree: 5 }
+        ]
+      },
+      "7": {
+        label: "属七",
+        suffix: "7",
+        tones: [
+          { role: "1", semitones: 0, degree: 1 },
+          { role: "3", semitones: 4, degree: 3 },
+          { role: "5", semitones: 7, degree: 5 },
+          { role: "b7", semitones: 10, degree: 7 }
+        ]
+      },
+      maj7: {
+        label: "大七",
+        suffix: "maj7",
+        tones: [
+          { role: "1", semitones: 0, degree: 1 },
+          { role: "3", semitones: 4, degree: 3 },
+          { role: "5", semitones: 7, degree: 5 },
+          { role: "7", semitones: 11, degree: 7 }
+        ]
+      },
+      m7: {
+        label: "小七",
+        suffix: "m7",
+        tones: [
+          { role: "1", semitones: 0, degree: 1 },
+          { role: "b3", semitones: 3, degree: 3 },
+          { role: "5", semitones: 7, degree: 5 },
+          { role: "b7", semitones: 10, degree: 7 }
+        ]
+      }
+    };
+
+    const songs = {
+      fly: {
+        chords: [
+          { symbol: "Am7", bar: "1", chordKey: "Am7" },
+          { symbol: "Dm7", bar: "2", chordKey: "Dm7" },
+          { symbol: "G7", bar: "3", chordKey: "G7" },
+          { symbol: "Cmaj7", bar: "4", chordKey: "Cmaj7" }
+        ]
+      }
+    };
+
+    const chordData = {
+      Am7: {
+        root: "A",
+        formula: [["A", "1"], ["C", "b3"], ["E", "5"], ["G", "b7"]],
+        why: "五品低音 E 弦的音是 A。把开放 Em7 的形状整体平移到五品，就得到以 A 为根音的 m7 和弦。这个把位不是“谱子规定”，而是因为它把 1-b3-5-b7 这些音组织在五品附近，声音紧凑，也方便接到二品到五品附近的 Dm7。",
+        voicings: [
+          { name: "五品 6 弦根音", shape: "5-x-5-5-5-x", frets: [5, null, 5, 5, 5, null], roles: ["1", null, "b7", "b3", "5", null], notes: ["A", null, "G", "C", "E", null], desc: "爵士常用壳和弦，根音清楚，适合开头确认调性。", tag: "Em7 movable shape", caged: "E" },
+          { name: "开放把位", shape: "x-0-2-0-1-0", frets: [null, 0, 2, 0, 1, 0], roles: [null, "1", "5", "b7", "b3", "5"], notes: [null, "A", "E", "G", "C", "E"], desc: "最熟悉，但低把位色彩较民谣，和爵士转位连接不一定顺。", tag: "open position", caged: "A" },
+          { name: "五品 5 弦根音", shape: "x-0-5-5-5-5", frets: [null, 0, 5, 5, 5, 5], roles: [null, "1", "b7", "b3", "5", "1"], notes: [null, "A", "G", "C", "E", "A"], desc: "保留 A 空弦，顶端有高音 A，适合旋律在高处时使用。", tag: "A string drone", caged: "A" },
+          { name: "十二品 5 弦根音", shape: "x-12-10-12-10-x", frets: [null, 12, 10, 12, 10, null], roles: [null, "1", "b7", "b3", "5", null], notes: [null, "A", "G", "C", "E", null], desc: "高把位版本，音色更亮，适合第二遍或小高潮。", tag: "high register", caged: "A" }
+        ]
+      },
+      Dm7: {
+        root: "D",
+        formula: [["D", "1"], ["F", "b3"], ["A", "5"], ["C", "b7"]],
+        why: "Dm7 是 A 小调里的 iv7。若 Am7 用五品壳和弦，Dm7 可以选五品 5 弦根音或十品 6 弦根音，让左手少移动，同时保留 C 和 F 这两个决定小七和弦性格的音。",
+        voicings: [
+          { name: "五品 5 弦根音", shape: "x-5-7-5-6-5", frets: [null, 5, 7, 5, 6, 5], roles: [null, "1", "5", "b7", "b3", "5"], notes: [null, "D", "A", "C", "F", "A"], desc: "常见 Dm7，和 Am7 五品区域连接自然。", tag: "Am shape", caged: "A" },
+          { name: "十品 6 弦根音", shape: "10-x-10-10-10-x", frets: [10, null, 10, 10, 10, null], roles: ["1", null, "b7", "b3", "5", null], notes: ["D", null, "C", "F", "A", null], desc: "和 Am7 五品壳和弦同结构，帮助理解可移动形状。", tag: "Em7 movable shape", caged: "E" },
+          { name: "开放把位", shape: "x-x-0-2-1-1", frets: [null, null, 0, 2, 1, 1], roles: [null, null, "1", "5", "b7", "b3"], notes: [null, null, "D", "A", "C", "F"], desc: "低把位清楚，适合慢练和声组成。", tag: "open position", caged: "D" }
+        ]
+      },
+      G7: {
+        root: "G",
+        formula: [["G", "1"], ["B", "3"], ["D", "5"], ["F", "b7"]],
+        why: "G7 是去 Cmaj7 的属七。真正推动解决的是 B 和 F 这对三全音：B 往上到 C，F 往下到 E。选把位时优先让这两个音靠近下一和弦的目标音。",
+        voicings: [
+          { name: "三品 6 弦根音", shape: "3-x-3-4-3-x", frets: [3, null, 3, 4, 3, null], roles: ["1", null, "b7", "3", "5", null], notes: ["G", null, "F", "B", "D", null], desc: "三全音在中间两根弦，非常容易看见解决方向。", tag: "dominant shell", caged: "E" },
+          { name: "开放把位", shape: "3-2-0-0-0-1", frets: [3, 2, 0, 0, 0, 1], roles: ["1", "3", "5", "1", "3", "b7"], notes: ["G", "B", "D", "G", "B", "F"], desc: "基础 G7，适合听清属七张力。", tag: "open position", caged: "G" },
+          { name: "十品 5 弦根音", shape: "x-10-9-10-8-x", frets: [null, 10, 9, 10, 8, null], roles: [null, "1", "3", "b7", "5", null], notes: [null, "G", "B", "F", "D", null], desc: "高把位紧凑，接 Cmaj7 八品区域很顺。", tag: "A7 movable shape", caged: "A" }
+        ]
+      },
+      Cmaj7: {
+        root: "C",
+        formula: [["C", "1"], ["E", "3"], ["G", "5"], ["B", "7"]],
+        why: "Cmaj7 是前四小节的落点。G7 里的 B 可以保留为 Cmaj7 的大七度，F 下降半音到 E，耳朵会听到很明确的解决。",
+        voicings: [
+          { name: "三品 5 弦根音", shape: "x-3-5-4-5-x", frets: [null, 3, 5, 4, 5, null], roles: [null, "1", "5", "7", "3", null], notes: [null, "C", "G", "B", "E", null], desc: "根音和大七度都很清楚，接 G7 三品区域方便。", tag: "Amaj7 movable shape", caged: "A" },
+          { name: "开放把位", shape: "x-3-2-0-0-0", frets: [null, 3, 2, 0, 0, 0], roles: [null, "1", "3", "5", "7", "3"], notes: [null, "C", "E", "G", "B", "E"], desc: "低把位 Cmaj7，声音明亮开放。", tag: "open position", caged: "C" },
+          { name: "八品 6 弦根音", shape: "8-x-9-9-8-x", frets: [8, null, 9, 9, 8, null], roles: ["1", null, "3", "7", "5", null], notes: ["C", null, "E", "B", "G", null], desc: "高把位落点，适合和 G7 十品区域配对。", tag: "Emaj7 movable shape", caged: "E" }
+        ]
+      }
+    };
+
+    const state = {
+      root: "A",
+      quality: "m7",
+      voicingIndex: 0,
+      mode: "input",
+      promptIndex: 0,
+      selectedNote: "A",
+      selectedCaged: "E",
+      selectedRootAnchor: null,
+      inputFrets: [null, null, null, null, null, null]
+    };
+
+    const prompts = [
+      {
+        q: "不用看谱，先回答：Am7 的四个核心音是什么？每个音分别是什么功能？",
+        a: "A 是根音，C 是小三度，E 是五度，G 是小七度。"
+      },
+      {
+        q: "为什么 Am7 的 5-x-5-5-5-x 不是“死记五品”？",
+        a: "因为 6 弦五品是 A，形状里包含 A、G、C、E，也就是 1-b7-b3-5。"
+      },
+      {
+        q: "从 Am7 到 Dm7，怎样判断应该留在五品附近还是换到十品？",
+        a: "先看旋律和下一和弦。如果目标音都在五品附近，就留在五品；如果要制造上行或高把位音色，再换到十品。"
+      }
+    ];
+
+    const el = {
+      fretboard: document.querySelector("#fretboard"),
+      voicingList: document.querySelector("#voicingList"),
+      rootPicker: document.querySelector("#rootPicker"),
+      qualityPicker: document.querySelector("#qualityPicker"),
+      voicingTitle: document.querySelector("#voicingTitle"),
+      shapeBadge: document.querySelector("#shapeBadge"),
+      whyTitle: document.querySelector("#whyTitle"),
+      whyText: document.querySelector("#whyText"),
+      notes: document.querySelector("#notes"),
+      noteMapStatus: document.querySelector("#noteMapStatus"),
+      anchorTitle: document.querySelector("#anchorTitle"),
+      anchorGrid: document.querySelector("#anchorGrid"),
+      anchorSummary: document.querySelector("#anchorSummary"),
+      nearbyTones: document.querySelector("#nearbyTones"),
+      cagedTitle: document.querySelector("#cagedTitle"),
+      cagedButtons: document.querySelector("#cagedButtons"),
+      cagedSummary: document.querySelector("#cagedSummary"),
+      cagedMeta: document.querySelector("#cagedMeta"),
+      intervalTitle: document.querySelector("#intervalTitle"),
+      intervalSummary: document.querySelector("#intervalSummary"),
+      letterSteps: document.querySelector("#letterSteps"),
+      chromaticSteps: document.querySelector("#chromaticSteps"),
+      fingeringInput: document.querySelector("#fingeringInput"),
+      analyzeFingering: document.querySelector("#analyzeFingering"),
+      clearFingering: document.querySelector("#clearFingering"),
+      muteRow: document.querySelector("#muteRow"),
+      analysisResult: document.querySelector("#analysisResult"),
+      prompt: document.querySelector("#prompt"),
+      feedback: document.querySelector("#feedback"),
+      reveal: document.querySelector("#reveal"),
+      newPrompt: document.querySelector("#newPrompt")
+    };
+
+    function getSymbol(root, quality) {
+      return `${root}${qualityTemplates[quality].suffix}`;
+    }
+
+    function pitchName(pitch) {
+      const preferred = {
+        0: "C",
+        1: "C#",
+        2: "D",
+        3: "Eb",
+        4: "E",
+        5: "F",
+        6: "F#",
+        7: "G",
+        8: "Ab",
+        9: "A",
+        10: "Bb",
+        11: "B"
+      };
+      return preferred[((pitch % 12) + 12) % 12];
+    }
+
+    function getNoteLetter(root, degree) {
+      const start = noteLetters.indexOf(root[0]);
+      return noteLetters[(start + degree - 1) % noteLetters.length];
+    }
+
+    function spellInterval(root, semitones, degree) {
+      const targetPitch = (noteToPitch[root] + semitones) % 12;
+      const letter = getNoteLetter(root, degree);
+      const naturalPitch = noteToPitch[letter];
+      let diff = (targetPitch - naturalPitch + 12) % 12;
+      if (diff > 6) diff -= 12;
+      if (diff === 0) return letter;
+      if (diff === 1) return `${letter}#`;
+      if (diff === -1) return `${letter}b`;
+      return pitchDisplay[pitchClasses[targetPitch]] || pitchClasses[targetPitch];
+    }
+
+    function inferCagedFromAnchor(anchor) {
+      if (anchor.stringNumber === 6 || anchor.stringNumber === 1) return "E";
+      if (anchor.stringNumber === 5) return "A";
+      if (anchor.stringNumber === 4 || anchor.stringNumber === 2) return "D";
+      return "G";
+    }
+
+    function getToneForPitch(formula, pitch) {
+      return formula.find(([note]) => noteToPitch[note] === pitch);
+    }
+
+    function formatShape(frets) {
+      return frets.map(fret => fret === null ? "x" : String(fret)).join("-");
+    }
+
+    function fretsToInputValue(frets) {
+      return frets.map(fret => fret === null ? "x" : String(fret)).join("-");
+    }
+
+    let audioContext;
+
+    function playGuitarNote(stringNumber, fret) {
+      const stringInfo = getStringInfo(stringNumber);
+      if (!stringInfo || fret === null) return;
+      audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioContext.state === "suspended") audioContext.resume();
+      const now = audioContext.currentTime;
+      const frequency = 440 * Math.pow(2, ((stringInfo.midi + fret) - 69) / 12);
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(frequency, now);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.997, now + 0.26);
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(2200, now);
+      filter.frequency.exponentialRampToValueAtTime(620, now + 0.22);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.22, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+
+      oscillator.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start(now);
+      oscillator.stop(now + 0.75);
+    }
+
+    function getGeneratedVoicing(anchor, chord) {
+      const frets = [null, null, null, null, null, null];
+      const roles = [null, null, null, null, null, null];
+      const notes = [null, null, null, null, null, null];
+      const formulaPitches = new Set(chord.formula.map(([note]) => noteToPitch[note]));
+
+      strings.forEach(stringInfo => {
+        const dataIndex = 6 - stringInfo.number;
+        let candidates = [];
+        for (let fret = 0; fret <= fretCount; fret += 1) {
+          const pitch = (stringInfo.pitch + fret) % 12;
+          if (!formulaPitches.has(pitch)) continue;
+          const inArea = Math.abs(fret - anchor.fret) <= 3;
+          const openNearNut = anchor.fret <= 3 && fret === 0;
+          if (inArea || openNearNut || (stringInfo.number === anchor.stringNumber && fret === anchor.fret)) {
+            const tone = getToneForPitch(chord.formula, pitch);
+            candidates.push({ fret, note: tone[0], role: tone[1], distance: Math.abs(fret - anchor.fret) });
+          }
+        }
+
+        if (stringInfo.number === anchor.stringNumber) {
+          candidates = [{ fret: anchor.fret, note: chord.root, role: "1", distance: 0 }];
+        }
+
+        if (!candidates.length) return;
+        candidates.sort((a, b) => a.distance - b.distance || a.fret - b.fret);
+        const picked = candidates[0];
+        frets[dataIndex] = picked.fret;
+        roles[dataIndex] = picked.role;
+        notes[dataIndex] = picked.note;
+      });
+
+      const caged = inferCagedFromAnchor(anchor);
+      const shape = formatShape(frets);
+      return {
+        name: `${anchor.stringNumber} 弦 ${anchor.fret} 品根音区域`,
+        shape,
+        frets,
+        roles,
+        notes,
+        desc: `以 ${anchor.stringNumber} 弦 ${anchor.fret} 品的 ${chord.root} 为中心，在附近找出 ${chord.formula.slice(1).map(([note]) => note).join(" / ")}。`,
+        tag: `${caged} shape area`,
+        caged
+      };
+    }
+
+    function buildChord(root, quality) {
+      const template = qualityTemplates[quality];
+      const formula = template.tones.map(tone => [
+        spellInterval(root, tone.semitones, tone.degree),
+        tone.role
+      ]);
+      const chord = {
+        root,
+        symbol: getSymbol(root, quality),
+        formula,
+        qualityLabel: template.label,
+        why: `${getSymbol(root, quality)} 不是固定按法，而是 ${formula.map(([note, role]) => `${note}(${roleText[role]})`).join("、")} 这些音的组合。先在指板上找到 ${root}，再围绕它找三度、五度和七度，按法只是这些音的一个排列。`,
+        voicings: []
+      };
+      const rootPositions = getAllNotePositions(root)
+        .filter(position => position.stringNumber >= 4 || position.fret <= 5)
+        .slice(0, 5);
+      chord.voicings = rootPositions.map(position => getGeneratedVoicing(position, chord));
+      return chord;
+    }
+
+    function getCurrentChordItem() {
+      return { symbol: getSymbol(state.root, state.quality) };
+    }
+
+    function getCurrentChord() {
+      return buildChord(state.root, state.quality);
+    }
+
+    function getCurrentVoicing() {
+      return getCurrentChord().voicings[state.voicingIndex];
+    }
+
+    function getVoicingRootAnchor() {
+      const voicing = getCurrentVoicing();
+      const rootIndex = voicing.roles.findIndex(role => role === "1");
+      if (rootIndex < 0) return null;
+      return {
+        stringNumber: 6 - rootIndex,
+        fret: voicing.frets[rootIndex]
+      };
+    }
+
+    function resetChordLens() {
+      const chord = getCurrentChord();
+      const voicing = getCurrentVoicing();
+      state.selectedNote = chord.root;
+      state.selectedCaged = voicing.caged || "E";
+      state.selectedRootAnchor = getVoicingRootAnchor();
+    }
+
+    function renderChordControls() {
+      el.rootPicker.innerHTML = rootChoices.map(root => `
+        <button class="${root === state.root ? "active" : ""}" type="button" data-root="${root}">${root}</button>
+      `).join("");
+      el.qualityPicker.innerHTML = Object.entries(qualityTemplates).map(([key, template]) => `
+        <button class="${key === state.quality ? "active" : ""}" type="button" data-quality="${key}">${template.label}</button>
+      `).join("");
+      el.muteRow.innerHTML = [6, 5, 4, 3, 2, 1].map(stringNumber => `
+        <button type="button" data-mute-string="${stringNumber}">${stringNumber}弦 x</button>
+      `).join("");
+    }
+
+    function getAllNotePositions(note) {
+      const targetPitch = noteToPitch[note];
+      if (targetPitch === undefined) return [];
+
+      return strings.flatMap((stringInfo, stringIndex) => {
+        const row = stringIndex + 1;
+        const positions = [];
+        for (let fret = 0; fret <= fretCount; fret += 1) {
+          if ((stringInfo.pitch + fret) % 12 === targetPitch) {
+            positions.push({
+              stringNumber: stringInfo.number,
+              fret,
+              row,
+              column: fret === 0 ? 1 : fret + 1
+            });
+          }
+        }
+        return positions;
+      });
+    }
+
+    function isVerticalFretboard() {
+      return window.matchMedia("(max-width: 520px)").matches;
+    }
+
+    function getDisplayStrings(vertical) {
+      return vertical ? [...strings].reverse() : strings;
+    }
+
+    function getBoardPosition(stringNumber, fret, vertical) {
+      if (vertical) {
+        const column = getDisplayStrings(true).findIndex(stringInfo => stringInfo.number === stringNumber) + 2;
+        return {
+          column,
+          row: fret === 0 ? 1 : fret + 1
+        };
+      }
+      const row = strings.findIndex(stringInfo => stringInfo.number === stringNumber) + 1;
+      return {
+        row,
+        column: fret === 0 ? 1 : fret + 1
+      };
+    }
+
+    function getAllChordTonePositions() {
+      const chord = getCurrentChord();
+      return chord.formula.flatMap(([note, role]) =>
+        getAllNotePositions(note).map(position => ({
+          ...position,
+          note,
+          role
+        }))
+      );
+    }
+
+    function getNearbyChordTones(anchor) {
+      if (!anchor) return [];
+      return getAllChordTonePositions()
+        .filter(position => {
+          if (position.note === getCurrentChord().root && position.fret === anchor.fret && position.stringNumber === anchor.stringNumber) {
+            return false;
+          }
+          const sameArea = Math.abs(position.fret - anchor.fret) <= 3;
+          const openNearNut = anchor.fret <= 3 && position.fret === 0;
+          return sameArea || openNearNut;
+        })
+        .sort((a, b) => {
+          const distance = Math.abs(a.fret - anchor.fret) - Math.abs(b.fret - anchor.fret);
+          if (distance !== 0) return distance;
+          return a.stringNumber - b.stringNumber;
+        })
+        .slice(0, 8);
+    }
+
+    function renderFretboard() {
+      const voicing = getCurrentVoicing();
+      const rows = [];
+      const isInputMode = state.mode === "input";
+      const vertical = isVerticalFretboard();
+      const displayStrings = getDisplayStrings(vertical);
+      el.fretboard.classList.toggle("vertical", vertical);
+      if (vertical) {
+        el.fretboard.style.gridTemplateColumns = "32px repeat(6, 1fr)";
+        el.fretboard.style.gridTemplateRows = `46px ${fretWidths.map(width => `${(width * 1000).toFixed(3)}fr`).join(" ")}`;
+      } else {
+        el.fretboard.style.gridTemplateColumns = `54px ${fretWidths.map(width => `${(width * 1000).toFixed(3)}fr`).join(" ")}`;
+        el.fretboard.style.gridTemplateRows = "repeat(6, 1fr)";
+      }
+      rows.push(`<div class="nut"></div>`);
+
+      displayStrings.forEach((stringInfo, stringIndex) => {
+        const inputFret = state.inputFrets[6 - stringInfo.number];
+        const labelClass = inputFret === null ? "muted" : inputFret === 0 ? "open-string" : "";
+        const labelText = inputFret === null ? "×" : inputFret === 0 ? "0" : `${stringInfo.number} ${stringInfo.note}`;
+        const title = inputFret === null
+          ? `${stringInfo.number} 弦不发音，点击设为空弦`
+          : `${stringInfo.number} 弦空弦`;
+        const pos = getBoardPosition(stringInfo.number, 0, vertical);
+        rows.push(`<button class="string-label ${labelClass}" type="button" data-input-string="${stringInfo.number}" data-input-fret="0" title="${title}" style="grid-column:${pos.column};grid-row:${pos.row}">${labelText}</button>`);
+      });
+
+      displayStrings.forEach(stringInfo => {
+        for (let fret = 1; fret <= fretCount; fret += 1) {
+          const pos = getBoardPosition(stringInfo.number, fret, vertical);
+          rows.push(`<button class="cell" type="button" data-input-string="${stringInfo.number}" data-input-fret="${fret}" title="${stringInfo.number} 弦 ${fret} 品" style="grid-column:${pos.column};grid-row:${pos.row}"></button>`);
+        }
+      });
+
+      displayStrings.forEach((stringInfo, stringIndex) => {
+        const thickness = {
+          6: 7,
+          5: 6,
+          4: 5,
+          3: 3.5,
+          2: 2.4,
+          1: 1.7
+        }[stringInfo.number];
+        const woundClass = stringInfo.number >= 4 ? "wound" : "";
+        const wireStyle = vertical
+          ? `grid-column:${stringIndex + 2};grid-row:2 / ${fretCount + 2};width:${thickness}px`
+          : `grid-column:2 / ${fretCount + 2};grid-row:${stringIndex + 1};height:${thickness}px`;
+        rows.push(`<span class="string-wire ${woundClass}" style="${wireStyle}"></span>`);
+      });
+
+      for (let fret = 1; fret <= fretCount; fret += 1) {
+        const numberStyle = vertical
+          ? `grid-column:1;grid-row:${fret + 1}`
+          : `grid-column:${fret + 1};grid-row:6`;
+        rows.push(`<div class="fret-number" style="${numberStyle}">${fret}</div>`);
+      }
+
+      const selectedPositions = isInputMode ? [] : getAllNotePositions(state.selectedNote);
+      if (!isInputMode) {
+        selectedPositions.forEach(position => {
+          const pos = getBoardPosition(position.stringNumber, position.fret, vertical);
+          rows.push(`
+            <div style="position:relative;grid-column:${pos.column};grid-row:${pos.row};z-index:2">
+              <button class="all-note-marker ${position.fret === 0 ? "open" : ""}" type="button" data-note="${state.selectedNote}" data-string="${position.stringNumber}" data-fret="${position.fret}" title="${position.stringNumber} 弦 ${position.fret} 品：${state.selectedNote}">
+                ${state.selectedNote}
+              </button>
+            </div>
+          `);
+        });
+      }
+
+      if (!isInputMode && state.selectedRootAnchor) {
+        const pos = getBoardPosition(state.selectedRootAnchor.stringNumber, state.selectedRootAnchor.fret, vertical);
+        rows.push(`
+          <div style="position:relative;grid-column:${pos.column};grid-row:${pos.row};z-index:4">
+            <span class="root-anchor-ring" title="当前根音入口"></span>
+          </div>
+        `);
+      }
+
+      if (isInputMode) {
+        state.inputFrets.forEach((fret, stringIndex) => {
+          if (fret === null) return;
+          const stringNumber = 6 - stringIndex;
+          const pos = getBoardPosition(stringNumber, fret, vertical);
+          const stringInfo = getStringInfo(stringNumber);
+          const pitch = (stringInfo.pitch + fret) % 12;
+          const chordTone = getCurrentChord().formula.find(([note]) => noteToPitch[note] === pitch);
+          const note = chordTone ? chordTone[0] : pitchName(pitch);
+          rows.push(`
+            <div style="position:relative;grid-column:${pos.column};grid-row:${pos.row};z-index:5">
+              <button class="input-fret-marker" type="button" data-input-selected="true" data-input-string="${stringNumber}" data-input-fret="${fret}" title="再次点击设为不发音">${note}</button>
+            </div>
+          `);
+        });
+      }
+
+      if (!isInputMode) {
+        voicing.frets.forEach((fret, stringIndex) => {
+          const role = voicing.roles[stringIndex];
+          const note = voicing.notes[stringIndex];
+          const stringNumber = 6 - stringIndex;
+          const pos = getBoardPosition(stringNumber, fret === null ? 0 : fret, vertical);
+          if (fret === null) {
+            rows.push(`<div class="muted-string" style="grid-column:${pos.column};grid-row:${pos.row}">×</div>`);
+            return;
+          }
+
+          const roleLabel = roleText[role] || "";
+          const marker = `<button class="marker ${roleClass[role] || "root"}" type="button" data-note="${note}" data-string="${stringNumber}" data-fret="${fret}" title="${note} ${roleLabel}">${note}</button>`;
+          rows.push(`<div style="position:relative;grid-column:${pos.column};grid-row:${pos.row};z-index:3">${marker}</div>`);
+        });
+      }
+
+      el.fretboard.innerHTML = rows.join("");
+      el.noteMapStatus.textContent = isInputMode
+        ? "点击指板录入指法；点弦名录入空弦。"
+        : `${state.selectedNote}: 0-${fretCount} 品内共 ${selectedPositions.length} 个位置`;
+    }
+
+    function renderVoicings() {
+      const chord = getCurrentChord();
+      if (state.mode === "input") {
+        el.voicingList.innerHTML = "";
+        return;
+      }
+      el.voicingList.innerHTML = chord.voicings.map((voicing, index) => `
+        <button class="voicing-card ${index === state.voicingIndex ? "active" : ""}" type="button" data-voicing-index="${index}">
+          <strong>${voicing.name}</strong>
+          <span>${voicing.shape}</span>
+          <span>${voicing.desc}</span>
+        </button>
+      `).join("");
+    }
+
+    function renderAnchorGuide() {
+      const item = getCurrentChordItem();
+      const chord = getCurrentChord();
+      const rootPositions = getAllNotePositions(chord.root);
+      if (!state.selectedRootAnchor) state.selectedRootAnchor = getVoicingRootAnchor() || rootPositions[0];
+      const anchor = state.selectedRootAnchor;
+      const nearby = getNearbyChordTones(anchor);
+
+      el.anchorTitle.textContent = `${item.symbol}: 先选一个 ${chord.root}`;
+      el.anchorGrid.innerHTML = rootPositions.slice(0, 6).map(position => {
+        const active = anchor && position.stringNumber === anchor.stringNumber && position.fret === anchor.fret;
+        return `
+          <button class="anchor-button ${active ? "active" : ""}" type="button" data-string="${position.stringNumber}" data-fret="${position.fret}">
+            <strong>${position.stringNumber} 弦 ${position.fret} 品</strong>
+            <span>${chord.root} 作为根音入口</span>
+          </button>
+        `;
+      }).join("");
+      el.anchorSummary.textContent = `把 ${anchor.stringNumber} 弦 ${anchor.fret} 品的 ${chord.root} 当作家门口，先在它附近找 ${chord.formula.slice(1).map(([note]) => note).join(" / ")}。找到这些音以后，按法只是把这些音组织成舒服的手型。`;
+      el.nearbyTones.innerHTML = nearby.map(position => `
+        <div class="nearby-tone">
+          <b>${position.note} · ${roleText[position.role]}</b>
+          <span>${position.stringNumber} 弦 ${position.fret} 品</span>
+        </div>
+      `).join("");
+    }
+
+    function getStringInfo(stringNumber) {
+      return strings.find(stringInfo => stringInfo.number === stringNumber);
+    }
+
+    function getRootFretsOnString(root, stringNumber) {
+      const stringInfo = getStringInfo(stringNumber);
+      const targetPitch = noteToPitch[root];
+      const frets = [];
+      for (let fret = 0; fret <= fretCount; fret += 1) {
+        if ((stringInfo.pitch + fret) % 12 === targetPitch) frets.push(fret);
+      }
+      return frets;
+    }
+
+    function getTightestAnchorSet(anchorOptions) {
+      const combinations = anchorOptions.reduce((sets, anchor) => {
+        return sets.flatMap(set =>
+          anchor.frets.map(fret => [...set, { ...anchor, fret }])
+        );
+      }, [[]]);
+
+      return combinations.sort((a, b) => {
+        const aFrets = a.map(anchor => anchor.fret);
+        const bFrets = b.map(anchor => anchor.fret);
+        const aRange = Math.max(...aFrets) - Math.min(...aFrets);
+        const bRange = Math.max(...bFrets) - Math.min(...bFrets);
+        if (aRange !== bRange) return aRange - bRange;
+        return Math.min(...aFrets) - Math.min(...bFrets);
+      })[0] || [];
+    }
+
+    function getCagedModel(root, shape) {
+      const anchors = cagedAnchors[shape].map(anchor => ({
+        ...anchor,
+        frets: getRootFretsOnString(root, anchor.stringNumber),
+        row: strings.findIndex(stringInfo => stringInfo.number === anchor.stringNumber) + 1
+      })).filter(anchor => anchor.frets.length);
+      const tightAnchors = getTightestAnchorSet(anchors);
+      const minFret = Math.min(...tightAnchors.map(anchor => anchor.fret));
+      const maxFret = Math.max(...tightAnchors.map(anchor => anchor.fret));
+      const startFret = Math.max(0, Math.min(minFret - 1, fretCount - 4));
+      const endFret = Math.min(fretCount, Math.max(maxFret + 1, startFret + 4));
+
+      return {
+        anchors: tightAnchors,
+        startFret,
+        endFret,
+        range: `${startFret}-${endFret}品`
+      };
+    }
+
+    function renderCagedMiniBoard(root, shape) {
+      const model = getCagedModel(root, shape);
+      const cells = [];
+
+      for (let row = 1; row <= 6; row += 1) {
+        for (let column = 1; column <= 5; column += 1) {
+          cells.push(`<span class="caged-mini-cell" style="grid-row:${row};grid-column:${column}"></span>`);
+        }
+      }
+
+      model.anchors.forEach(anchor => {
+        const column = anchor.fret - model.startFret + 1;
+        if (column < 1 || column > 5) return;
+        cells.push(`
+          <span class="caged-root-dot" style="grid-row:${anchor.row};grid-column:${column}" title="${anchor.label} ${anchor.fret}品">
+            ${root}
+          </span>
+        `);
+      });
+
+      return cells.join("");
+    }
+
+    function renderCagedGuide() {
+      const item = getCurrentChordItem();
+      const chord = getCurrentChord();
+      const voicing = getCurrentVoicing();
+      const available = new Map();
+      chord.voicings.forEach((shape, index) => {
+        if (!available.has(shape.caged)) available.set(shape.caged, index);
+      });
+      const selected = state.selectedCaged || voicing.caged;
+      const selectedIndex = available.get(selected);
+      const selectedVoicing = selectedIndex === undefined ? null : chord.voicings[selectedIndex];
+      const rootPositions = getAllNotePositions(chord.root).map(position =>
+        `${position.stringNumber}弦${position.fret}品`
+      ).join(" / ");
+
+      el.cagedTitle.textContent = `${item.symbol} 的 CAGED 视角`;
+      el.cagedButtons.innerHTML = cagedOrder.map(shape => `
+        <button class="caged-button ${shape === selected ? "active" : ""} ${available.has(shape) ? "" : "missing"}" type="button" data-caged="${shape}">
+          <span class="caged-button-head">
+            <span class="caged-letter">${shape}</span>
+            <span class="caged-range">${getCagedModel(chord.root, shape).range}</span>
+          </span>
+          <span class="caged-mini-board" aria-label="${shape} 形根音地图">
+            ${renderCagedMiniBoard(chord.root, shape)}
+          </span>
+          <span class="caged-string-hint">${cagedAnchors[shape].map(anchor => anchor.label).join(" / ")}</span>
+        </button>
+      `).join("");
+      el.cagedSummary.textContent = selectedVoicing
+        ? `${selected} 形家族：当前可用按法是 ${selectedVoicing.shape}。${cagedInfo[selected]}`
+        : `${selected} 形家族：这个原型还没有收录 ${item.symbol} 的完整示例，但逻辑一样，先找 ${chord.root} 的根音位置，再在附近按 ${selected} 形骨架补出三度、五度和七度。`;
+      el.cagedMeta.innerHTML = `
+        <span>当前按法：${voicing.caged} 形</span>
+        <span>根音：${chord.root}</span>
+        <span>根音位置：${rootPositions}</span>
+      `;
+    }
+
+    function getLetterPath(fromNote, toNote) {
+      const from = fromNote[0];
+      const to = toNote[0];
+      const path = [from];
+      let index = noteLetters.indexOf(from);
+
+      while (path[path.length - 1] !== to && path.length < 8) {
+        index = (index + 1) % noteLetters.length;
+        path.push(noteLetters[index]);
+      }
+
+      return path;
+    }
+
+    function getChromaticPath(fromNote, toNote) {
+      const from = noteToPitch[fromNote];
+      const to = noteToPitch[toNote];
+      const distance = (to - from + 12) % 12;
+
+      return Array.from({ length: distance + 1 }, (_, index) => {
+        const pitch = pitchClasses[(from + index) % 12];
+        return pitchDisplay[pitch] || pitch;
+      });
+    }
+
+    function renderIntervalGuide() {
+      const chord = getCurrentChord();
+      const root = chord.formula[0][0];
+      const third = chord.formula.find(([, role]) => role === "b3" || role === "3") || chord.formula[1];
+      const target = third[0];
+      const role = third[1];
+      const letterPath = getLetterPath(root, target);
+      const chromaticPath = getChromaticPath(root, target);
+      const semitones = chromaticPath.length - 1;
+      const intervalName = intervalBySemitones[semitones] || roleText[role];
+
+      el.intervalTitle.textContent = `为什么 ${root} 到 ${target} 是${intervalName}？`;
+      el.intervalSummary.textContent = `${root} 到 ${target} 先按字母名数：${letterPath.join("-")}，所以它属于“三度”。再按半音数数：${chromaticPath.join(" -> ")}，一共 ${semitones} 个半音。三度里 3 个半音叫小三度，4 个半音叫大三度。`;
+      el.letterSteps.innerHTML = letterPath.map((note, index) => `
+        <span class="letter-step ${index === 0 || index === letterPath.length - 1 ? "active" : ""}">${note}</span>
+        ${index < letterPath.length - 1 ? '<span class="step-link">下一字母</span>' : ""}
+      `).join("");
+      el.chromaticSteps.innerHTML = chromaticPath.map((note, index) => `
+        <span class="chromatic-step ${index === 0 || index === chromaticPath.length - 1 ? "active" : ""}">${note}</span>
+        ${index < chromaticPath.length - 1 ? '<span class="step-link">+1 半音</span>' : ""}
+      `).join("");
+    }
+
+    function renderExplanation() {
+      const item = getCurrentChordItem();
+      const chord = getCurrentChord();
+      const voicing = getCurrentVoicing();
+      el.voicingTitle.textContent = `${item.symbol} · ${voicing.shape}`;
+      el.shapeBadge.textContent = voicing.tag;
+      el.whyTitle.textContent = `为什么 ${item.symbol} 可以这样弹？`;
+      el.whyText.textContent = state.mode === "anchor"
+        ? `先别管 CAGED 名字。把 ${chord.root} 当成地图入口，选一个你想落脚的根音位置，然后在附近找出 ${chord.formula.slice(1).map(([note]) => note).join("、")}。这样你是在用音组成和弦，不是在背一个按法。`
+        : state.mode === "caged"
+        ? `CAGED 的价值是把散落的根音变成五个熟悉区域。先点出 ${chord.root} 在全指板的位置，再选择 C/A/G/E/D 形状家族，就能知道这个和弦可以在哪个区域展开。`
+        : state.mode === "voice"
+        ? getVoiceLeadingText(item.symbol)
+        : chord.why;
+      el.notes.innerHTML = chord.formula.map(([note, role]) => `
+        <button class="note-pill ${roleClass[role]} ${note === state.selectedNote ? "active" : ""}" type="button" data-note="${note}">
+          <b>${note}</b>
+          <span>${roleText[role]}</span>
+        </button>
+      `).join("");
+      renderAnchorGuide();
+      renderCagedGuide();
+      renderIntervalGuide();
+    }
+
+    function getVoiceLeadingText(symbol) {
+      const chord = getCurrentChord();
+      const third = chord.formula.find(([, role]) => role === "b3" || role === "3");
+      const seventh = chord.formula.find(([, role]) => role === "b7" || role === "7");
+      if (seventh) {
+        return `${symbol} 里最值得盯住的是 ${third[0]}(${roleText[third[1]]}) 和 ${seventh[0]}(${roleText[seventh[1]]})。根音告诉你落点，三度决定大小色彩，七度决定张力；换下一个和弦时，优先观察这两个音怎么移动。`;
+      }
+      return `${symbol} 里最值得先看的是 ${chord.root}(根音)、${third[0]}(${roleText[third[1]]}) 和 ${chord.formula.find(([, role]) => role === "5")[0]}(五度)。先找根音，再判断三度是大三度还是小三度，和弦性格就清楚了。`;
+    }
+
+    function renderPrompt() {
+      const chord = getCurrentChord();
+      const generatedPrompts = [
+        {
+          q: `不用看图，先回答：${chord.symbol} 的组成音是什么？`,
+          a: chord.formula.map(([note, role]) => `${note} 是${roleText[role]}`).join("，") + "。"
+        },
+        {
+          q: `在指板上任选一个 ${chord.root}，你接下来要找哪些音才能组成 ${chord.symbol}？`,
+          a: `要继续找 ${chord.formula.slice(1).map(([note]) => note).join("、")}。`
+        },
+        {
+          q: `${chord.symbol} 的三度是什么？它为什么决定和弦的明暗？`,
+          a: `三度是 ${chord.formula.find(([, role]) => role === "b3" || role === "3")[0]}。大三度听起来更明亮，小三度听起来更暗。`
+        }
+      ];
+      const prompt = generatedPrompts[state.promptIndex % generatedPrompts.length];
+      el.prompt.textContent = prompt.q;
+      el.reveal.dataset.answer = prompt.a;
+      el.feedback.textContent = "";
+    }
+
+    const recognitionTemplates = [
+      { name: "maj9", label: "maj9", intervals: { "1": 0, "3": 4, "5": 7, "7": 11, "9": 2 }, essential: ["1", "3", "7", "9"], type: "extended" },
+      { name: "m9", label: "m9", intervals: { "1": 0, "b3": 3, "5": 7, "b7": 10, "9": 2 }, essential: ["1", "b3", "b7", "9"], type: "extended" },
+      { name: "9", label: "9", intervals: { "1": 0, "3": 4, "5": 7, "b7": 10, "9": 2 }, essential: ["1", "3", "b7", "9"], type: "extended" },
+      { name: "m11", label: "m11", intervals: { "1": 0, "b3": 3, "5": 7, "b7": 10, "9": 2, "11": 5 }, essential: ["1", "b3", "b7", "11"], type: "extended" },
+      { name: "13", label: "13", intervals: { "1": 0, "3": 4, "5": 7, "b7": 10, "9": 2, "13": 9 }, essential: ["1", "3", "b7", "13"], type: "extended" },
+      { name: "maj7", label: "maj7", intervals: { "1": 0, "3": 4, "5": 7, "7": 11 }, essential: ["1", "3", "7"], type: "basic" },
+      { name: "m7", label: "m7", intervals: { "1": 0, "b3": 3, "5": 7, "b7": 10 }, essential: ["1", "b3", "b7"], type: "basic" },
+      { name: "7", label: "7", intervals: { "1": 0, "3": 4, "5": 7, "b7": 10 }, essential: ["1", "3", "b7"], type: "basic" },
+      { name: "m7b5", label: "m7b5", intervals: { "1": 0, "b3": 3, "b5": 6, "b7": 10 }, essential: ["1", "b3", "b5", "b7"], type: "basic" },
+      { name: "m", label: "m", intervals: { "1": 0, "b3": 3, "5": 7 }, essential: ["1", "b3"], type: "basic" },
+      { name: "", label: "", intervals: { "1": 0, "3": 4, "5": 7 }, essential: ["1", "3"], type: "basic" }
+    ];
+
+    function parseFingering(value) {
+      const parts = value.trim().replace(/[，, ]+/g, "-").split("-").filter(Boolean);
+      if (parts.length !== 6) return null;
+      const frets = parts.map(part => {
+        const normalized = part.toLowerCase();
+        if (normalized === "x" || normalized === "mute") return null;
+        const fret = Number(normalized);
+        return Number.isInteger(fret) && fret >= 0 && fret <= 24 ? fret : NaN;
+      });
+      return frets.some(Number.isNaN) ? null : frets;
+    }
+
+    function getFingeringNotes(frets) {
+      return frets.flatMap((fret, index) => {
+        if (fret === null) return [];
+        const stringNumber = 6 - index;
+        const stringInfo = getStringInfo(stringNumber);
+        const pitch = (stringInfo.pitch + fret) % 12;
+        return [{
+          stringNumber,
+          fret,
+          pitch,
+          note: pitchName(pitch)
+        }];
+      });
+    }
+
+    function scoreTemplate(pitchSet, rootPitch, template) {
+      const present = Object.entries(template.intervals).filter(([, interval]) =>
+        pitchSet.has((rootPitch + interval) % 12)
+      ).map(([role]) => role);
+      const missing = Object.entries(template.intervals).filter(([role, interval]) =>
+        role !== "1" && !pitchSet.has((rootPitch + interval) % 12)
+      ).map(([role]) => role);
+      const essentialMissing = template.essential.filter(role =>
+        !pitchSet.has((rootPitch + template.intervals[role]) % 12)
+      );
+      const extra = [...pitchSet].filter(pitch =>
+        !Object.values(template.intervals).some(interval => (rootPitch + interval) % 12 === pitch)
+      );
+      const score = present.length * 3 - missing.length - essentialMissing.length * 5 - extra.length * 2 + (template.type === "extended" ? 1 : 0);
+      return { template, present, missing, essentialMissing, extra, score };
+    }
+
+    function findBestChordMatches(notes) {
+      const pitchSet = new Set(notes.map(note => note.pitch));
+      const rootPitches = [...pitchSet];
+      const matches = [];
+      rootPitches.forEach(rootPitch => {
+        recognitionTemplates.forEach(template => {
+          const scored = scoreTemplate(pitchSet, rootPitch, template);
+          if (scored.essentialMissing.length <= 1 && scored.present.includes("1")) {
+            matches.push({
+              ...scored,
+              root: pitchName(rootPitch),
+              symbol: `${pitchName(rootPitch)}${template.label}`
+            });
+          }
+        });
+      });
+      matches.sort((a, b) => b.score - a.score || b.present.length - a.present.length);
+      return matches;
+    }
+
+    function renderFingeringAnalysis() {
+      const frets = parseFingering(el.fingeringInput.value);
+      if (!frets) {
+        el.analysisResult.innerHTML = `<div class="analysis-card"><strong>格式错误</strong><span>请输入 6 弦到 1 弦，例如 x-5-7-5-6-5。</span></div>`;
+        return;
+      }
+      state.inputFrets = frets;
+      const notes = getFingeringNotes(frets);
+      if (!notes.length) {
+        el.analysisResult.innerHTML = `
+          <div class="analysis-card">
+            <strong>等待输入</strong>
+            <span>直接点击左侧空指板。每根弦只保留一个位置。</span>
+          </div>
+          <div class="analysis-card">
+            <strong>实际音</strong>
+            <span>暂无</span>
+          </div>
+        `;
+        return;
+      }
+      const matches = findBestChordMatches(notes);
+      const basic = matches.find(match => match.template.type === "basic");
+      const extended = matches.find(match => match.template.type === "extended" && match.score >= (basic ? basic.score - 2 : 0));
+      const main = extended || basic || matches[0];
+      const noteText = notes.map(note => `${note.stringNumber}弦${note.fret}品=${note.note}`).join(" / ");
+      const omit = main ? main.missing.map(role => roleText[role] || role).join("、") : "";
+
+      el.analysisResult.innerHTML = `
+        <div class="analysis-card">
+          <strong>基础和弦</strong>
+          <span>${basic ? basic.symbol : "未识别"}${basic ? ` · ${basic.present.join(" ")}` : ""}</span>
+        </div>
+        <div class="analysis-card">
+          <strong>扩展和弦</strong>
+          <span>${extended ? extended.symbol : "未包含 9/11/13 等扩展音"}</span>
+        </div>
+        <div class="analysis-card">
+          <strong>省略音</strong>
+          <span>${omit ? `omit ${omit}` : "无明显省略音"}</span>
+        </div>
+        <div class="analysis-card">
+          <strong>实际音</strong>
+          <span>${noteText}</span>
+        </div>
+      `;
+    }
+
+    function render() {
+      if (!state.selectedRootAnchor) resetChordLens();
+      renderChordControls();
+      el.fingeringInput.value = fretsToInputValue(state.inputFrets);
+      renderFretboard();
+      renderVoicings();
+      renderExplanation();
+      renderFingeringAnalysis();
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      document.querySelectorAll("[data-mode]").forEach(item => {
+        item.classList.toggle("active", item.dataset.mode === mode);
+      });
+      document.querySelectorAll("[data-panel]").forEach(panel => {
+        panel.classList.toggle("active", panel.dataset.panel === mode);
+      });
+    }
+
+    el.rootPicker.addEventListener("click", event => {
+      const button = event.target.closest("[data-root]");
+      if (!button) return;
+      state.root = button.dataset.root;
+      state.voicingIndex = 0;
+      resetChordLens();
+      setMode("map");
+      render();
+    });
+
+    el.qualityPicker.addEventListener("click", event => {
+      const button = event.target.closest("[data-quality]");
+      if (!button) return;
+      state.quality = button.dataset.quality;
+      state.voicingIndex = 0;
+      resetChordLens();
+      setMode("map");
+      render();
+    });
+
+    el.voicingList.addEventListener("click", event => {
+      const button = event.target.closest("[data-voicing-index]");
+      if (!button) return;
+      state.voicingIndex = Number(button.dataset.voicingIndex);
+      state.selectedCaged = getCurrentVoicing().caged;
+      state.selectedRootAnchor = getVoicingRootAnchor();
+      render();
+    });
+
+    el.anchorGrid.addEventListener("click", event => {
+      const button = event.target.closest("[data-string]");
+      if (!button) return;
+      state.selectedRootAnchor = {
+        stringNumber: Number(button.dataset.string),
+        fret: Number(button.dataset.fret)
+      };
+      state.selectedNote = getCurrentChord().root;
+      render();
+    });
+
+    el.cagedButtons.addEventListener("click", event => {
+      const button = event.target.closest("[data-caged]");
+      if (!button) return;
+      const shape = button.dataset.caged;
+      const matchIndex = getCurrentChord().voicings.findIndex(voicing => voicing.caged === shape);
+      state.selectedCaged = shape;
+      state.selectedNote = getCurrentChord().root;
+      if (matchIndex >= 0) {
+        state.voicingIndex = matchIndex;
+        state.selectedRootAnchor = getVoicingRootAnchor();
+      }
+      render();
+    });
+
+    el.notes.addEventListener("click", event => {
+      const button = event.target.closest("[data-note]");
+      if (!button) return;
+      state.selectedNote = button.dataset.note;
+      render();
+    });
+
+    el.fretboard.addEventListener("click", event => {
+      const selectedInput = event.target.closest("[data-input-selected]");
+      if (selectedInput) {
+        const stringNumber = Number(selectedInput.dataset.inputString);
+        state.inputFrets[6 - stringNumber] = null;
+        el.fingeringInput.value = fretsToInputValue(state.inputFrets);
+        setMode("input");
+        renderFretboard();
+        renderFingeringAnalysis();
+        return;
+      }
+
+      const inputTarget = event.target.closest("[data-input-string], [data-string][data-fret]");
+      if (inputTarget) {
+        const stringNumber = Number(inputTarget.dataset.inputString || inputTarget.dataset.string);
+        const fret = Number(inputTarget.dataset.inputFret || inputTarget.dataset.fret);
+        if (Number.isInteger(stringNumber) && Number.isInteger(fret)) {
+          state.inputFrets[6 - stringNumber] = fret;
+          el.fingeringInput.value = fretsToInputValue(state.inputFrets);
+          playGuitarNote(stringNumber, fret);
+          setMode("input");
+          renderFretboard();
+          renderFingeringAnalysis();
+        }
+        if (state.mode === "input") return;
+      }
+
+      const button = event.target.closest("[data-note]");
+      if (!button) return;
+      state.selectedNote = button.dataset.note;
+      if (button.dataset.note === getCurrentChord().root && button.dataset.string) {
+        state.selectedRootAnchor = {
+          stringNumber: Number(button.dataset.string),
+          fret: Number(button.dataset.fret)
+        };
+      }
+      render();
+    });
+
+    document.querySelectorAll("[data-mode]").forEach(button => {
+      button.addEventListener("click", () => {
+        setMode(button.dataset.mode);
+        renderFretboard();
+        renderVoicings();
+        renderExplanation();
+        if (state.mode === "quiz") renderPrompt();
+      });
+    });
+
+    el.analyzeFingering.addEventListener("click", renderFingeringAnalysis);
+    el.fingeringInput.addEventListener("input", () => {
+      const frets = parseFingering(el.fingeringInput.value);
+      if (frets) {
+        state.inputFrets = frets;
+        setMode("input");
+        renderFretboard();
+      }
+      renderFingeringAnalysis();
+    });
+    el.clearFingering.addEventListener("click", () => {
+      state.inputFrets = [null, null, null, null, null, null];
+      el.fingeringInput.value = fretsToInputValue(state.inputFrets);
+      setMode("input");
+      renderFretboard();
+      renderFingeringAnalysis();
+    });
+
+    el.muteRow.addEventListener("click", event => {
+      const button = event.target.closest("[data-mute-string]");
+      if (!button) return;
+      const stringNumber = Number(button.dataset.muteString);
+      state.inputFrets[6 - stringNumber] = null;
+      el.fingeringInput.value = fretsToInputValue(state.inputFrets);
+      setMode("input");
+      renderFretboard();
+      renderFingeringAnalysis();
+    });
+
+    el.reveal.addEventListener("click", () => {
+      el.feedback.textContent = el.reveal.dataset.answer || "";
+    });
+
+    el.newPrompt.addEventListener("click", () => {
+      state.promptIndex = (state.promptIndex + 1) % prompts.length;
+      renderPrompt();
+    });
+
+    render();
+    renderPrompt();
+
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
+</body>
+</html>
