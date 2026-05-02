@@ -58,6 +58,10 @@
       z-index: 100;
     }
 
+    body.standalone-pwa::before {
+      height: max(env(safe-area-inset-top), 54px);
+    }
+
     button,
     select {
       font: inherit;
@@ -407,6 +411,61 @@
       left: 4px;
     }
 
+    .caged-region {
+      position: relative;
+      align-self: stretch;
+      justify-self: stretch;
+      border: 2px dashed var(--caged-line);
+      background: var(--caged-fill);
+      background:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, .1) 0 8px, rgba(255, 255, 255, 0) 8px 18px),
+        var(--caged-fill);
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, .32),
+        0 0 0 1px rgba(255, 255, 255, .36);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .caged-region.active {
+      border-width: 3px;
+      border-style: dashed;
+      background: var(--caged-fill-strong);
+      background:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, .16) 0 8px, rgba(255, 255, 255, 0) 8px 18px),
+        var(--caged-fill-strong);
+      box-shadow:
+        inset 0 0 0 2px rgba(255, 255, 255, .48),
+        0 0 0 2px rgba(23, 32, 27, .16);
+      z-index: 2;
+    }
+
+    .caged-region-label {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .9);
+      color: #1f2b25;
+      font-size: 12px;
+      font-weight: 900;
+      border: 1px dashed var(--caged-line);
+      box-shadow: 0 2px 8px rgba(40, 30, 18, .12);
+    }
+
+    .fretboard.vertical .caged-region-label {
+      top: 5px;
+      left: 4px;
+      writing-mode: vertical-rl;
+      min-height: 34px;
+      min-width: 22px;
+      justify-content: center;
+    }
+
     .marker {
       position: absolute;
       left: 50%;
@@ -493,6 +552,60 @@
       z-index: 5;
       padding: 0;
       min-height: 0;
+    }
+
+    .input-fret-marker.root,
+    .input-fret-marker.third,
+    .input-fret-marker.fifth,
+    .input-fret-marker.seventh {
+      color: #fff;
+      border-color: rgba(255, 255, 255, .86);
+    }
+
+    .input-fret-marker.root { background: var(--root); }
+    .input-fret-marker.third { background: var(--third); }
+    .input-fret-marker.fifth { background: var(--fifth); }
+    .input-fret-marker.seventh { background: var(--seventh); }
+
+    .interval-arc-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 4;
+      overflow: visible;
+    }
+
+    .interval-arc-path {
+      fill: none;
+      stroke-dasharray: 7 7;
+      stroke-linecap: round;
+      stroke-width: 2.4;
+      opacity: .86;
+      filter: drop-shadow(0 2px 2px rgba(27, 20, 12, .2));
+    }
+
+    .interval-arc-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      min-height: 26px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(23, 32, 27, .16);
+      background: rgba(255, 255, 255, .94);
+      color: #18221d;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 7;
+      box-shadow: 0 3px 10px rgba(28, 20, 12, .18);
     }
 
     .muted-string {
@@ -775,11 +888,15 @@
       font-weight: 900;
       background: #fff;
       text-align: left;
+      border-color: var(--caged-line, var(--line));
+      border-style: dashed;
     }
 
     .caged-button.active {
-      border-color: var(--ink);
-      box-shadow: inset 0 0 0 1px var(--ink);
+      border-color: var(--caged-line, var(--ink));
+      box-shadow:
+        inset 0 0 0 1px var(--caged-line, var(--ink)),
+        0 0 0 2px var(--caged-fill-strong, rgba(23, 32, 27, .08));
     }
 
     .caged-button.missing {
@@ -802,12 +919,13 @@
       height: 24px;
       width: 24px;
       border-radius: 50%;
-      background: var(--ghost);
+      background: var(--caged-fill-strong, var(--ghost));
+      border: 1px solid var(--caged-line, var(--line));
       color: var(--ink);
     }
 
     .caged-button.active .caged-letter {
-      background: var(--ink);
+      background: var(--caged-line, var(--ink));
       color: #fff;
     }
 
@@ -826,7 +944,9 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       overflow: hidden;
-      background: linear-gradient(90deg, #f0c180, #cb8c4e);
+      background: var(--caged-fill, #f0c180);
+      background:
+        linear-gradient(90deg, var(--caged-fill, rgba(240, 193, 128, .4)), var(--caged-fill-strong, rgba(203, 140, 78, .28)));
     }
 
     .caged-mini-cell {
@@ -999,6 +1119,10 @@
         min-height: 100vh;
         width: min(100vw - 16px, 1220px);
         padding: calc(10px + env(safe-area-inset-top)) 0 calc(12px + env(safe-area-inset-bottom));
+      }
+
+      body.standalone-pwa .app {
+        padding-top: calc(10px + max(env(safe-area-inset-top), 54px));
       }
 
       .layout,
@@ -1268,6 +1392,10 @@
   </main>
 
   <script>
+    if (window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches) {
+      document.body.classList.add("standalone-pwa");
+    }
+
     const strings = [
       { number: 1, note: "E", pitch: 4, midi: 64 },
       { number: 2, note: "B", pitch: 11, midi: 59 },
@@ -1314,9 +1442,11 @@
       const nearBridge = Math.pow(2, -(index + 1) / 12);
       return nearNut - nearBridge;
     });
-    const roleClass = { "1": "root", "b3": "third", "3": "third", "5": "fifth", "b7": "seventh", "7": "seventh" };
-    const roleText = { "1": "根音", "b3": "小三度", "3": "大三度", "5": "五度", "b7": "小七度", "7": "大七度" };
+    const roleClass = { "1": "root", "b3": "third", "3": "third", "b5": "fifth", "5": "fifth", "b7": "seventh", "7": "seventh", "9": "seventh", "11": "third", "13": "fifth" };
+    const roleText = { "1": "根音", "b3": "小三度", "3": "大三度", "b5": "降五度", "5": "五度", "b7": "小七度", "7": "大七度", "9": "九度", "11": "十一度", "13": "十三度" };
     const intervalBySemitones = { 3: "小三度", 4: "大三度", 7: "五度", 10: "小七度", 11: "大七度" };
+    const degreeByRole = { "1": 1, "b3": 3, "3": 3, "b5": 5, "5": 5, "b7": 7, "7": 7, "9": 2, "11": 4, "13": 6 };
+    const formulaRoleOrder = ["1", "b3", "3", "b5", "5", "b7", "7", "9", "11", "13"];
     const cagedOrder = ["C", "A", "G", "E", "D"];
     const cagedInfo = {
       C: "C 形家族常用 5 弦和 2 弦附近的根音做定位，适合把开放 C 的骨架搬到别的根音上。",
@@ -1324,6 +1454,13 @@
       G: "G 形家族横跨范围大，更多用来连接相邻区域，而不是初学时完整按下整个形状。",
       E: "E 形家族以 6 弦根音最直观。比如 6 弦五品是 A，所以 E 形小七骨架搬到五品就是 Am7。",
       D: "D 形家族集中在高音弦，适合旋律音在上方时使用，也适合练习只看高音区的和弦片段。"
+    };
+    const cagedPalette = {
+      C: { line: "#e66f55", fill: "rgba(230, 111, 85, .16)", strong: "rgba(230, 111, 85, .24)" },
+      A: { line: "#1f9a8a", fill: "rgba(31, 154, 138, .14)", strong: "rgba(31, 154, 138, .23)" },
+      G: { line: "#7a70c8", fill: "rgba(122, 112, 200, .14)", strong: "rgba(122, 112, 200, .23)" },
+      E: { line: "#df9a2f", fill: "rgba(223, 154, 47, .15)", strong: "rgba(223, 154, 47, .24)" },
+      D: { line: "#4b95d7", fill: "rgba(75, 149, 215, .14)", strong: "rgba(75, 149, 215, .23)" }
     };
     const cagedAnchors = {
       C: [
@@ -1700,12 +1837,25 @@
       state.selectedRootAnchor = getVoicingRootAnchor();
     }
 
+    function getQualityKeyForMatch(match) {
+      if (!match) return state.quality;
+      const name = match.template.name;
+      if (name === "maj9" || name === "maj7") return "maj7";
+      if (name === "m9" || name === "m11" || name === "m7" || name === "m7b5") return "m7";
+      if (name === "9" || name === "13" || name === "7") return "7";
+      if (name === "m") return "m";
+      return "major";
+    }
+
     function renderChordControls() {
+      const inputRecognition = state.mode === "input" ? getInputRecognition() : null;
+      const activeRoot = inputRecognition && inputRecognition.main ? inputRecognition.main.root : state.root;
+      const activeQuality = inputRecognition && inputRecognition.main ? getQualityKeyForMatch(inputRecognition.main) : state.quality;
       el.rootPicker.innerHTML = rootChoices.map(root => `
-        <button class="${root === state.root ? "active" : ""}" type="button" data-root="${root}">${root}</button>
+        <button class="${root === activeRoot ? "active" : ""}" type="button" data-root="${root}">${root}</button>
       `).join("");
       el.qualityPicker.innerHTML = Object.entries(qualityTemplates).map(([key, template]) => `
-        <button class="${key === state.quality ? "active" : ""}" type="button" data-quality="${key}">${template.label}</button>
+        <button class="${key === activeQuality ? "active" : ""}" type="button" data-quality="${key}">${template.label}</button>
       `).join("");
       el.muteRow.innerHTML = [6, 5, 4, 3, 2, 1].map(stringNumber => `
         <button type="button" data-mute-string="${stringNumber}">${stringNumber}弦 x</button>
@@ -1786,8 +1936,29 @@
         .slice(0, 8);
     }
 
+    function renderCagedRegions(root, vertical) {
+      if (state.mode !== "caged") return [];
+      const selected = state.selectedCaged || getCurrentVoicing().caged;
+      return cagedOrder.map(shape => {
+        const palette = cagedPalette[shape];
+        const model = getCagedModel(root, shape);
+        const start = Math.max(1, model.startFret);
+        const end = Math.max(start, model.endFret);
+        const vars = `--caged-line:${palette.line};--caged-fill:${palette.fill};--caged-fill-strong:${palette.strong}`;
+        const style = vertical
+          ? `grid-column:2 / 8;grid-row:${start + 1} / ${end + 2};${vars}`
+          : `grid-column:${start + 1} / ${end + 2};grid-row:1 / 7;${vars}`;
+        return `
+          <div class="caged-region ${shape === selected ? "active" : ""}" style="${style}" aria-hidden="true">
+            <span class="caged-region-label">${shape} 形</span>
+          </div>
+        `;
+      });
+    }
+
     function renderFretboard() {
       const voicing = getCurrentVoicing();
+      const chord = getCurrentChord();
       const rows = [];
       const isInputMode = state.mode === "input";
       const vertical = isVerticalFretboard();
@@ -1801,6 +1972,7 @@
         el.fretboard.style.gridTemplateRows = "repeat(6, 1fr)";
       }
       rows.push(`<div class="nut"></div>`);
+      rows.push(...renderCagedRegions(chord.root, vertical));
 
       displayStrings.forEach((stringInfo, stringIndex) => {
         const inputFret = state.inputFrets[6 - stringInfo.number];
@@ -1867,17 +2039,20 @@
       }
 
       if (isInputMode) {
+        const inputFormula = getInputDisplayFormula();
         state.inputFrets.forEach((fret, stringIndex) => {
           if (fret === null) return;
           const stringNumber = 6 - stringIndex;
           const pos = getBoardPosition(stringNumber, fret, vertical);
           const stringInfo = getStringInfo(stringNumber);
           const pitch = (stringInfo.pitch + fret) % 12;
-          const chordTone = getCurrentChord().formula.find(([note]) => noteToPitch[note] === pitch);
+          const chordTone = inputFormula.find(([note]) => noteToPitch[note] === pitch);
           const note = chordTone ? chordTone[0] : pitchName(pitch);
+          const role = chordTone ? chordTone[1] : "";
+          const roleLabel = roleText[role] || "非和弦内音";
           rows.push(`
             <div style="position:relative;grid-column:${pos.column};grid-row:${pos.row};z-index:5">
-              <button class="input-fret-marker" type="button" data-input-selected="true" data-input-string="${stringNumber}" data-input-fret="${fret}" title="再次点击设为不发音">${note}</button>
+              <button class="input-fret-marker ${roleClass[role] || ""}" type="button" data-input-selected="true" data-input-string="${stringNumber}" data-input-fret="${fret}" data-role="${role}" title="${note} ${roleLabel}，再次点击设为不发音">${note}</button>
             </div>
           `);
         });
@@ -1904,6 +2079,136 @@
       el.noteMapStatus.textContent = isInputMode
         ? "点击指板录入指法；点弦名录入空弦。"
         : `${state.selectedNote}: 0-${fretCount} 品内共 ${selectedPositions.length} 个位置`;
+      requestAnimationFrame(renderIntervalArcs);
+    }
+
+    function roleColor(role) {
+      return {
+        "1": getComputedStyle(document.documentElement).getPropertyValue("--root").trim() || "#d94d38",
+        "b3": getComputedStyle(document.documentElement).getPropertyValue("--third").trim() || "#1b7f79",
+        "3": getComputedStyle(document.documentElement).getPropertyValue("--third").trim() || "#1b7f79",
+        "b5": getComputedStyle(document.documentElement).getPropertyValue("--fifth").trim() || "#6f5aa7",
+        "5": getComputedStyle(document.documentElement).getPropertyValue("--fifth").trim() || "#6f5aa7",
+        "b7": getComputedStyle(document.documentElement).getPropertyValue("--seventh").trim() || "#d18916",
+        "7": getComputedStyle(document.documentElement).getPropertyValue("--seventh").trim() || "#d18916",
+        "9": getComputedStyle(document.documentElement).getPropertyValue("--seventh").trim() || "#d18916",
+        "11": getComputedStyle(document.documentElement).getPropertyValue("--third").trim() || "#1b7f79",
+        "13": getComputedStyle(document.documentElement).getPropertyValue("--fifth").trim() || "#6f5aa7"
+      }[role] || "#31423a";
+    }
+
+    function renderIntervalArcs() {
+      el.fretboard.querySelector(".interval-arc-svg")?.remove();
+      el.fretboard.querySelectorAll(".interval-arc-label").forEach(label => label.remove());
+      if (state.mode !== "input") return;
+      const recognition = getInputRecognition();
+      if (!recognition || !recognition.main) return;
+
+      const rootMarker = [...el.fretboard.querySelectorAll('.input-fret-marker[data-role="1"]')]
+        .sort((a, b) => Number(b.dataset.inputString) - Number(a.dataset.inputString) || Number(a.dataset.inputFret) - Number(b.dataset.inputFret))[0];
+      if (!rootMarker) return;
+
+      const boardRect = el.fretboard.getBoundingClientRect();
+      const rootRect = rootMarker.getBoundingClientRect();
+      const start = {
+        x: rootRect.left + rootRect.width / 2 - boardRect.left,
+        y: rootRect.top + rootRect.height / 2 - boardRect.top
+      };
+      const targets = [...el.fretboard.querySelectorAll(".input-fret-marker[data-role]")]
+        .filter(marker => marker !== rootMarker && marker.dataset.role !== "1");
+      if (!targets.length) return;
+      const markerRects = [...el.fretboard.querySelectorAll(".input-fret-marker")].map(marker => {
+        const rect = marker.getBoundingClientRect();
+        return {
+          left: rect.left - boardRect.left - 10,
+          right: rect.right - boardRect.left + 10,
+          top: rect.top - boardRect.top - 8,
+          bottom: rect.bottom - boardRect.top + 8
+        };
+      });
+      const placedLabelRects = [];
+      const overlaps = (a, b) =>
+        a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+      const labelRect = (x, y, width) => ({
+        left: x - width / 2,
+        right: x + width / 2,
+        top: y - 13,
+        bottom: y + 13
+      });
+      const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+      const vertical = el.fretboard.classList.contains("vertical");
+      const labelBounds = {
+        minX: vertical ? 42 : 88,
+        maxX: boardRect.width - 12,
+        minY: vertical ? 72 : 18,
+        maxY: vertical ? boardRect.height - 18 : boardRect.height - 44
+      };
+      const hasCollision = rect => [...markerRects, ...placedLabelRects].some(occupied => overlaps(rect, occupied));
+
+      const defs = `
+        <defs>
+          ${targets.map(marker => `
+            <marker id="arrow-${marker.dataset.inputString}-${marker.dataset.inputFret}" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L8,4 L0,8 Z" fill="${roleColor(marker.dataset.role)}"></path>
+            </marker>
+          `).join("")}
+        </defs>
+      `;
+      const labels = [];
+      const paths = targets.map((marker, index) => {
+        const rect = marker.getBoundingClientRect();
+        const end = {
+          x: rect.left + rect.width / 2 - boardRect.left,
+          y: rect.top + rect.height / 2 - boardRect.top
+        };
+        const dx = end.x - start.x;
+        const dy = end.y - start.y;
+        const distance = Math.hypot(dx, dy) || 1;
+        const normal = { x: -dy / distance, y: dx / distance };
+        const bend = 38 + (index % 3) * 12;
+        const direction = index % 2 === 0 ? 1 : -1;
+        const control = {
+          x: (start.x + end.x) / 2 + normal.x * bend * direction,
+          y: (start.y + end.y) / 2 + normal.y * bend * direction
+        };
+        const label = roleText[marker.dataset.role] || "";
+        const labelWidth = Math.max(48, label.length * 14 + 18);
+        const tangent = { x: dx / distance, y: dy / distance };
+        const targetAnchor = {
+          x: end.x + tangent.x * 18,
+          y: end.y + tangent.y * 18
+        };
+        const offsets = [30, -30, 46, -46, 62, -62, 0, 78, -78];
+        const minX = Math.min(labelBounds.maxX - labelWidth / 2, labelBounds.minX + labelWidth / 2);
+        const maxX = Math.max(labelBounds.minX + labelWidth / 2, labelBounds.maxX - labelWidth / 2);
+        let labelX = clamp(targetAnchor.x + normal.x * offsets[0], minX, maxX);
+        let labelY = clamp(targetAnchor.y + normal.y * offsets[0], labelBounds.minY, labelBounds.maxY);
+        for (const offset of offsets) {
+          const candidateX = clamp(targetAnchor.x + normal.x * offset, minX, maxX);
+          const candidateY = clamp(targetAnchor.y + normal.y * offset, labelBounds.minY, labelBounds.maxY);
+          const candidateRect = labelRect(candidateX, candidateY, labelWidth);
+          if (!hasCollision(candidateRect)) {
+            labelX = candidateX;
+            labelY = candidateY;
+            break;
+          }
+        }
+        placedLabelRects.push(labelRect(labelX, labelY, labelWidth));
+        const color = roleColor(marker.dataset.role);
+        labels.push(`<span class="interval-arc-label" style="left:${labelX}px;top:${labelY}px;min-width:${labelWidth}px">${label}</span>`);
+
+        return `
+          <path class="interval-arc-path" d="M ${start.x} ${start.y} Q ${control.x} ${control.y} ${end.x} ${end.y}" stroke="${color}" marker-end="url(#arrow-${marker.dataset.inputString}-${marker.dataset.inputFret})"></path>
+        `;
+      }).join("");
+
+      el.fretboard.insertAdjacentHTML("beforeend", `
+        <svg class="interval-arc-svg" viewBox="0 0 ${boardRect.width} ${boardRect.height}" aria-hidden="true">
+          ${defs}
+          ${paths}
+        </svg>
+        ${labels.join("")}
+      `);
     }
 
     function renderVoicings() {
@@ -2038,18 +2343,22 @@
       ).join(" / ");
 
       el.cagedTitle.textContent = `${item.symbol} 的 CAGED 视角`;
-      el.cagedButtons.innerHTML = cagedOrder.map(shape => `
-        <button class="caged-button ${shape === selected ? "active" : ""} ${available.has(shape) ? "" : "missing"}" type="button" data-caged="${shape}">
-          <span class="caged-button-head">
-            <span class="caged-letter">${shape}</span>
-            <span class="caged-range">${getCagedModel(chord.root, shape).range}</span>
-          </span>
-          <span class="caged-mini-board" aria-label="${shape} 形根音地图">
-            ${renderCagedMiniBoard(chord.root, shape)}
-          </span>
-          <span class="caged-string-hint">${cagedAnchors[shape].map(anchor => anchor.label).join(" / ")}</span>
-        </button>
-      `).join("");
+      el.cagedButtons.innerHTML = cagedOrder.map(shape => {
+        const palette = cagedPalette[shape];
+        const vars = `--caged-line:${palette.line};--caged-fill:${palette.fill};--caged-fill-strong:${palette.strong}`;
+        return `
+          <button class="caged-button ${shape === selected ? "active" : ""} ${available.has(shape) ? "" : "missing"}" type="button" data-caged="${shape}" style="${vars}">
+            <span class="caged-button-head">
+              <span class="caged-letter">${shape}</span>
+              <span class="caged-range">${getCagedModel(chord.root, shape).range}</span>
+            </span>
+            <span class="caged-mini-board" aria-label="${shape} 形根音地图">
+              ${renderCagedMiniBoard(chord.root, shape)}
+            </span>
+            <span class="caged-string-hint">${cagedAnchors[shape].map(anchor => anchor.label).join(" / ")}</span>
+          </button>
+        `;
+      }).join("");
       el.cagedSummary.textContent = selectedVoicing
         ? `${selected} 形家族：当前可用按法是 ${selectedVoicing.shape}。${cagedInfo[selected]}`
         : `${selected} 形家族：这个原型还没有收录 ${item.symbol} 的完整示例，但逻辑一样，先找 ${chord.root} 的根音位置，再在附近按 ${selected} 形骨架补出三度、五度和七度。`;
@@ -2112,8 +2421,19 @@
       const item = getCurrentChordItem();
       const chord = getCurrentChord();
       const voicing = getCurrentVoicing();
-      el.voicingTitle.textContent = `${item.symbol} · ${voicing.shape}`;
-      el.shapeBadge.textContent = voicing.tag;
+      const inputRecognition = state.mode === "input" ? getInputRecognition() : null;
+      const inputFormula = inputRecognition && inputRecognition.main ? formulaFromMatch(inputRecognition.main) : null;
+      const displayFormula = state.mode === "input" ? inputFormula || [] : chord.formula;
+      const displaySymbol = state.mode === "input"
+        ? inputRecognition
+          ? inputRecognition.main
+            ? inputRecognition.main.symbol
+            : "输入指法识别"
+          : "格式错误"
+        : item.symbol;
+      const displayShape = state.mode === "input" ? el.fingeringInput.value : voicing.shape;
+      el.voicingTitle.textContent = `${displaySymbol} · ${displayShape}`;
+      el.shapeBadge.textContent = state.mode === "input" ? "识别结果" : voicing.tag;
       el.whyTitle.textContent = `为什么 ${item.symbol} 可以这样弹？`;
       el.whyText.textContent = state.mode === "anchor"
         ? `先别管 CAGED 名字。把 ${chord.root} 当成地图入口，选一个你想落脚的根音位置，然后在附近找出 ${chord.formula.slice(1).map(([note]) => note).join("、")}。这样你是在用音组成和弦，不是在背一个按法。`
@@ -2122,12 +2442,14 @@
         : state.mode === "voice"
         ? getVoiceLeadingText(item.symbol)
         : chord.why;
-      el.notes.innerHTML = chord.formula.map(([note, role]) => `
-        <button class="note-pill ${roleClass[role]} ${note === state.selectedNote ? "active" : ""}" type="button" data-note="${note}">
-          <b>${note}</b>
-          <span>${roleText[role]}</span>
-        </button>
-      `).join("");
+      el.notes.innerHTML = displayFormula.length
+        ? displayFormula.map(([note, role]) => `
+          <button class="note-pill ${roleClass[role]} ${note === state.selectedNote ? "active" : ""}" type="button" data-note="${note}">
+            <b>${note}</b>
+            <span>${roleText[role]}</span>
+          </button>
+        `).join("")
+        : `<div class="analysis-card"><strong>等待输入</strong><span>点击指板后显示识别出的组成音。</span></div>`;
       renderAnchorGuide();
       renderCagedGuide();
       renderIntervalGuide();
@@ -2243,14 +2565,47 @@
       return matches;
     }
 
-    function renderFingeringAnalysis() {
+    function getInputRecognition() {
       const frets = parseFingering(el.fingeringInput.value);
-      if (!frets) {
+      if (!frets) return null;
+      const notes = getFingeringNotes(frets);
+      if (!notes.length) return { frets, notes, matches: [], basic: null, extended: null, main: null };
+      const matches = findBestChordMatches(notes);
+      const basic = matches.find(match => match.template.type === "basic") || null;
+      const extended = matches.find(match => match.template.type === "extended" && match.score >= (basic ? basic.score - 2 : 0)) || null;
+      return {
+        frets,
+        notes,
+        matches,
+        basic,
+        extended,
+        main: extended || basic || matches[0] || null
+      };
+    }
+
+    function formulaFromMatch(match) {
+      if (!match) return null;
+      return Object.entries(match.template.intervals)
+        .sort(([roleA], [roleB]) => formulaRoleOrder.indexOf(roleA) - formulaRoleOrder.indexOf(roleB))
+        .map(([role, semitones]) => [
+          spellInterval(match.root, semitones, degreeByRole[role] || 1),
+          role
+        ]);
+    }
+
+    function getInputDisplayFormula() {
+      const recognition = getInputRecognition();
+      return recognition && recognition.main ? formulaFromMatch(recognition.main) : getCurrentChord().formula;
+    }
+
+    function renderFingeringAnalysis() {
+      const recognition = getInputRecognition();
+      if (!recognition) {
         el.analysisResult.innerHTML = `<div class="analysis-card"><strong>格式错误</strong><span>请输入 6 弦到 1 弦，例如 x-5-7-5-6-5。</span></div>`;
         return;
       }
-      state.inputFrets = frets;
-      const notes = getFingeringNotes(frets);
+      state.inputFrets = recognition.frets;
+      const notes = recognition.notes;
       if (!notes.length) {
         el.analysisResult.innerHTML = `
           <div class="analysis-card">
@@ -2264,10 +2619,7 @@
         `;
         return;
       }
-      const matches = findBestChordMatches(notes);
-      const basic = matches.find(match => match.template.type === "basic");
-      const extended = matches.find(match => match.template.type === "extended" && match.score >= (basic ? basic.score - 2 : 0));
-      const main = extended || basic || matches[0];
+      const { basic, extended, main } = recognition;
       const noteText = notes.map(note => `${note.stringNumber}弦${note.fret}品=${note.note}`).join(" / ");
       const omit = main ? main.missing.map(role => roleText[role] || role).join("、") : "";
 
@@ -2293,8 +2645,8 @@
 
     function render() {
       if (!state.selectedRootAnchor) resetChordLens();
-      renderChordControls();
       el.fingeringInput.value = fretsToInputValue(state.inputFrets);
+      renderChordControls();
       renderFretboard();
       renderVoicings();
       renderExplanation();
@@ -2309,6 +2661,13 @@
       document.querySelectorAll("[data-panel]").forEach(panel => {
         panel.classList.toggle("active", panel.dataset.panel === mode);
       });
+    }
+
+    function renderInputRecognitionView() {
+      renderChordControls();
+      renderFretboard();
+      renderFingeringAnalysis();
+      renderExplanation();
     }
 
     el.rootPicker.addEventListener("click", event => {
@@ -2379,8 +2738,7 @@
         state.inputFrets[6 - stringNumber] = null;
         el.fingeringInput.value = fretsToInputValue(state.inputFrets);
         setMode("input");
-        renderFretboard();
-        renderFingeringAnalysis();
+        renderInputRecognitionView();
         return;
       }
 
@@ -2393,8 +2751,7 @@
           el.fingeringInput.value = fretsToInputValue(state.inputFrets);
           playGuitarNote(stringNumber, fret);
           setMode("input");
-          renderFretboard();
-          renderFingeringAnalysis();
+          renderInputRecognitionView();
         }
         if (state.mode === "input") return;
       }
@@ -2414,6 +2771,7 @@
     document.querySelectorAll("[data-mode]").forEach(button => {
       button.addEventListener("click", () => {
         setMode(button.dataset.mode);
+        renderChordControls();
         renderFretboard();
         renderVoicings();
         renderExplanation();
@@ -2421,22 +2779,20 @@
       });
     });
 
-    el.analyzeFingering.addEventListener("click", renderFingeringAnalysis);
+    el.analyzeFingering.addEventListener("click", renderInputRecognitionView);
     el.fingeringInput.addEventListener("input", () => {
       const frets = parseFingering(el.fingeringInput.value);
       if (frets) {
         state.inputFrets = frets;
         setMode("input");
-        renderFretboard();
       }
-      renderFingeringAnalysis();
+      renderInputRecognitionView();
     });
     el.clearFingering.addEventListener("click", () => {
       state.inputFrets = [null, null, null, null, null, null];
       el.fingeringInput.value = fretsToInputValue(state.inputFrets);
       setMode("input");
-      renderFretboard();
-      renderFingeringAnalysis();
+      renderInputRecognitionView();
     });
 
     el.muteRow.addEventListener("click", event => {
@@ -2446,8 +2802,11 @@
       state.inputFrets[6 - stringNumber] = null;
       el.fingeringInput.value = fretsToInputValue(state.inputFrets);
       setMode("input");
-      renderFretboard();
-      renderFingeringAnalysis();
+      renderInputRecognitionView();
+    });
+
+    window.addEventListener("resize", () => {
+      requestAnimationFrame(renderIntervalArcs);
     });
 
     el.reveal.addEventListener("click", () => {
