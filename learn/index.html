@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#12101c">
+<title>吉他陪练 · 循序渐进学会一首歌</title>
+<style>
+:root{
+  --bg:#12101c; --panel:#1d1a2e; --panel2:#262240; --line:#3a3560;
+  --text:#efeaff; --dim:#9b93c0; --accent:#ff9f43; --accent2:#7c6cff;
+  --good:#2ecc71; --bad:#ff6b6b; --radius:14px;
+}
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+button,select,input,.measure,.strum-cell,.chord-card{touch-action:manipulation;}
+body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:linear-gradient(160deg,#12101c 0%,#1a1530 100%);color:var(--text);min-height:100vh;min-height:100dvh;-webkit-text-size-adjust:100%;}
+.wrap{max-width:980px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(80px + env(safe-area-inset-bottom));}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:6px;}
+header h1{font-size:24px;letter-spacing:1px;}
+header .meta{color:var(--dim);font-size:13px;}
+.progress-wrap{margin:12px 0 18px;}
+.progress-bar{height:10px;background:var(--panel2);border-radius:6px;overflow:hidden;}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:6px;transition:width .5s;}
+.progress-label{font-size:12px;color:var(--dim);margin-top:5px;}
+nav.stages{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+nav.stages button{
+  flex:1;min-width:118px;background:var(--panel);border:1px solid var(--line);color:var(--dim);
+  padding:10px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;line-height:1.5;text-align:left;transition:.2s;
+}
+nav.stages button .num{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--panel2);text-align:center;line-height:20px;font-size:11px;margin-right:5px;}
+nav.stages button.active{border-color:var(--accent);color:var(--text);background:var(--panel2);}
+nav.stages button.done .num{background:var(--good);color:#fff;}
+nav.stages button.locked{opacity:.45;cursor:not-allowed;}
+nav.stages button:not(.locked):hover{border-color:var(--accent2);}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px;}
+.card h2{font-size:18px;margin-bottom:6px;color:var(--accent);}
+.card h3{font-size:15px;margin:14px 0 8px;color:var(--accent2);}
+.card p.tip{color:var(--dim);font-size:13px;line-height:1.7;}
+.chord-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px;}
+.chord-card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;transition:.2s;}
+.chord-card.learned{border-color:var(--good);}
+.chord-card .cname{font-size:17px;font-weight:700;margin-bottom:4px;}
+.chord-card button{margin:3px 2px 0;font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer;}
+.chord-card button:hover{border-color:var(--accent);}
+.chord-card button.learn-btn.on{background:var(--good);border-color:var(--good);color:#fff;}
+.bigchord{display:flex;align-items:center;justify-content:center;gap:30px;flex-wrap:wrap;min-height:230px;}
+.bigchord .now-label{font-size:13px;color:var(--dim);text-align:center;margin-bottom:4px;}
+.bigchord .now-name{font-size:54px;font-weight:800;text-align:center;}
+.bigchord .next-name{font-size:26px;color:var(--dim);text-align:center;}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;}
+.controls label{font-size:13px;color:var(--dim);}
+.controls input[type=range]{accent-color:var(--accent);}
+.btn{background:var(--accent);color:#211500;font-weight:700;border:none;padding:10px 22px;border-radius:10px;cursor:pointer;font-size:14px;transition:.15s;}
+.btn:hover{filter:brightness(1.1);}
+.btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line);}
+.btn.green{background:var(--good);color:#fff;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.beat-dots{display:flex;gap:10px;justify-content:center;margin:10px 0;}
+.beat-dot{width:16px;height:16px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);transition:.05s;}
+.beat-dot.on{background:var(--accent);box-shadow:0 0 12px var(--accent);transform:scale(1.25);}
+.beat-dot.on.first{background:var(--accent2);box-shadow:0 0 12px var(--accent2);}
+.strum-row{display:flex;gap:8px;justify-content:center;margin:18px 0;flex-wrap:wrap;}
+.strum-cell{width:56px;height:78px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:.06s;}
+.strum-cell .arrow{font-size:26px;}
+.strum-cell .cnt{font-size:11px;color:var(--dim);}
+.strum-cell.hit{background:var(--accent);border-color:var(--accent);transform:scale(1.12);}
+.strum-cell.hit .arrow,.strum-cell.hit .cnt{color:#211500;}
+.strum-cell.rest{opacity:.35;}
+.section-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+.section-tabs button{background:var(--panel2);border:1px solid var(--line);color:var(--dim);padding:7px 14px;border-radius:9px;cursor:pointer;font-size:13px;}
+.section-tabs button.active{border-color:var(--accent);color:var(--text);}
+.section-tabs button.sec-done{border-color:var(--good);}
+.measure-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:8px;margin-top:12px;}
+.measure{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;min-height:64px;transition:.1s;}
+.measure .mch{font-weight:700;font-size:16px;}
+.measure .mly{font-size:11px;color:var(--dim);margin-top:4px;line-height:1.4;}
+.measure.now{border-color:var(--accent);background:#3d2f18;box-shadow:0 0 10px rgba(255,159,67,.35);}
+.measure.played{opacity:.55;}
+textarea#importBox{width:100%;min-height:260px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.6;}
+pre.fmt{background:#141221;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;color:var(--dim);overflow-x:auto;line-height:1.7;}
+.songs-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.songs-list button{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;}
+.songs-list button.cur{border-color:var(--accent);}
+.songs-list button .del{color:var(--bad);margin-left:8px;}
+.stage-done-banner{margin-top:16px;padding:12px;border-radius:10px;background:rgba(46,204,113,.12);border:1px solid var(--good);font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+.hidden{display:none!important;}
+.kbd{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12px;}
+.celebrate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,8,18,.85);z-index:99;flex-direction:column;gap:14px;text-align:center;padding:20px;}
+.celebrate h2{font-size:34px;color:var(--accent);}
+.celebrate p{color:var(--dim);max-width:430px;line-height:1.8;}
+footer{margin-top:30px;text-align:center;color:var(--dim);font-size:12px;line-height:1.8;}
+svg.chord-svg{display:block;margin:0 auto;}
+/* ===== 移动端适配（iPhone / iPad） ===== */
+@media (max-width:740px){
+  header h1{font-size:21px;}
+  nav.stages{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  nav.stages button{min-width:0;padding:9px 7px;font-size:12px;}
+  .card{padding:14px 12px;}
+  .bigchord{gap:14px;min-height:0;padding:8px 0;}
+  .bigchord .now-name{font-size:42px;}
+  .bigchord .next-name{font-size:22px;}
+  .strum-cell{width:40px;height:62px;}
+  .strum-cell .arrow{font-size:20px;}
+  .measure-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
+  .measure{padding:6px 4px;min-height:56px;}
+  .measure .mch{font-size:14px;}
+  .measure .mly{font-size:10px;}
+  .chord-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+  .controls{gap:8px;}
+  .controls label{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .controls input[type=range]{width:130px;}
+  .btn{padding:12px 20px;}
+  textarea#importBox{font-size:16px;} /* 防止 iOS 聚焦时自动放大 */
+}
+@media (max-width:400px){
+  nav.stages{grid-template-columns:repeat(2,1fr);}
+  .measure-grid{grid-template-columns:repeat(3,1fr);}
+  .strum-cell{width:36px;height:56px;}
+}
+/* 触屏设备：加大可点面积 */
+@media (pointer:coarse){
+  .chord-card button{padding:8px 12px;font-size:13px;}
+  .section-tabs button{padding:10px 16px;}
+  .songs-list button{padding:11px 16px;}
+  input[type=checkbox]{width:18px;height:18px;}
+  select{padding:6px 8px;font-size:14px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="songTitle">普通朋友</h1>
+    <span class="meta" id="songMeta"></span>
+  </header>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel"></div>
+  </div>
+  <nav class="stages" id="stageNav"></nav>
+  <main id="stageContainer"></main>
+  <footer>
+    🎸 建议每天练习 15–30 分钟 · 慢就是快，先求准再求快<br>
+    练完整曲后，点「学新歌」粘贴新的谱子继续闯关
+  </footer>
+</div>
+<script>
+/* ===================== 数据 ===================== */
+// 和弦字典：6条弦从低音E到高音e；-1=不弹(×)，0=空弦
+const CHORD_DICT = {
+  "C":[-1,3,2,0,1,0],"Cmaj7":[-1,3,2,0,0,0],"C7":[-1,3,2,3,1,0],
+  "D":[-1,-1,0,2,3,2],"Dm":[-1,-1,0,2,3,1],"D7":[-1,-1,0,2,1,2],"Dm7":[-1,-1,0,2,1,1],
+  "E":[0,2,2,1,0,0],"Em":[0,2,2,0,0,0],"E7":[0,2,0,1,0,0],"Em7":[0,2,0,0,0,0],"Emaj7":[0,2,1,1,0,0],
+  "F":[1,3,3,2,1,1],"Fmaj7":[-1,-1,3,2,1,0],"F#m":[2,4,4,2,2,2],"F#m7":[2,-1,2,2,2,-1],
+  "G":[3,2,0,0,0,3],"G7":[3,2,0,0,0,1],"Gmaj7":[3,2,0,0,0,2],"G#m7":[4,-1,4,4,4,-1],"G#7":[4,6,4,5,4,4],
+  "A":[-1,0,2,2,2,0],"Am":[-1,0,2,2,1,0],"A7":[-1,0,2,0,2,0],"Am7":[-1,0,2,0,1,0],"Amaj7":[-1,0,2,1,2,0],
+  "B":[-1,2,4,4,4,2],"Bm":[-1,2,4,4,3,2],"B7":[-1,2,1,2,0,2],"Bm7":[-1,2,0,2,0,2],
+  "B7sus4":[-1,2,2,2,0,2],"A/B":[-1,2,2,2,2,0],
+  "C#m":[-1,4,6,6,5,4],"C#m7":[-1,4,2,4,2,-1],"C#7":[-1,4,3,4,2,-1]
+};
+// 指法提示
+const CHORD_TIPS = {
+  "E":"1指3弦1品，2指5弦2品，3指4弦2品，全部六弦都可弹",
+  "Emaj7":"E和弦的基础上，把4弦改按1品（1指并排按住3、4弦1品）",
+  "Am7":"Am 抬起无名指即可：1指2弦1品，2指4弦2品，×不弹6弦",
+  "B7":"1指4弦1品，2指5弦2品，3指3弦2品，4指1弦2品，×不弹6弦",
+  "C#m7":"小横按：1指横按4品，3指4弦6品（也可先用简化按法）",
+  "F#m7":"1指横按2品（先按好低音6弦），放松手腕慢慢来",
+  "G#m7":"1指横按4品，是 F#m7 整体往上移2品",
+  "A":"2、3、4指并排按4、3、2弦2品，×不弹6弦",
+  "A/B":"A和弦指型，低音换成5弦2品（B音），1弦空弦",
+  "B7sus4":"B7 的过渡和弦，常作为副歌前的推动"
+};
+// 默认歌曲：普通朋友（陶喆）— 依据用户上传的吉他谱整理
+const DEFAULT_SONG = {
+  id:"putongpengyou",
+  title:"普通朋友",
+  artist:"陶喆",
+  key:"F 调 · Capo 夹1品 · 按 E 调指法",
+  tempo:80,
+  strum:[
+    {arrow:"↓",cnt:"1"},{arrow:"",cnt:"&"},{arrow:"↓",cnt:"2"},{arrow:"↑",cnt:"&"},
+    {arrow:"",cnt:"3"},{arrow:"↑",cnt:"&"},{arrow:"↓",cnt:"4"},{arrow:"↑",cnt:"&"}
+  ],
+  strumName:"R&B 常用16分节奏：↓ _ ↓↑ _ ↑↓↑（空拍处手继续摆动但不触弦）",
+  chords:["E","Emaj7","Am7","B7","C#m7","F#m7","G#m7","A","A/B","B7sus4"],
+  sections:[
+    {name:"前奏",  measures:[
+      {chord:"Emaj7",lyric:"♪"},{chord:"Emaj7",lyric:"♪"},{chord:"C#m7",lyric:"♪"},{chord:"A/B",lyric:"♪"}
+    ]},
+    {name:"主歌A", measures:[
+      {chord:"E",lyric:"第1句"},{chord:"Am7",lyric:""},{chord:"E",lyric:"第2句"},{chord:"Am7",lyric:""},
+      {chord:"E",lyric:"第3句"},{chord:"Am7",lyric:""},{chord:"E",lyric:"第4句"},{chord:"Am7",lyric:""}
+    ]},
+    {name:"预副歌", measures:[
+      {chord:"B7",lyric:"第1句"},{chord:"Am7",lyric:""},{chord:"E",lyric:"第2句"},{chord:"Am7",lyric:""},
+      {chord:"E",lyric:"第3句"},{chord:"G#m7",lyric:""},{chord:"C#m7",lyric:"第4句"},{chord:"A/B",lyric:""}
+    ]},
+    {name:"副歌",  measures:[
+      {chord:"F#m7",lyric:"第1句"},{chord:"B7",lyric:""},{chord:"E",lyric:"第2句"},{chord:"C#m7",lyric:""},
+      {chord:"F#m7",lyric:"第3句"},{chord:"B7sus4",lyric:""},{chord:"G#m7",lyric:"第4句"},{chord:"C#m7",lyric:""},
+      {chord:"F#m7",lyric:"第5句"},{chord:"B7",lyric:""},{chord:"E",lyric:"收尾"},{chord:"E",lyric:""}
+    ]},
+    {name:"尾奏",  measures:[
+      {chord:"A",lyric:"♪"},{chord:"Am7",lyric:"♪"},{chord:"E",lyric:"♪"},{chord:"E",lyric:"♪"}
+    ]}
+  ],
+  notes:"谱面提示：注意伴奏中滑音的运用；和弦走向按你上传的谱整理，歌词请对照原谱跟唱（标注为句序提示）。"
+};
+const STAGE_DEFS = [
+  {id:0,name:"认识和弦",desc:"逐个学会本歌用到的和弦"},
+  {id:1,name:"和弦切换",desc:"两两切换，练到不卡顿"},
+  {id:2,name:"节奏型",desc:"右手扫弦节奏跟练"},
+  {id:3,name:"分段练习",desc:"逐段跟弹，慢速循环"},
+  {id:4,name:"整曲串联",desc:"完整跟奏一遍"},
+  {id:5,name:"学新歌",desc:"导入新谱，开始新的闯关"}
+];
+/* ===================== 音频引擎 (Web Audio) ===================== */
+const OPEN_FREQS = [82.41,110.00,146.83,196.00,246.94,329.63]; // EADGBe
+let AC = null;
+function ac(){ if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); return AC; }
+// iOS Safari：首次触摸即解锁音频（静音播放一帧）
+(function(){
+  const unlock=()=>{ try{ const ctx=ac(); const b=ctx.createBuffer(1,1,22050); const s=ctx.createBufferSource(); s.buffer=b; s.connect(ctx.destination); s.start(0); }catch(e){}
+    document.removeEventListener("touchstart",unlock); document.removeEventListener("click",unlock); };
+  document.addEventListener("touchstart",unlock,{once:true});
+  document.addEventListener("click",unlock,{once:true});
+})();
+function pluck(freq, when, dur=1.6, gainVal=0.16){
+  const ctx=ac();
+  const osc=ctx.createOscillator(); osc.type="triangle"; osc.frequency.value=freq;
+  const osc2=ctx.createOscillator(); osc2.type="sine"; osc2.frequency.value=freq*2; // 一点泛音
+  const g=ctx.createGain(), g2=ctx.createGain();
+  const lp=ctx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.setValueAtTime(freq*6,when); lp.frequency.exponentialRampToValueAtTime(freq*1.5,when+dur);
+  g.gain.setValueAtTime(0.0001,when); g.gain.exponentialRampToValueAtTime(gainVal,when+0.008); g.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+  g2.gain.setValueAtTime(0.0001,when); g2.gain.exponentialRampToValueAtTime(gainVal*0.25,when+0.008); g2.gain.exponentialRampToValueAtTime(0.0001,when+dur*0.5);
+  osc.connect(g).connect(lp); osc2.connect(g2).connect(lp); lp.connect(ctx.destination);
+  osc.start(when); osc.stop(when+dur+0.1); osc2.start(when); osc2.stop(when+dur+0.1);
+}
+function strumChord(name, when=null, dur=1.6, dir=1, gainVal=0.15){
+  const frets = currentSong.chords ? (getChordFrets(name)) : CHORD_DICT[name];
+  if(!frets) return;
+  const ctx=ac(); const t0 = when===null ? ctx.currentTime+0.02 : when;
+  const order=[]; for(let s=0;s<6;s++){ if(frets[s]>=0) order.push(s); }
+  if(dir<0) order.reverse();
+  order.forEach((s,i)=>{ pluck(OPEN_FREQS[s]*Math.pow(2,frets[s]/12), t0+i*0.018, dur, gainVal); });
+}
+function clickSound(when, accent=false){
+  const ctx=ac();
+  const osc=ctx.createOscillator(); osc.type="square"; osc.frequency.value=accent?1500:1000;
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(accent?0.25:0.15,when); g.gain.exponentialRampToValueAtTime(0.0001,when+0.05);
+  osc.connect(g).connect(ctx.destination); osc.start(when); osc.stop(when+0.07);
+}
+/* ---- 通用调度器：以拍为单位回调 ---- */
+function makeScheduler(){
+  return {
+    timer:null, nextTime:0, beatIndex:0, running:false,
+    bpm:80, subdiv:1, onBeat:null, // onBeat(beatIndex, audioTime)
+    start(){
+      this.stop(); const ctx=ac(); this.running=true;
+      this.nextTime=ctx.currentTime+0.1; this.beatIndex=0;
+      const lookahead=0.12;
+      this.timer=setInterval(()=>{
+        while(this.nextTime < ctx.currentTime + lookahead){
+          const bi=this.beatIndex, t=this.nextTime;
+          try{ this.onBeat && this.onBeat(bi,t); }catch(e){ console.error(e); }
+          const secPerBeat = 60/this.bpm/this.subdiv;
+          this.nextTime += secPerBeat; this.beatIndex++;
+        }
+      },30);
+    },
+    stop(){ this.running=false; if(this.timer){clearInterval(this.timer); this.timer=null;} }
+  };
+}
+/* ===================== 渲染工具 ===================== */
+function getChordFrets(name){
+  if(currentSong.customChords && currentSong.customChords[name]) return currentSong.customChords[name];
+  return CHORD_DICT[name] || null;
+}
+// 画和弦图（SVG）
+function chordSVG(name, size=1){
+  const frets=getChordFrets(name);
+  const W=120*size, H=140*size;
+  if(!frets) return `<svg class="chord-svg" width="${W}" height="${H}"><text x="${W/2}" y="${H/2}" fill="#9b93c0" text-anchor="middle" font-size="12">无图: ${name}</text></svg>`;
+  const played=frets.filter(f=>f>0);
+  const minF=played.length?Math.min(...played):0, maxF=played.length?Math.max(...played):0;
+  let base = (maxF<=4)?1:minF; // 起始品
+  const left=18*size, top=26*size, w=84*size, h=96*size, nFrets=4;
+  const sx=w/5, sy=h/nFrets;
+  let s=`<svg class="chord-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+  s+=`<text x="${W/2}" y="${14*size}" fill="#efeaff" text-anchor="middle" font-size="${13*size}" font-weight="bold">${name}</text>`;
+  // 品丝横线
+  for(let i=0;i<=nFrets;i++){
+    const y=top+i*sy, thick=(i===0&&base===1)?3:1;
+    s+=`<line x1="${left}" y1="${y}" x2="${left+w}" y2="${y}" stroke="#9b93c0" stroke-width="${thick}"/>`;
+  }
+  // 弦竖线
+  for(let i=0;i<6;i++){
+    const x=left+i*sx;
+    s+=`<line x1="${x}" y1="${top}" x2="${x}" y2="${top+h}" stroke="#9b93c0" stroke-width="1"/>`;
+  }
+  if(base>1) s+=`<text x="${left-6*size}" y="${top+sy*0.65}" fill="#9b93c0" text-anchor="end" font-size="${10*size}">${base}</text>`;
+  // 点位 / 开放 / 不弹
+  for(let i=0;i<6;i++){
+    const x=left+i*sx, f=frets[i];
+    if(f<0) s+=`<text x="${x}" y="${top-5*size}" fill="#ff6b6b" text-anchor="middle" font-size="${11*size}">×</text>`;
+    else if(f===0) s+=`<circle cx="${x}" cy="${top-8*size}" r="${3.5*size}" fill="none" stroke="#2ecc71" stroke-width="1.5"/>`;
+    else{
+      const fr=f-base+1; if(fr>=1&&fr<=nFrets){
+        s+=`<circle cx="${x}" cy="${top+(fr-0.5)*sy}" r="${6*size}" fill="#ff9f43"/>`;
+      }
+    }
+  }
+  s+=`</svg>`;
+  return s;
+}
+function fretsToStr(frets){ return frets.map(f=>f<0?"×":f).join(" "); }
+/* ---- 状态存取 ---- */
+let memStore={};
+function store(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){ memStore[k]=v; } }
+function load(k,def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return memStore[k]!==undefined?memStore[k]:def; } }
+let songs = load("gc_songs", {});
+if(!songs[DEFAULT_SONG.id]) songs[DEFAULT_SONG.id]=DEFAULT_SONG;
+let currentSongId = load("gc_current", DEFAULT_SONG.id);
+if(!songs[currentSongId]) currentSongId=DEFAULT_SONG.id;
+let currentSong = songs[currentSongId];
+function progKey(){ return "gc_prog_"+currentSongId; }
+function getProg(){ return load(progKey(), {stagesDone:[], learnedChords:[], sectionsDone:[]}); }
+function setProg(p){ store(progKey(), p); refreshHeader(); renderNav(); }
+function saveSongs(){ store("gc_songs",songs); store("gc_current",currentSongId); }
+/* ---- 头部与导航 ---- */
+let activeStage = 0;
+function stageUnlocked(i){
+  if(i===5) return true; // 学新歌随时可进
+  if(i===0) return true;
+  return getProg().stagesDone.includes(i-1);
+}
+function refreshHeader(){
+  document.getElementById("songTitle").textContent=currentSong.title;
+  document.getElementById("songMeta").textContent=(currentSong.artist?currentSong.artist+" · ":"")+(currentSong.key||"")+" · 建议速度 "+currentSong.tempo+" BPM";
+  const p=getProg(); const done=p.stagesDone.filter(s=>s<5).length;
+  document.getElementById("progressFill").style.width=(done/5*100)+"%";
+  document.getElementById("progressLabel").textContent = done>=5 ? "🎉 本歌已通关！可以挑战提速，或学一首新歌" : `闯关进度：${done} / 5`;
+}
+function renderNav(){
+  const nav=document.getElementById("stageNav"); nav.innerHTML="";
+  const p=getProg();
+  STAGE_DEFS.forEach(st=>{
+    const b=document.createElement("button");
+    const done=p.stagesDone.includes(st.id);
+    const locked=!stageUnlocked(st.id);
+    b.className=(activeStage===st.id?"active ":"")+(done?"done ":"")+(locked?"locked":"");
+    b.innerHTML=`<span class="num">${done?"✓":(st.id===5?"＋":st.id+1)}</span>${st.name}<br><span style="font-size:11px;opacity:.7">${st.desc}</span>`;
+    b.onclick=()=>{ if(locked){ flashMsg("先完成上一关再来～"); return; } gotoStage(st.id); };
+    nav.appendChild(b);
+  });
+}
+function flashMsg(t){
+  const d=document.createElement("div");
+  d.textContent=t;
+  d.style.cssText="position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#3a3560;color:#fff;padding:10px 20px;border-radius:10px;z-index:100;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,.4)";
+  document.body.appendChild(d); setTimeout(()=>d.remove(),1800);
+}
+function markStageDone(i){
+  const p=getProg();
+  if(!p.stagesDone.includes(i)){ p.stagesDone.push(i); setProg(p); }
+  if(p.stagesDone.filter(s=>s<5).length>=5) showCelebrate();
+}
+function showCelebrate(){
+  if(document.getElementById("celebrateBox")) return;
+  const d=document.createElement("div"); d.className="celebrate"; d.id="celebrateBox";
+  d.innerHTML=`<h2>🎉 恭喜通关！</h2>
+  <p>你已经完整学会了《${currentSong.title}》！<br>接下来可以：① 提高速度再跟弹几遍巩固；② 边弹边唱；③ 点「学新歌」导入下一首谱子。</p>
+  <button class="btn" onclick="document.getElementById('celebrateBox').remove();gotoStage(5)">去学新歌</button>
+  <button class="btn secondary" onclick="document.getElementById('celebrateBox').remove()">继续巩固</button>`;
+  document.body.appendChild(d);
+}
+/* ===================== 各关卡 ===================== */
+let sched = makeScheduler();
+function stopAll(){ sched.stop(); document.querySelectorAll(".playing-flag").forEach(e=>e.classList.remove("playing-flag")); }
+const C = ()=>document.getElementById("stageContainer");
+
+/* ---- 第1关：认识和弦 ---- */
+function renderStage0(){
+  const p=getProg();
+  let html=`<div class="card"><h2>第1关 · 认识和弦</h2>
+  <p class="tip">这首歌一共用到 <b>${currentSong.chords.length}</b> 个和弦。逐个练习：照图按好 → 点「🔊听」对比音色 → 六根弦逐根弹，确认每根都干净不闷音 → 点「我学会了」。</p>
+  <div class="chord-grid">`;
+  currentSong.chords.forEach(ch=>{
+    const learned=p.learnedChords.includes(ch);
+    const tip=CHORD_TIPS[ch]||"";
+    html+=`<div class="chord-card ${learned?'learned':''}" id="cc-${cssSafe(ch)}">
+      ${chordSVG(ch)}
+      <div style="font-size:11px;color:#9b93c0;margin:2px 0">${fretsToStr(getChordFrets(ch)||[])}</div>
+      ${tip?`<div style="font-size:11px;color:#9b93c0;line-height:1.5;margin:4px 0">${tip}</div>`:""}
+      <button onclick="strumChord('${ch}')">🔊 听</button>
+      <button class="learn-btn ${learned?'on':''}" onclick="toggleLearned('${ch}')">${learned?'✓ 已学会':'我学会了'}</button>
+    </div>`;
+  });
+  html+=`</div>`;
+  const allLearned=currentSong.chords.every(c=>p.learnedChords.includes(c));
+  html+=`<div class="stage-done-banner ${allLearned?'':'hidden'}" id="s0banner">
+    <span>👍 所有和弦都学会了！</span><button class="btn green" onclick="markStageDone(0);gotoStage(1)">进入第2关：和弦切换 →</button>
+  </div></div>`;
+  C().innerHTML=html;
+}
+function cssSafe(s){ return s.replace(/[^a-zA-Z0-9]/g,"_"); }
+function toggleLearned(ch){
+  const p=getProg();
+  const i=p.learnedChords.indexOf(ch);
+  if(i>=0) p.learnedChords.splice(i,1); else p.learnedChords.push(ch);
+  setProg(p); renderStage0();
+}
+
+/* ---- 第2关：和弦切换 ---- */
+let switchState={pairIdx:0,running:false};
+function chordPairs(){
+  // 从歌曲段落里提取真实出现的相邻和弦组合
+  const pairs=[],seen=new Set();
+  currentSong.sections.forEach(sec=>{
+    for(let i=0;i<sec.measures.length-1;i++){
+      const a=sec.measures[i].chord,b=sec.measures[i+1].chord;
+      if(a!==b && !seen.has(a+">"+b) && !seen.has(b+">"+a)){ seen.add(a+">"+b); pairs.push([a,b]); }
+    }
+  });
+  return pairs;
+}
+function renderStage1(){
+  const pairs=chordPairs();
+  if(!pairs.length){
+    C().innerHTML=`<div class="card"><h2>第2关 · 和弦切换</h2><p class="tip">这首歌只用了一个和弦，不需要切换练习，直接进入下一关吧。</p>
+    <div class="controls"><button class="btn green" onclick="markStageDone(1);gotoStage(2)">进入第3关 →</button></div></div>`;
+    return;
+  }
+  if(switchState.pairIdx>=pairs.length) switchState.pairIdx=0;
+  const [a,b]=pairs[switchState.pairIdx];
+  C().innerHTML=`<div class="card"><h2>第2关 · 和弦切换</h2>
+  <p class="tip">切换是新手最大的坎。方法：换和弦时手指<b>同时</b>移动（不要一根一根挪）；眼睛提前看下一个和弦。节拍器每 N 拍换一次，跟着提示切换。从慢速开始，能连续 1 分钟不卡顿，再加快。</p>
+  <div class="section-tabs" id="pairTabs"></div>
+  <div class="bigchord">
+    <div>${chordSVG(a,1.2)}</div>
+    <div>
+      <div class="now-label">当前</div><div class="now-name" id="swNow">${a}</div>
+      <div class="now-label" style="margin-top:8px">下一个</div><div class="next-name" id="swNext">${b}</div>
+    </div>
+    <div>${chordSVG(b,1.2)}</div>
+  </div>
+  <div class="beat-dots" id="swDots"></div>
+  <div class="controls">
+    <button class="btn" id="swToggle" onclick="toggleSwitch()">▶ 开始</button>
+    <label>速度 <span id="swBpmV">60</span> BPM <input type="range" min="40" max="120" value="60" id="swBpm" oninput="document.getElementById('swBpmV').textContent=this.value;sched.bpm=+this.value"></label>
+    <label>每 <select id="swEvery"><option>4</option><option>2</option><option selected>4</option><option>8</option></select> 拍切换</label>
+    <label><input type="checkbox" id="swSound" checked> 播放和弦示范音</label>
+  </div>
+  <div class="stage-done-banner" style="margin-top:18px">
+    <span>每一对都能 60 BPM 连续切换不停顿？</span>
+    <button class="btn green" onclick="stopAll();markStageDone(1);gotoStage(2)">完成，进入第3关 →</button>
+  </div></div>`;
+  // 修正 select 重复项
+  const sel=document.getElementById("swEvery"); sel.innerHTML='<option>2</option><option selected>4</option><option>8</option>';
+  const tabs=document.getElementById("pairTabs");
+  pairs.forEach((pr,i)=>{
+    const btn=document.createElement("button");
+    btn.textContent=pr[0]+" ↔ "+pr[1];
+    btn.className=i===switchState.pairIdx?"active":"";
+    btn.onclick=()=>{ stopAll(); switchState.pairIdx=i; renderStage1(); };
+    tabs.appendChild(btn);
+  });
+  const dots=document.getElementById("swDots");
+  for(let i=0;i<4;i++){ const d=document.createElement("div"); d.className="beat-dot"; dots.appendChild(d); }
+}
+function toggleSwitch(){
+  const btn=document.getElementById("swToggle");
+  if(sched.running){ stopAll(); btn.textContent="▶ 开始"; return; }
+  const pairs=chordPairs(); const pair=pairs[switchState.pairIdx];
+  let cur=0;
+  sched=makeScheduler();
+  sched.bpm=+document.getElementById("swBpm").value; sched.subdiv=1;
+  sched.onBeat=(bi,t)=>{
+    const every=+document.getElementById("swEvery").value;
+    const beatInBar=bi%4;
+    clickSound(t, beatInBar===0);
+    if(bi%every===0){
+      cur=(Math.floor(bi/every))%2;
+      if(document.getElementById("swSound").checked) strumChord(pair[cur],t,1.2,1,0.1);
+    }
+    requestAnimationFrame(()=>{
+      const now=document.getElementById("swNow"),next=document.getElementById("swNext");
+      if(now){ now.textContent=pair[cur]; next.textContent=pair[(cur+1)%2]; }
+      document.querySelectorAll("#swDots .beat-dot").forEach((d,i)=>{
+        d.className="beat-dot"+(i===beatInBar?(" on"+(beatInBar===0?" first":"")):"");
+      });
+    });
+  };
+  sched.start(); btn.textContent="⏸ 停止";
+}
+
+/* ---- 第3关：节奏型 ---- */
+function renderStage2(){
+  const strum=currentSong.strum;
+  let cells="";
+  strum.forEach((s,i)=>{
+    cells+=`<div class="strum-cell ${s.arrow?'':'rest'}" id="st-${i}"><div class="arrow">${s.arrow||"·"}</div><div class="cnt">${s.cnt}</div></div>`;
+  });
+  C().innerHTML=`<div class="card"><h2>第3关 · 节奏型</h2>
+  <p class="tip">${currentSong.strumName||"跟着亮起的格子扫弦"}。↓ = 下扫，↑ = 上扫，· = 空拍（<b>手不要停</b>，继续上下摆动，只是不碰弦）。先左手轻按 E 和弦（或捂住琴弦只练右手），跟着亮格扫。</p>
+  <div class="strum-row">${cells}</div>
+  <div class="controls">
+    <button class="btn" id="stToggle" onclick="toggleStrum()">▶ 开始</button>
+    <label>速度 <span id="stBpmV">60</span> BPM <input type="range" min="40" max="${currentSong.tempo+20}" value="60" id="stBpm" oninput="document.getElementById('stBpmV').textContent=this.value;sched.bpm=+this.value"></label>
+    <label><input type="checkbox" id="stSound" checked> 示范扫弦声</label>
+    <label><input type="checkbox" id="stClick" checked> 节拍器</label>
+  </div>
+  <h3>练习路线</h3>
+  <p class="tip">① 40–50 BPM 跟亮格，扫准每个箭头 → ② 提到歌曲速度 ${currentSong.tempo} BPM → ③ 边扫边在第1拍换和弦（用第2关练过的和弦对）。</p>
+  <div class="stage-done-banner" style="margin-top:18px">
+    <span>能在 ${currentSong.tempo} BPM 稳定扫完整个节奏型？</span>
+    <button class="btn green" onclick="stopAll();markStageDone(2);gotoStage(3)">完成，进入第4关 →</button>
+  </div></div>`;
+}
+function toggleStrum(){
+  const btn=document.getElementById("stToggle");
+  if(sched.running){ stopAll(); btn.textContent="▶ 开始"; return; }
+  const strum=currentSong.strum, n=strum.length;
+  sched=makeScheduler();
+  sched.bpm=+document.getElementById("stBpm").value;
+  sched.subdiv=n/4; // 一小节4拍，strum数组覆盖一小节
+  sched.onBeat=(bi,t)=>{
+    const i=bi%n;
+    const isBeat = i % (n/4) === 0;
+    if(document.getElementById("stClick").checked && isBeat) clickSound(t, i===0);
+    if(document.getElementById("stSound").checked && strum[i].arrow){
+      strumChord("E", t, 0.5, strum[i].arrow==="↑"?-1:1, 0.09);
+    }
+    requestAnimationFrame(()=>{
+      for(let k=0;k<n;k++){ const el=document.getElementById("st-"+k); if(el) el.classList.toggle("hit",k===i); }
+    });
+  };
+  sched.start(); btn.textContent="⏸ 停止";
+}
+
+/* ---- 第4关：分段练习 / 第5关：整曲 ---- */
+let playState={secIdx:0};
+function renderStage3(){ renderPlayer(false); }
+function renderStage4(){ renderPlayer(true); }
+function renderPlayer(full){
+  const p=getProg();
+  const secs=currentSong.sections;
+  if(playState.secIdx>=secs.length) playState.secIdx=0;
+  let tabs="";
+  if(!full){
+    secs.forEach((s,i)=>{
+      tabs+=`<button class="${i===playState.secIdx?'active':''} ${p.sectionsDone.includes(i)?'sec-done':''}" onclick="stopAll();playState.secIdx=${i};renderStage3()">${s.name}${p.sectionsDone.includes(i)?' ✓':''}</button>`;
+    });
+  }
+  const measures = full ? secs.flatMap((s,si)=>s.measures.map(m=>({...m,_sec:s.name}))) : secs[playState.secIdx].measures;
+  let mhtml="";
+  measures.forEach((m,i)=>{
+    const secTag = full && (i===0 || measures[i-1]._sec!==m._sec) ? `<div style="grid-column:1/-1;color:#7c6cff;font-size:12px;margin-top:6px">— ${m._sec} —</div>` : "";
+    mhtml+=secTag+`<div class="measure" id="ms-${i}"><div class="mch">${m.chord}</div><div class="mly">${m.lyric||"&nbsp;"}</div></div>`;
+  });
+  C().innerHTML=`<div class="card">
+  <h2>${full?"第5关 · 整曲串联":"第4关 · 分段练习"}</h2>
+  <p class="tip">${full
+    ?"把所有段落连起来完整跟奏。先用慢速完整弹一遍（中间出错不要停，继续往下），再逐渐提到原速 "+currentSong.tempo+" BPM。"
+    :"一段一段攻克。亮起的格子是当前小节，跟着示范音换和弦+扫节奏。建议从 60% 速度开始，本段能连续弹 3 遍不出错就打勾。"}</p>
+  ${full?"":'<div class="section-tabs">'+tabs+'</div>'}
+  <div class="bigchord" style="min-height:110px">
+    <div><div class="now-label">当前</div><div class="now-name" id="plNow">–</div></div>
+    <div><div class="now-label">下一个</div><div class="next-name" id="plNext" style="font-size:34px">–</div></div>
+  </div>
+  <div class="beat-dots" id="plDots"></div>
+  <div class="measure-grid" id="plGrid">${mhtml}</div>
+  <div class="controls">
+    <button class="btn" id="plToggle" onclick="togglePlay(${full})">▶ 跟奏</button>
+    <label>速度 <span id="plBpmV">${Math.round(currentSong.tempo*0.6)}</span> BPM
+      <input type="range" min="40" max="${currentSong.tempo+20}" value="${Math.round(currentSong.tempo*0.6)}" id="plBpm" oninput="document.getElementById('plBpmV').textContent=this.value;sched.bpm=+this.value">
+    </label>
+    <label><input type="checkbox" id="plLoop" ${full?"":"checked"}> 循环</label>
+    <label><input type="checkbox" id="plSound" checked> 示范音</label>
+    <label><input type="checkbox" id="plClick" checked> 节拍器</label>
+  </div>
+  ${full
+    ?`<div class="stage-done-banner" style="margin-top:18px"><span>完整跟下来一遍了吗？那就是学会了这首歌！</span><button class="btn green" onclick="stopAll();markStageDone(4)">🎉 我弹完整首了！</button></div>`
+    :`<div class="stage-done-banner" style="margin-top:18px"><span>本段练熟了？</span>
+      <button class="btn" onclick="markSectionDone()">✓ 本段完成</button>
+      <button class="btn green" id="s3next" onclick="stopAll();markStageDone(3);gotoStage(4)" ${p.sectionsDone.length>=secs.length?"":"disabled"}>全部段落完成，进入第5关 →</button></div>`}
+  </div>`;
+  const dots=document.getElementById("plDots");
+  for(let i=0;i<4;i++){ const d=document.createElement("div"); d.className="beat-dot"; dots.appendChild(d); }
+  if(measures.length){ document.getElementById("plNow").textContent=measures[0].chord; if(measures[1]) document.getElementById("plNext").textContent=measures[1].chord; }
+  window._plMeasures=measures; window._plFull=full;
+}
+function markSectionDone(){
+  const p=getProg();
+  if(!p.sectionsDone.includes(playState.secIdx)) p.sectionsDone.push(playState.secIdx);
+  setProg(p); stopAll(); renderStage3();
+}
+function togglePlay(full){
+  const btn=document.getElementById("plToggle");
+  if(sched.running){ stopAll(); btn.textContent="▶ 跟奏"; return; }
+  const measures=window._plMeasures; if(!measures||!measures.length) return;
+  const strum=currentSong.strum||[];
+  sched=makeScheduler();
+  sched.bpm=+document.getElementById("plBpm").value; sched.subdiv=2; // 8分音符调度
+  const subPerBar=8;
+  sched.onBeat=(bi,t)=>{
+    const total=measures.length*subPerBar;
+    let idx=bi;
+    if(document.getElementById("plLoop").checked) idx=bi%total;
+    else if(bi>=total){ stopAll(); requestAnimationFrame(()=>{btn.textContent="▶ 跟奏";}); return; }
+    const mi=Math.floor(idx/subPerBar), sub=idx%subPerBar, beatInBar=Math.floor(sub/2);
+    if(document.getElementById("plClick").checked && sub%2===0) clickSound(t, sub===0);
+    if(document.getElementById("plSound").checked){
+      const sl = strum.length===8 ? strum[sub] : (sub%2===0?{arrow:"↓"}:{arrow:""});
+      if(sl && sl.arrow) strumChord(measures[mi].chord, t, 0.6, sl.arrow==="↑"?-1:1, 0.09);
+      else if(sub===0) strumChord(measures[mi].chord, t, 1.5, 1, 0.1);
+    }
+    requestAnimationFrame(()=>{
+      const grid=document.getElementById("plGrid"); if(!grid) return;
+      measures.forEach((_,k)=>{
+        const el=document.getElementById("ms-"+k); if(!el) return;
+        el.classList.toggle("now",k===mi); el.classList.toggle("played",k<mi);
+      });
+      const now=document.getElementById("plNow"),next=document.getElementById("plNext");
+      if(now){ now.textContent=measures[mi].chord; next.textContent=measures[mi+1]?measures[mi+1].chord:(document.getElementById("plLoop").checked?measures[0].chord:"完"); }
+      document.querySelectorAll("#plDots .beat-dot").forEach((d,i)=>{
+        d.className="beat-dot"+(i===beatInBar?(" on"+(beatInBar===0?" first":"")):"");
+      });
+      const nowEl=document.getElementById("ms-"+mi);
+      if(nowEl && sub===0) nowEl.scrollIntoView({block:"nearest",behavior:"smooth"});
+    });
+  };
+  sched.start(); btn.textContent="⏸ 停止";
+}
+/* ---- 第6项：学新歌（导入） ---- */
+const IMPORT_EXAMPLE=`标题: 月亮代表我的心
+艺人: 邓丽君
+调式: C调 · 不夹Capo
+速度: 70
+节奏型: ↓ . ↓ ↑ . ↑ ↓ ↑
+
+[前奏]
+C | ♪
+Em | ♪
+
+[主歌A]
+C | 第1句
+Em | (句中换)
+Am | 第2句
+Em | (句中换)
+
+[副歌]
+F | 第1句
+G7 | (句中换)
+C | 第2句
+
+# 可选：自定义和弦按法（6弦→1弦，×=不弹）
+和弦: Badd9=× 2 4 4 2 2`;
+function renderStage5(){
+  let listHtml="";
+  Object.values(songs).forEach(s=>{
+    listHtml+=`<button class="${s.id===currentSongId?'cur':''}" onclick="switchSong('${s.id}')">${s.title}${s.id===currentSongId?' ←当前':''}${s.id!=='putongpengyou'?`<span class="del" onclick="event.stopPropagation();delSong('${s.id}')">✕</span>`:''}</button>`;
+  });
+  C().innerHTML=`<div class="card"><h2>学新歌</h2>
+  <h3>我的歌单</h3>
+  <div class="songs-list">${listHtml}</div>
+  <h3>导入新谱</h3>
+  <p class="tip">把新歌按下面的格式粘贴进来（一行一小节：<b>和弦 | 提示文字</b>）。提示文字可以写句序或自己的备注。和弦名会自动匹配内置和弦图（C、G、Am、F、Em7、Cmaj7…常用和弦都有），特殊按法可在最后用「和弦:」自定义。<br>
+  💡 也可以把新谱拍照发给 Claude，让它帮你转换成这个格式再粘贴。</p>
+  <pre class="fmt">${IMPORT_EXAMPLE.replace(/</g,"&lt;")}</pre>
+  <textarea id="importBox" placeholder="把谱子按上面格式粘贴到这里…"></textarea>
+  <div class="controls">
+    <button class="btn" onclick="doImport()">📥 导入并开始闯关</button>
+    <button class="btn secondary" onclick="document.getElementById('importBox').value=IMPORT_EXAMPLE">填入示例</button>
+  </div>
+  <div id="importMsg" style="margin-top:10px;font-size:13px"></div>
+  </div>`;
+}
+function switchSong(id){
+  stopAll(); currentSongId=id; currentSong=songs[id]; saveSongs();
+  playState.secIdx=0; switchState.pairIdx=0;
+  refreshHeader(); renderNav(); gotoStage(0);
+  flashMsg("已切换到《"+currentSong.title+"》");
+}
+function delSong(id){
+  if(!confirm("删除《"+songs[id].title+"》及其进度？")) return;
+  delete songs[id];
+  try{ localStorage.removeItem("gc_prog_"+id); }catch(e){}
+  if(currentSongId===id){ currentSongId="putongpengyou"; currentSong=songs[currentSongId]; }
+  saveSongs(); renderStage5(); refreshHeader();
+}
+function parseStrum(s){
+  // "↓ . ↓ ↑ . ↑ ↓ ↑" → 8格
+  const toks=s.trim().split(/\s+/).filter(Boolean);
+  const cnts=["1","&","2","&","3","&","4","&"];
+  const cells=toks.slice(0,8).map((t,i)=>({arrow:(t==="."||t==="·"||t==="_")?"":t, cnt:cnts[i]||"&"}));
+  while(cells.length<8) cells.push({arrow:"",cnt:cnts[cells.length]});
+  return cells;
+}
+function doImport(){
+  const txt=document.getElementById("importBox").value;
+  const msg=document.getElementById("importMsg");
+  try{
+    const song=parseSongText(txt);
+    songs[song.id]=song; currentSongId=song.id; currentSong=song; saveSongs();
+    msg.innerHTML='<span style="color:#2ecc71">✓ 导入成功！开始学《'+song.title+'》</span>';
+    setTimeout(()=>{ refreshHeader(); renderNav(); gotoStage(0); flashMsg("新歌已就绪，从第1关开始！"); },600);
+  }catch(e){
+    msg.innerHTML='<span style="color:#ff6b6b">✗ '+e.message+'</span>';
+  }
+}
+function parseSongText(txt){
+  if(!txt.trim()) throw new Error("内容是空的，先粘贴谱子");
+  const lines=txt.split("\n");
+  const song={id:"song_"+Date.now(),title:"未命名",artist:"",key:"",tempo:75,
+    strum:DEFAULT_SONG.strum.map(x=>({...x})),strumName:"",chords:[],sections:[],customChords:{}};
+  let curSec=null; const chordSet=new Set(); const unknown=new Set();
+  lines.forEach(raw=>{
+    const line=raw.trim();
+    if(!line||line.startsWith("#")) return;
+    let m;
+    if(m=line.match(/^标题[:：]\s*(.+)$/)){ song.title=m[1].trim(); return; }
+    if(m=line.match(/^艺人[:：]\s*(.+)$/)){ song.artist=m[1].trim(); return; }
+    if(m=line.match(/^调式[:：]\s*(.+)$/)){ song.key=m[1].trim(); return; }
+    if(m=line.match(/^速度[:：]\s*(\d+)/)){ song.tempo=+m[1]; return; }
+    if(m=line.match(/^节奏型[:：]\s*(.+)$/)){ song.strum=parseStrum(m[1]); song.strumName="自定义节奏型："+m[1].trim(); return; }
+    if(m=line.match(/^和弦[:：]\s*(.+)$/)){
+      m[1].split(/[,，;；]/).forEach(def=>{
+        const mm=def.trim().match(/^(\S+)\s*=\s*(.+)$/);
+        if(mm){
+          const frets=mm[2].trim().split(/\s+/).map(x=>(x==="×"||x==="x"||x==="X")?-1:parseInt(x,10));
+          if(frets.length===6&&frets.every(f=>!isNaN(f))) song.customChords[mm[1]]=frets;
+        }
+      });
+      return;
+    }
+    if(m=line.match(/^\[(.+)\]$/)){ curSec={name:m[1].trim(),measures:[]}; song.sections.push(curSec); return; }
+    if(m=line.match(/^(\S+)\s*\|\s*(.*)$/)){
+      if(!curSec){ curSec={name:"段落1",measures:[]}; song.sections.push(curSec); }
+      const ch=m[1].trim();
+      curSec.measures.push({chord:ch,lyric:m[2].trim()});
+      chordSet.add(ch);
+      if(!CHORD_DICT[ch]&&!song.customChords[ch]) unknown.add(ch);
+      return;
+    }
+  });
+  if(!song.sections.length) throw new Error("没有找到任何小节。格式：每行「和弦 | 提示」，段落用 [名称] 分隔");
+  song.chords=[...chordSet];
+  // 二次检查：自定义和弦可能在小节之后才声明
+  const stillUnknown=[...unknown].filter(ch=>!song.customChords[ch]);
+  if(stillUnknown.length) throw new Error("这些和弦没有内置按法："+stillUnknown.join("、")+"。请在末尾加一行，如「和弦: "+stillUnknown[0]+"=× 0 2 2 1 0」");
+  return song;
+}
+
+/* ===================== 启动 ===================== */
+const STAGE_RENDERERS=[renderStage0,renderStage1,renderStage2,renderStage3,renderStage4,renderStage5];
+function gotoStage(i){
+  stopAll(); activeStage=i;
+  renderNav(); STAGE_RENDERERS[i]();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+window.IMPORT_EXAMPLE=IMPORT_EXAMPLE;
+saveSongs(); refreshHeader(); renderNav();
+// 自动跳到第一个未完成的关卡
+(function(){
+  const p=getProg(); let first=0;
+  for(let i=0;i<5;i++){ if(!p.stagesDone.includes(i)){ first=i; break; } if(i===4) first=4; }
+  gotoStage(first);
+})();
+</script>
+</body>
+</html>
