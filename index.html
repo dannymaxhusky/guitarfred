@@ -2,11 +2,11 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#17201b">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f2ea">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="GuitarFret">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon.svg">
@@ -78,8 +78,9 @@
     .app {
       width: min(1220px, calc(100vw - 32px));
       margin: 0 auto;
-      padding: 12px 0;
+      padding: calc(12px + env(safe-area-inset-top)) 0 calc(12px + env(safe-area-inset-bottom));
       height: 100vh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -126,6 +127,20 @@
     .practice-switch button.active {
       background: var(--ink);
       color: #fff;
+    }
+
+    .practice-switch .learn-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 84px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--root);
+      color: #fff;
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
     }
 
     .layout {
@@ -464,9 +479,8 @@
       transform: translate(-50%, -50%);
       display: grid;
       place-items: center;
-      width: 34px;
-      height: 30px;
       width: 30px;
+      height: 30px;
       min-height: 0;
       padding: 0;
       border-radius: 50%;
@@ -490,9 +504,8 @@
       transform: translate(-50%, -50%);
       display: grid;
       place-items: center;
-      width: 24px;
-      height: 22px;
       width: 22px;
+      height: 22px;
       min-height: 0;
       padding: 0;
       border-radius: 50%;
@@ -514,9 +527,8 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 46px;
-      height: 40px;
       width: 40px;
+      height: 40px;
       border-radius: 50%;
       border: 4px solid var(--ink);
       box-shadow: 0 0 0 4px rgba(255, 255, 255, .65);
@@ -705,7 +717,6 @@
       padding: 9px;
       border-radius: 8px;
       color: #fff;
-      min-height: 58px;
       min-height: 52px;
       border: 2px solid transparent;
       text-align: left;
@@ -906,9 +917,8 @@
     .caged-letter {
       display: inline-grid;
       place-items: center;
-      width: 28px;
-      height: 24px;
       width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: var(--caged-fill-strong, var(--ghost));
       border: 1px solid var(--caged-line, var(--line));
@@ -1114,7 +1124,7 @@
 
       body.standalone-pwa .app {
         min-height: 100vh;
-        padding-top: 10px;
+        padding-top: calc(10px + env(safe-area-inset-top));
       }
 
       .layout,
@@ -1303,6 +1313,7 @@
         <button data-mode="caged">CAGED</button>
         <button data-mode="voice">连接</button>
         <button data-mode="quiz">问答</button>
+        <a class="learn-link" href="learn/">🎸 学歌</a>
       </nav>
     </header>
 
@@ -1558,17 +1569,6 @@
           { role: "b3", semitones: 3, degree: 3 },
           { role: "5", semitones: 7, degree: 5 },
           { role: "b7", semitones: 10, degree: 7 }
-        ]
-      }
-    };
-
-    const songs = {
-      fly: {
-        chords: [
-          { symbol: "Am7", bar: "1", chordKey: "Am7" },
-          { symbol: "Dm7", bar: "2", chordKey: "Dm7" },
-          { symbol: "G7", bar: "3", chordKey: "G7" },
-          { symbol: "Cmaj7", bar: "4", chordKey: "Cmaj7" }
         ]
       }
     };
@@ -1837,8 +1837,11 @@
       return { symbol: getSymbol(state.root, state.quality) };
     }
 
+    const chordCache = new Map();
     function getCurrentChord() {
-      return buildChord(state.root, state.quality);
+      const key = state.root + "|" + state.quality;
+      if (!chordCache.has(key)) chordCache.set(key, buildChord(state.root, state.quality));
+      return chordCache.get(key);
     }
 
     function getCurrentVoicing() {
@@ -2108,18 +2111,26 @@
       requestAnimationFrame(renderIntervalArcs);
     }
 
+    const cssVarCache = {};
+    function cssVar(name, fallback) {
+      if (!cssVarCache[name]) {
+        cssVarCache[name] = getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+      }
+      return cssVarCache[name];
+    }
+
     function roleColor(role) {
       return {
-        "1": getComputedStyle(document.documentElement).getPropertyValue("--root").trim() || "#d94d38",
-        "b3": getComputedStyle(document.documentElement).getPropertyValue("--third").trim() || "#1b7f79",
-        "3": getComputedStyle(document.documentElement).getPropertyValue("--third").trim() || "#1b7f79",
-        "b5": getComputedStyle(document.documentElement).getPropertyValue("--fifth").trim() || "#6f5aa7",
-        "5": getComputedStyle(document.documentElement).getPropertyValue("--fifth").trim() || "#6f5aa7",
-        "b7": getComputedStyle(document.documentElement).getPropertyValue("--seventh").trim() || "#d18916",
-        "7": getComputedStyle(document.documentElement).getPropertyValue("--seventh").trim() || "#d18916",
-        "9": getComputedStyle(document.documentElement).getPropertyValue("--seventh").trim() || "#d18916",
-        "11": getComputedStyle(document.documentElement).getPropertyValue("--third").trim() || "#1b7f79",
-        "13": getComputedStyle(document.documentElement).getPropertyValue("--fifth").trim() || "#6f5aa7"
+        "1": cssVar("--root", "#d94d38"),
+        "b3": cssVar("--third", "#1b7f79"),
+        "3": cssVar("--third", "#1b7f79"),
+        "b5": cssVar("--fifth", "#6f5aa7"),
+        "5": cssVar("--fifth", "#6f5aa7"),
+        "b7": cssVar("--seventh", "#d18916"),
+        "7": cssVar("--seventh", "#d18916"),
+        "9": cssVar("--seventh", "#d18916"),
+        "11": cssVar("--third", "#1b7f79"),
+        "13": cssVar("--fifth", "#6f5aa7")
       }[role] || "#31423a";
     }
 
@@ -2840,7 +2851,7 @@
     });
 
     el.newPrompt.addEventListener("click", () => {
-      state.promptIndex = (state.promptIndex + 1) % prompts.length;
+      state.promptIndex = (state.promptIndex + 1) % 3;
       renderPrompt();
     });
 
