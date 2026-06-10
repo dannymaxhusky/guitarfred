@@ -1,19 +1,26 @@
 {
   "name": "GuitarFret",
   "short_name": "GuitarFret",
-  "description": "吉他指板、和弦识别和和弦地图工具",
+  "description": "吉他指板、和弦识别、和弦地图与学歌陪练工具",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f5f2ea",
-  "theme_color": "#17201b",
+  "theme_color": "#f5f2ea",
   "icons": [
     {
       "src": "icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "学歌陪练",
+      "url": "./learn/",
+      "description": "循序渐进学会一首歌"
     }
   ]
 }
