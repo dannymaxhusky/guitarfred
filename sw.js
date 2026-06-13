@@ -1,8 +1,7 @@
-const CACHE_NAME = "guitarfret-v7";
+const CACHE_NAME = "guitarfret-v8";
 const ASSETS = [
   "./",
   "./index.html",
-  "./learn/",
   "./manifest.json",
   "./icons/icon.svg"
 ];
