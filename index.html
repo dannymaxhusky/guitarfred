@@ -1298,6 +1298,276 @@
       }
     }
   </style>
+  <style id="redesign-c">
+    :root {
+      --ink: #16181D;
+      --ink-soft: #3A3D44;
+      --muted: #8A8578;
+      --line: #E6E1D6;
+      --line-soft: #EFEBE2;
+      --panel: #FFFFFF;
+      --bg: #FBFAF8;
+      --ghost: #F3EFE7;
+      --focus: #0E7C66;
+      --root: #C7522A;
+      --third: #0E7C66;
+      --fifth: #3E5C8A;
+      --seventh: #B8801F;
+      --board: #F6F1E7;
+      --board-edge: #DED6C6;
+      --shadow: 0 1px 2px rgba(20, 16, 10, .04);
+      --sheet-peek: 112px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg) !important;
+      color: var(--ink);
+      overflow: auto;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    }
+
+    button, select, input { font-family: inherit; }
+    button {
+      border-radius: 10px;
+      box-shadow: none;
+      transition: background .12s, color .12s, border-color .12s;
+    }
+    button:hover, button:focus-visible, select:focus-visible {
+      outline: none;
+      border-color: var(--line);
+    }
+
+    .app {
+      width: min(560px, calc(100vw - 32px));
+      height: auto;
+      min-height: 100vh;
+      gap: 0;
+      padding: calc(16px + env(safe-area-inset-top)) 0 calc(28px + env(safe-area-inset-bottom));
+    }
+
+    header { display: block; margin-bottom: 6px; align-items: start; }
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      color: var(--ink);
+      margin: 0 0 3px;
+    }
+    .subtitle {
+      font-size: 12.5px;
+      color: var(--muted);
+      max-width: none;
+      margin: 0 0 14px;
+      line-height: 1.5;
+    }
+
+    .practice-switch {
+      display: flex;
+      gap: 20px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      border-radius: 0;
+      border-bottom: 1px solid var(--line-soft);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .practice-switch::-webkit-scrollbar { display: none; }
+    .practice-switch button {
+      border: 0;
+      background: transparent;
+      min-width: 0;
+      padding: 4px 0 11px;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--muted);
+      position: relative;
+      white-space: nowrap;
+    }
+    .practice-switch button.active { background: transparent; color: var(--ink); }
+    .practice-switch button.active::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -1px;
+      height: 2px;
+      background: var(--ink);
+      border-radius: 2px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      border-radius: 0;
+      padding: 16px 0 0;
+      margin: 0 0 4px;
+    }
+    .control-group { gap: 8px; }
+    .control-group > span { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .root-picker, .quality-picker {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .root-picker::-webkit-scrollbar, .quality-picker::-webkit-scrollbar { display: none; }
+    .root-picker button, .quality-picker button {
+      flex: 0 0 auto;
+      min-height: 0;
+      padding: 7px 13px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink-soft);
+      border-radius: 999px;
+      font-weight: 600;
+      box-shadow: none;
+    }
+    .root-picker button.active, .quality-picker button.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+    }
+
+    .layout { display: block; overflow: visible; }
+    .board-column, .side { overflow: visible; min-height: 0; }
+
+    .fretboard-panel { background: transparent; border: 0; box-shadow: none; padding: 16px 0 0; }
+    .board-sticky { position: static; background: transparent; padding: 0; }
+    .selected-title { align-items: flex-end; margin-bottom: 12px; }
+    .selected-title h2 { font-size: 42px; font-weight: 600; letter-spacing: -.02em; line-height: 1; }
+    .badge { background: var(--ghost); color: var(--ink-soft); font-weight: 600; font-size: 12px; box-shadow: none; }
+
+    .fretboard-wrap { padding: 4px 0 8px; }
+    .fretboard {
+      background: var(--board) !important;
+      border: 1px solid var(--board-edge) !important;
+      box-shadow: none;
+      border-radius: 14px;
+    }
+    .fret-number { color: var(--muted); }
+    .marker { box-shadow: 0 2px 5px rgba(40, 30, 18, .16); border-color: rgba(255, 255, 255, .78); }
+    .all-note-marker { background: #fff; border-color: var(--focus); color: var(--focus); }
+    .root-anchor-ring { border-color: var(--ink); box-shadow: 0 0 0 3px var(--bg); }
+    .input-fret-marker { border-color: var(--ink); }
+
+    .string-wire.wound,
+    .fretboard.vertical .string-wire.wound {
+      box-shadow: 0 1px 0 rgba(255, 255, 255, .5), 0 1px 2px rgba(60, 46, 26, .16);
+    }
+    .string-wire.wound {
+      background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, .24) 0 2px, rgba(120, 104, 76, .1) 2px 4px),
+        linear-gradient(180deg, #e9dec6, #c3b591 46%, #9a8c6c 58%, #e3d8bd);
+    }
+    .fretboard.vertical .string-wire.wound {
+      background:
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, .24) 0 2px, rgba(120, 104, 76, .1) 2px 4px),
+        linear-gradient(90deg, #e9dec6, #c3b591 46%, #9a8c6c 58%, #e3d8bd);
+    }
+    .fret-inlay {
+      place-self: center;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(92, 79, 56, .22);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .legend { margin-top: 12px; }
+    .legend span { font-size: 12.5px; color: var(--muted); }
+    .note-map-status { color: var(--muted); }
+
+    .voicing-list { gap: 8px; margin-top: 12px; }
+    .voicing-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: none; }
+    .voicing-card.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+
+    .side { gap: 0; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: none;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+    .panel h3 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; margin: 0 0 12px; }
+
+    .answer, .anchor-summary, .caged-summary, .interval-summary {
+      font-size: 16.5px;
+      line-height: 1.62;
+      color: var(--ink-soft);
+      max-height: none;
+    }
+
+    .note-pill { border-radius: 10px; box-shadow: none; }
+    .analysis-card, .nearby-tone, .anchor-button, .caged-button,
+    .letter-step, .chromatic-step, .prompt, .fingering-input-row input {
+      box-shadow: none;
+      border-radius: 10px;
+    }
+    .caged-meta span { box-shadow: none; }
+    .sheet-handle { display: none; }
+
+    @media (max-width: 700px) {
+      .app { width: min(100vw - 24px, 560px); }
+      body { padding-bottom: var(--sheet-peek); }
+      .selected-title h2 { font-size: 38px; }
+
+      .side {
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        z-index: 60;
+        width: min(100vw, 560px);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        background: var(--panel);
+        border: 0;
+        border-top: 1px solid var(--line);
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -10px 34px rgba(20, 16, 10, .14);
+        transform: translateY(calc(100% - var(--sheet-peek)));
+        transition: transform .34s cubic-bezier(.32, .72, 0, 1);
+        max-height: 84vh;
+        overflow: hidden;
+        padding: 26px 16px calc(20px + env(safe-area-inset-bottom));
+      }
+      .side.expanded {
+        transform: translateY(0);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .side .panel {
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        padding: 4px 0;
+        background: transparent;
+      }
+      .side .panel + .panel { border-top: 1px solid var(--line-soft); padding-top: 16px; margin-top: 14px; }
+
+      .sheet-handle {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 26px;
+        display: grid;
+        place-items: center;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        cursor: pointer;
+        z-index: 2;
+      }
+      .sheet-handle span { width: 38px; height: 4px; border-radius: 2px; background: var(--line); display: block; }
+    }
+  </style>
 </head>
 <body>
   <main class="app">
@@ -1351,7 +1621,8 @@
         </section>
       </div>
 
-      <aside class="side">
+      <aside class="side" id="sideSheet">
+        <button class="sheet-handle" id="sheetHandle" type="button" aria-label="展开或收起面板"><span></span></button>
         <section class="panel mode-panel active" data-panel="input">
           <h3>输入指法识别</h3>
           <div class="recognizer">
@@ -1913,7 +2184,7 @@
     }
 
     function isVerticalFretboard() {
-      return window.matchMedia("(max-width: 520px)").matches;
+      return window.matchMedia("(max-width: 700px)").matches;
     }
 
     function getDisplayStrings(vertical) {
@@ -2043,6 +2314,24 @@
           : `grid-column:${fret + 1};grid-row:6`;
         rows.push(`<div class="fret-number" style="${numberStyle}">${fret}</div>`);
       }
+
+      [3, 5, 7, 9, 12].forEach(fret => {
+        if (fret > fretCount) return;
+        const dot = position => rows.push(`<div class="fret-inlay" style="${position}"></div>`);
+        if (fret === 12) {
+          if (vertical) {
+            dot(`grid-row:${fret + 1};grid-column:3 / 5`);
+            dot(`grid-row:${fret + 1};grid-column:5 / 7`);
+          } else {
+            dot(`grid-column:${fret + 1};grid-row:2 / 4`);
+            dot(`grid-column:${fret + 1};grid-row:4 / 6`);
+          }
+        } else if (vertical) {
+          dot(`grid-row:${fret + 1};grid-column:4 / 6`);
+        } else {
+          dot(`grid-column:${fret + 1};grid-row:3 / 5`);
+        }
+      });
 
       const selectedPositions = isInputMode ? [] : getAllNotePositions(state.selectedNote);
       if (!isInputMode) {
@@ -2469,8 +2758,8 @@
           : "格式错误"
         : item.symbol;
       const displayShape = state.mode === "input" ? el.fingeringInput.value : voicing.shape;
-      el.voicingTitle.textContent = `${displaySymbol} · ${displayShape}`;
-      el.shapeBadge.textContent = state.mode === "input" ? "识别结果" : voicing.tag;
+      el.voicingTitle.textContent = displaySymbol;
+      el.shapeBadge.textContent = state.mode === "input" ? "识别结果" : `${voicing.tag} · ${displayShape}`;
       el.whyTitle.textContent = `为什么 ${item.symbol} 可以这样弹？`;
       el.whyText.textContent = state.mode === "anchor"
         ? `先别管 CAGED 名字。把 ${chord.root} 当成地图入口，选一个你想落脚的根音位置，然后在附近找出 ${chord.formula.slice(1).map(([note]) => note).join("、")}。这样你是在用音组成和弦，不是在背一个按法。`
@@ -2861,6 +3150,33 @@
     if ("serviceWorker" in navigator && location.protocol !== "file:") {
       navigator.serviceWorker.register("sw.js");
     }
+  </script>
+  <script>
+    (function () {
+      const sheet = document.getElementById("sideSheet");
+      const handle = document.getElementById("sheetHandle");
+      if (!sheet || !handle) return;
+      const phone = window.matchMedia("(max-width: 700px)");
+
+      function orderActivePanel() {
+        sheet.querySelectorAll(".mode-panel").forEach(panel => {
+          panel.style.order = panel.classList.contains("active") ? "-1" : "";
+        });
+      }
+
+      handle.addEventListener("click", () => sheet.classList.toggle("expanded"));
+
+      document.querySelectorAll("[data-mode]").forEach(button => {
+        button.addEventListener("click", () => {
+          orderActivePanel();
+          if (phone.matches) sheet.classList.add("expanded");
+        });
+      });
+
+      document.addEventListener("click", () => setTimeout(orderActivePanel, 0), true);
+      phone.addEventListener("change", () => sheet.classList.remove("expanded"));
+      orderActivePanel();
+    })();
   </script>
 </body>
 </html>
