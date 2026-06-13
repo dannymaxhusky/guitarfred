@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#FBFAF8">
+  <meta name="theme-color" content="#0A0E16">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="GuitarFret">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,28 +13,38 @@
   <title>GuitarFret · 和弦识别</title>
   <style>
     :root {
-      --ink: #16181D;
-      --ink-soft: #3A3D44;
-      --muted: #8A8578;
-      --line: #E6E1D6;
-      --line-soft: #EFEBE2;
-      --paper: #FBFAF8;
-      --card: #FFFFFF;
-      --root: #C7522A;
-      --third: #0E7C66;
-      --fifth: #3E5C8A;
-      --seventh: #B8801F;
-      --other: #8A8578;
-      --accent: #0E9C84;
-      --accent-soft: #E3F4EF;
-      --board: #F6F1E7;
-      --board-edge: #DED6C6;
+      --ink: #F2F5FA;
+      --ink-soft: #C2CAD8;
+      --muted: #8A95A8;
+      --line: rgba(255,255,255,.12);
+      --line-soft: rgba(255,255,255,.07);
+      --paper: #0A0E16;
+      --card: rgba(255,255,255,.05);
+      --surface: rgba(255,255,255,.07);
+      --glass-border: rgba(255,255,255,.11);
+      --root: #F0572F;
+      --third: #18C7A3;
+      --fifth: #5A7FF0;
+      --seventh: #E0A32F;
+      --other: #8A95A8;
+      --accent: #6EE7D2;
+      --accent-soft: rgba(110,231,210,.1);
+      --board: rgba(255,255,255,.04);
+      --board-edge: rgba(255,255,255,.09);
       --wire: #C9C0AE;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { margin: 0; }
-    body { background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; line-height: 1.5; }
+    body {
+      background:
+        radial-gradient(115% 70% at 12% -8%, #1c2a45 0%, transparent 52%),
+        radial-gradient(95% 60% at 92% 6%, rgba(139,92,246,.22) 0%, transparent 50%),
+        radial-gradient(85% 55% at 50% 108%, rgba(45,212,191,.13) 0%, transparent 60%),
+        #0A0E16;
+      background-attachment: fixed;
+      color: var(--ink); -webkit-font-smoothing: antialiased; line-height: 1.5;
+    }
     button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
 
     .wrap { max-width: 1180px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top)) 18px calc(28px + env(safe-area-inset-bottom)); }
@@ -137,6 +147,56 @@
     .quiz-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
     .quiz-actions button { border: 1px solid var(--line); border-radius: 10px; padding: 9px; font-weight: 600; background: var(--card); }
     .feedback { margin-top: 8px; font-size: 13px; color: var(--ink-soft); font-weight: 600; min-height: 18px; }
+
+    /* ===== Midnight Studio · 深色辉光皮 ===== */
+    .brand b { color: var(--ink); }
+    #coach .result, #coach .card, .voice-card, #bench .panel, #bench .shelf-item,
+    .adv-toggle, .adv-panel, .quiz-actions button {
+      -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+      border-color: var(--glass-border);
+    }
+    #coach .result, #coach .card, #bench .panel, .adv-panel {
+      box-shadow: 0 10px 34px -16px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    #coach .result .big, #bench .chordname { color: #fff; text-shadow: 0 0 26px rgba(110,231,210,.2); }
+
+    .board { background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); border-color: var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+    .board .lbl { color: #aeb8c8; }
+    .board .lbl.mute { color: #ff8a6b; }
+    .board .lbl.open { color: var(--accent); }
+    .board.h .cell { border-right-color: rgba(255,255,255,.06); }
+    .board.v .cell { border-bottom-color: rgba(255,255,255,.06); }
+    .nutbar { background: rgba(255,255,255,.1); }
+    .board.h .nutbar { border-right-color: rgba(255,255,255,.42); }
+    .board.v .nutbar { border-bottom-color: rgba(255,255,255,.42); }
+    .board .wire { background: linear-gradient(var(--wiredir,180deg), rgba(255,255,255,.5), rgba(190,205,225,.72) 50%, rgba(255,255,255,.4)); box-shadow: 0 0 6px rgba(160,200,255,.22); transition: box-shadow .2s; }
+    .board .wire.wound { background: linear-gradient(var(--wiredir,180deg), rgba(228,200,150,.6), rgba(180,150,110,.82) 50%, rgba(228,200,150,.5)); }
+    .board .inlay { background: rgba(255,255,255,.13); }
+    .board .fnum { color: #6a7585; }
+    .dot { border-color: rgba(255,255,255,.55); }
+    .dot.root { box-shadow: 0 0 22px -2px var(--root), inset 0 1px 2px rgba(255,255,255,.45); }
+    .dot.third { box-shadow: 0 0 22px -2px var(--third), inset 0 1px 2px rgba(255,255,255,.45); }
+    .dot.fifth { box-shadow: 0 0 22px -2px var(--fifth), inset 0 1px 2px rgba(255,255,255,.45); }
+    .dot.seventh { box-shadow: 0 0 22px -2px var(--seventh), inset 0 1px 2px rgba(255,255,255,.45); }
+
+    .iv-pill { background: rgba(16,22,34,.86); color: #e6ebf3; border-color: rgba(255,255,255,.16); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: 0 2px 10px rgba(0,0,0,.5); }
+    .iv-lines line { stroke: rgba(180,200,230,.5) !important; }
+    .coach-bubble { background: rgba(110,231,210,.08); border: 1px solid rgba(110,231,210,.22); color: #bdf1e6; }
+    #bench .ro { background: var(--surface); }
+    #bench .shelf-item.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent), 0 0 16px -5px var(--accent); }
+
+    .caged-letter { background: rgba(255,255,255,.1); color: var(--ink); }
+    .caged-mini { background: rgba(255,255,255,.04); border-color: var(--line); }
+    .caged-mini-cell { border-right-color: rgba(255,255,255,.06); border-bottom-color: rgba(255,255,255,.05); }
+    .caged-root-dot { border-color: rgba(255,255,255,.55); box-shadow: 0 0 9px -1px var(--root); }
+    .anchor-btn.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .prompt { background: var(--surface); }
+
+    /* ===== 钢弦抖动 ===== */
+    @keyframes wireV { 0%{transform:none} 12%{transform:translateX(3px)} 26%{transform:translateX(-2.4px)} 42%{transform:translateX(1.7px)} 60%{transform:translateX(-1.1px)} 78%{transform:translateX(.6px)} 100%{transform:none} }
+    @keyframes wireH { 0%{transform:none} 12%{transform:translateY(3px)} 26%{transform:translateY(-2.4px)} 42%{transform:translateY(1.7px)} 60%{transform:translateY(-1.1px)} 78%{transform:translateY(.6px)} 100%{transform:none} }
+    .board.v .wire.vib { animation: wireV .5s cubic-bezier(.36,.07,.19,.97); box-shadow: 0 0 16px rgba(160,210,255,.7) !important; }
+    .board.h .wire.vib { animation: wireH .5s cubic-bezier(.36,.07,.19,.97); box-shadow: 0 0 16px rgba(160,210,255,.7) !important; }
   </style>
 </head>
 <body>
@@ -412,7 +472,7 @@
         const style = vertical
           ? `grid-column:${slot(sn)};grid-row:2 / ${FRETS + 2};width:${thick}px;justify-self:center;height:100%;--wiredir:90deg`
           : `grid-row:${slot(sn)};grid-column:2 / ${FRETS + 2};height:${thick}px;align-self:center;width:100%`;
-        cells.push(`<span class="wire ${wound}" style="${style}"></span>`);
+        cells.push(`<span class="wire ${wound}" data-wire="${sn}" style="${style}"></span>`);
       });
 
       // fret numbers + inlays
@@ -486,17 +546,17 @@
       const dotR = size * 0.085, mk = size * 0.16;
       const x = c => pad + c * colGap, y = r => top + r * rowGap;
       let s = `<svg width="${W}" height="${H.toFixed(1)}" viewBox="0 0 ${W} ${H.toFixed(1)}">`;
-      if (start === 1) s += `<rect x="${pad}" y="${(top - size * 0.04).toFixed(1)}" width="${innerW.toFixed(1)}" height="${(size * 0.04).toFixed(1)}" fill="#534338"/>`;
-      else s += `<text x="${(pad - 3).toFixed(1)}" y="${(top + size * 0.13).toFixed(1)}" font-size="${mk * 0.62}" fill="#8A8578" text-anchor="end">${start}</text>`;
-      for (let c = 0; c < cols; c++) s += `<line x1="${x(c).toFixed(1)}" y1="${top.toFixed(1)}" x2="${x(c).toFixed(1)}" y2="${y(span).toFixed(1)}" stroke="#C9C0AE" stroke-width="1"/>`;
-      for (let r = 0; r <= span; r++) s += `<line x1="${pad.toFixed(1)}" y1="${y(r).toFixed(1)}" x2="${(pad + innerW).toFixed(1)}" y2="${y(r).toFixed(1)}" stroke="#D8CDB8" stroke-width="1"/>`;
+      if (start === 1) s += `<rect x="${pad}" y="${(top - size * 0.04).toFixed(1)}" width="${innerW.toFixed(1)}" height="${(size * 0.04).toFixed(1)}" fill="rgba(255,255,255,.5)"/>`;
+      else s += `<text x="${(pad - 3).toFixed(1)}" y="${(top + size * 0.13).toFixed(1)}" font-size="${mk * 0.62}" fill="#9aa3b5" text-anchor="end">${start}</text>`;
+      for (let c = 0; c < cols; c++) s += `<line x1="${x(c).toFixed(1)}" y1="${top.toFixed(1)}" x2="${x(c).toFixed(1)}" y2="${y(span).toFixed(1)}" stroke="rgba(255,255,255,.28)" stroke-width="1"/>`;
+      for (let r = 0; r <= span; r++) s += `<line x1="${pad.toFixed(1)}" y1="${y(r).toFixed(1)}" x2="${(pad + innerW).toFixed(1)}" y2="${y(r).toFixed(1)}" stroke="rgba(255,255,255,.18)" stroke-width="1"/>`;
       frets.forEach((f, i) => {
         const col = i; // 0..5 = string6..string1 = low E .. high e
-        if (f === null) { s += `<text x="${x(col).toFixed(1)}" y="${(top - size * 0.07).toFixed(1)}" font-size="${mk}" fill="#8e3328" text-anchor="middle">✕</text>`; return; }
-        if (f === 0) { s += `<circle cx="${x(col).toFixed(1)}" cy="${(top - size * 0.09).toFixed(1)}" r="${(dotR * 0.62).toFixed(1)}" fill="none" stroke="#0E9C84" stroke-width="1.3"/>`; return; }
+        if (f === null) { s += `<text x="${x(col).toFixed(1)}" y="${(top - size * 0.07).toFixed(1)}" font-size="${mk}" fill="#ff8a6b" text-anchor="middle">✕</text>`; return; }
+        if (f === 0) { s += `<circle cx="${x(col).toFixed(1)}" cy="${(top - size * 0.09).toFixed(1)}" r="${(dotR * 0.62).toFixed(1)}" fill="none" stroke="#6EE7D2" stroke-width="1.3"/>`; return; }
         const rr = f - start + 1;
         if (rr < 1 || rr > span) return;
-        s += `<circle cx="${x(col).toFixed(1)}" cy="${(y(rr) - rowGap / 2).toFixed(1)}" r="${dotR.toFixed(1)}" fill="#16181D"/>`;
+        s += `<circle cx="${x(col).toFixed(1)}" cy="${(y(rr) - rowGap / 2).toFixed(1)}" r="${dotR.toFixed(1)}" fill="#e7edf6"/>`;
       });
       s += `</svg>`;
       return s;
@@ -507,7 +567,7 @@
       const size = 186, c = size / 2, R = 56;
       const formula = formulaOf(match);
       let s = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
-      s += `<circle cx="${c}" cy="${c}" r="${R}" fill="none" stroke="#E6E1D6" stroke-width="1"/>`;
+      s += `<circle cx="${c}" cy="${c}" r="${R}" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1"/>`;
       const colorVar = { root:"--root", third:"--third", fifth:"--fifth", seventh:"--seventh", other:"--other" };
       const rootPitch = match.rootPitch;
       formula.forEach(([note, role]) => {
@@ -519,9 +579,9 @@
         s += `<circle cx="${px}" cy="${py}" r="13" fill="${col}"/>`;
         s += `<text x="${px}" y="${py + 4}" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">${note}</text>`;
         const lx = c + (R + 16) * Math.cos(ang), ly = c + (R + 16) * Math.sin(ang);
-        s += `<text x="${lx}" y="${ly + 3}" font-size="9" fill="#8A8578" text-anchor="middle">${role === "1" ? "根音" : roleText[role]}</text>`;
+        s += `<text x="${lx}" y="${ly + 3}" font-size="9" fill="#9aa3b5" text-anchor="middle">${role === "1" ? "根音" : roleText[role]}</text>`;
       });
-      s += `<circle cx="${c}" cy="${c}" r="3" fill="#C7C2B6"/></svg>`;
+      s += `<circle cx="${c}" cy="${c}" r="3" fill="rgba(255,255,255,.3)"/></svg>`;
       return s;
     }
 
@@ -547,6 +607,24 @@
     function loadVoicing(frets) {
       state.frets = frets.slice();
       render();
+      strum();
+    }
+
+    function vibrateString(sn) {
+      document.querySelectorAll(`.wire[data-wire="${sn}"]`).forEach(w => {
+        w.classList.remove("vib"); void w.offsetWidth; w.classList.add("vib");
+        setTimeout(() => w.classList.remove("vib"), 540);
+      });
+    }
+    function strum() {
+      let i = 0;
+      for (let sn = 6; sn >= 1; sn--) {
+        const f = state.frets[6 - sn];
+        if (f === null) continue;
+        const info = strings.find(x => x.number === sn);
+        setTimeout(() => { pluck(info.midi, f); vibrateString(sn); }, i * 42);
+        i++;
+      }
     }
 
     /* ---------- 进阶视角: CAGED / 根音 / 练习 ---------- */
@@ -732,6 +810,8 @@
         const idx = 6 - sn;
         state.frets[idx] = state.frets[idx] === null ? 0 : null;
         render();
+        if (state.frets[idx] !== null) { const s = strings.find(x => x.number === sn); pluck(s.midi, 0); }
+        vibrateString(sn);
         return;
       }
       const cell = e.target.closest("[data-string][data-fret]");
@@ -742,6 +822,7 @@
         const s = strings.find(x => x.number === sn);
         if (state.frets[idx] !== null) pluck(s.midi, f);
         render();
+        vibrateString(sn);
         return;
       }
       const v = e.target.closest("[data-frets]");
