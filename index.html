@@ -429,7 +429,7 @@
       const match = recognize();
       const roleByPitch = {};
       if (match) formulaOf(match).forEach(([n, r]) => { roleByPitch[noteToPitch[n]] = [n, r]; });
-      const dotSize = vertical ? 27 : 24;
+      const dotSize = vertical ? 36 : 32;
       order.forEach(sn => {
         const f = state.frets[6 - sn];
         if (f === null) return;
@@ -441,7 +441,7 @@
         const pos = vertical
           ? `grid-column:${slot(sn)};grid-row:${f === 0 ? 1 : f + 1}`
           : `grid-row:${slot(sn)};grid-column:${f === 0 ? 1 : f + 1}`;
-        cells.push(`<span class="mk" data-midi="${s.midi + f}" data-role="${role}" style="position:relative;pointer-events:none;${pos};z-index:4"><span class="dot ${roleClass(role)}" style="width:${dotSize}px;height:${dotSize}px;font-size:${vertical ? 12 : 11}px">${note}</span></span>`);
+        cells.push(`<span class="mk" data-midi="${s.midi + f}" data-role="${role}" style="position:relative;pointer-events:none;${pos};z-index:4"><span class="dot ${roleClass(role)}" style="width:${dotSize}px;height:${dotSize}px;font-size:${vertical ? 16 : 14}px">${note}</span></span>`);
       });
       return cells.join("");
     }
