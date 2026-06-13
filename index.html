@@ -1512,60 +1512,28 @@
       border-radius: 10px;
     }
     .caged-meta span { box-shadow: none; }
-    .sheet-handle { display: none; }
+
+    .advanced-toggle {
+      width: 100%;
+      margin-top: 12px;
+      padding: 13px 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+    .advanced-toggle .chev { transition: transform .2s; color: var(--muted); font-size: 13px; }
+    .advanced-toggle.open .chev { transform: rotate(180deg); }
+    .advanced-fold[hidden] { display: none; }
 
     @media (max-width: 700px) {
       .app { width: min(100vw - 24px, 560px); }
-      body { padding-bottom: var(--sheet-peek); }
       .selected-title h2 { font-size: 38px; }
-
-      .side {
-        position: fixed;
-        left: 0; right: 0; bottom: 0;
-        z-index: 60;
-        width: min(100vw, 560px);
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        background: var(--panel);
-        border: 0;
-        border-top: 1px solid var(--line);
-        border-radius: 20px 20px 0 0;
-        box-shadow: 0 -10px 34px rgba(20, 16, 10, .14);
-        transform: translateY(calc(100% - var(--sheet-peek)));
-        transition: transform .34s cubic-bezier(.32, .72, 0, 1);
-        max-height: 84vh;
-        overflow: hidden;
-        padding: 26px 16px calc(20px + env(safe-area-inset-bottom));
-      }
-      .side.expanded {
-        transform: translateY(0);
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      .side .panel {
-        margin: 0;
-        border: 0;
-        border-radius: 0;
-        padding: 4px 0;
-        background: transparent;
-      }
-      .side .panel + .panel { border-top: 1px solid var(--line-soft); padding-top: 16px; margin-top: 14px; }
-
-      .sheet-handle {
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 26px;
-        display: grid;
-        place-items: center;
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        padding: 0;
-        cursor: pointer;
-        z-index: 2;
-      }
-      .sheet-handle span { width: 38px; height: 4px; border-radius: 2px; background: var(--line); display: block; }
     }
 
     @media (min-width: 701px) {
@@ -1591,15 +1559,9 @@
     <header>
       <div>
         <h1>GuitarFret</h1>
-        <p class="subtitle">把“看谱弹”拆成可理解的指板地图：根音在哪里、这个把位为什么成立、同一个和弦还能去哪里、下一和弦怎样移动最省力。</p>
+        <p class="subtitle">在指板上按出你弹的和弦，自动识别它的组成音、音程，和同一个和弦的不同弹法。</p>
       </div>
-      <nav class="practice-switch" aria-label="练习模式">
-        <button class="active" data-mode="input">识别</button>
-        <button data-mode="map">地图</button>
-        <button data-mode="anchor">根音</button>
-        <button data-mode="caged">CAGED</button>
-        <button data-mode="voice">连接</button>
-        <button data-mode="quiz">问答</button>
+      <nav class="practice-switch" aria-label="入口">
         <a class="learn-link" href="learn/">🎸 学歌</a>
       </nav>
     </header>
@@ -1638,10 +1600,9 @@
         </section>
       </div>
 
-      <aside class="side" id="sideSheet">
-        <button class="sheet-handle" id="sheetHandle" type="button" aria-label="展开或收起面板"><span></span></button>
-        <section class="panel mode-panel active" data-panel="input">
-          <h3>输入指法识别</h3>
+      <aside class="side">
+        <section class="panel">
+          <h3>按出你的和弦</h3>
           <div class="recognizer">
             <div class="fingering-input-row">
               <input id="fingeringInput" type="text" value="x-x-x-x-x-x" aria-label="输入六弦到一弦的指法" placeholder="例如 x-5-7-5-6-5">
@@ -1653,32 +1614,13 @@
           </div>
         </section>
 
-        <section class="panel mode-panel" data-panel="map">
-          <h3 id="whyTitle">为什么 Am7 可以在五品弹？</h3>
-          <p class="answer" id="whyText"></p>
-        </section>
-
         <section class="panel">
-          <h3>这个和弦由什么组成</h3>
+          <h3>组成音</h3>
           <div class="notes" id="notes"></div>
         </section>
 
-        <section class="panel mode-panel" data-panel="anchor">
-          <h3 id="anchorTitle">从一个根音长出和弦</h3>
-          <div class="anchor-grid" id="anchorGrid"></div>
-          <p class="anchor-summary" id="anchorSummary"></p>
-          <div class="nearby-tones" id="nearbyTones"></div>
-        </section>
-
-        <section class="panel mode-panel" data-panel="caged">
-          <h3 id="cagedTitle">CAGED 视角</h3>
-          <div class="caged-grid" id="cagedButtons"></div>
-          <p class="caged-summary" id="cagedSummary"></p>
-          <div class="caged-meta" id="cagedMeta"></div>
-        </section>
-
-        <section class="panel mode-panel" data-panel="voice">
-          <h3 id="intervalTitle">为什么 A 到 C 是小三度？</h3>
+        <section class="panel">
+          <h3 id="intervalTitle">音程</h3>
           <div class="interval-card">
             <p class="interval-summary" id="intervalSummary"></p>
             <div class="interval-rule">
@@ -1692,17 +1634,40 @@
           </div>
         </section>
 
-        <section class="panel mode-panel" id="drillPanel" data-panel="quiz">
-          <h3>小练习</h3>
-          <div class="drill">
-            <div class="prompt" id="prompt"></div>
-            <div class="drill-actions">
-              <button id="reveal" type="button">显示答案</button>
-              <button id="newPrompt" type="button">换一题</button>
+        <button class="advanced-toggle" id="advancedToggle" type="button" aria-expanded="false">进阶视角 <span class="chev">▾</span></button>
+        <div class="advanced-fold" id="advancedFold" hidden>
+          <section class="panel">
+            <h3 id="whyTitle">为什么可以这样弹</h3>
+            <p class="answer" id="whyText"></p>
+            <p class="answer" id="voiceLeadText" style="margin-top: 10px"></p>
+          </section>
+
+          <section class="panel">
+            <h3 id="anchorTitle">从一个根音长出和弦</h3>
+            <div class="anchor-grid" id="anchorGrid"></div>
+            <p class="anchor-summary" id="anchorSummary"></p>
+            <div class="nearby-tones" id="nearbyTones"></div>
+          </section>
+
+          <section class="panel">
+            <h3 id="cagedTitle">CAGED 视角</h3>
+            <div class="caged-grid" id="cagedButtons"></div>
+            <p class="caged-summary" id="cagedSummary"></p>
+            <div class="caged-meta" id="cagedMeta"></div>
+          </section>
+
+          <section class="panel" id="drillPanel">
+            <h3>小练习</h3>
+            <div class="drill">
+              <div class="prompt" id="prompt"></div>
+              <div class="drill-actions">
+                <button id="reveal" type="button">显示答案</button>
+                <button id="newPrompt" type="button">换一题</button>
+              </div>
+              <div class="feedback" id="feedback"></div>
             </div>
-            <div class="feedback" id="feedback"></div>
-          </div>
-        </section>
+          </section>
+        </div>
       </aside>
     </section>
   </main>
@@ -1941,6 +1906,7 @@
       shapeBadge: document.querySelector("#shapeBadge"),
       whyTitle: document.querySelector("#whyTitle"),
       whyText: document.querySelector("#whyText"),
+      voiceLeadText: document.querySelector("#voiceLeadText"),
       notes: document.querySelector("#notes"),
       noteMapStatus: document.querySelector("#noteMapStatus"),
       anchorTitle: document.querySelector("#anchorTitle"),
@@ -2556,10 +2522,6 @@
 
     function renderVoicings() {
       const chord = getCurrentChord();
-      if (state.mode === "input") {
-        el.voicingList.innerHTML = "";
-        return;
-      }
       el.voicingList.innerHTML = chord.voicings.map((voicing, index) => `
         <button class="voicing-card ${index === state.voicingIndex ? "active" : ""}" type="button" data-voicing-index="${index}">
           <strong>${voicing.name}</strong>
@@ -2764,27 +2726,19 @@
       const item = getCurrentChordItem();
       const chord = getCurrentChord();
       const voicing = getCurrentVoicing();
-      const inputRecognition = state.mode === "input" ? getInputRecognition() : null;
+      const inputRecognition = getInputRecognition();
       const inputFormula = inputRecognition && inputRecognition.main ? formulaFromMatch(inputRecognition.main) : null;
-      const displayFormula = state.mode === "input" ? inputFormula || [] : chord.formula;
-      const displaySymbol = state.mode === "input"
-        ? inputRecognition
-          ? inputRecognition.main
-            ? inputRecognition.main.symbol
-            : "输入指法识别"
-          : "格式错误"
-        : item.symbol;
-      const displayShape = state.mode === "input" ? el.fingeringInput.value : voicing.shape;
+      const displayFormula = inputFormula || [];
+      const displaySymbol = inputRecognition
+        ? inputRecognition.main
+          ? inputRecognition.main.symbol
+          : "等待输入"
+        : "格式错误";
       el.voicingTitle.textContent = displaySymbol;
-      el.shapeBadge.textContent = state.mode === "input" ? "识别结果" : `${voicing.tag} · ${displayShape}`;
+      el.shapeBadge.textContent = "识别结果";
       el.whyTitle.textContent = `为什么 ${item.symbol} 可以这样弹？`;
-      el.whyText.textContent = state.mode === "anchor"
-        ? `先别管 CAGED 名字。把 ${chord.root} 当成地图入口，选一个你想落脚的根音位置，然后在附近找出 ${chord.formula.slice(1).map(([note]) => note).join("、")}。这样你是在用音组成和弦，不是在背一个按法。`
-        : state.mode === "caged"
-        ? `CAGED 的价值是把散落的根音变成五个熟悉区域。先点出 ${chord.root} 在全指板的位置，再选择 C/A/G/E/D 形状家族，就能知道这个和弦可以在哪个区域展开。`
-        : state.mode === "voice"
-        ? getVoiceLeadingText(item.symbol)
-        : chord.why;
+      el.whyText.textContent = chord.why;
+      el.voiceLeadText.textContent = getVoiceLeadingText(item.symbol);
       el.notes.innerHTML = displayFormula.length
         ? displayFormula.map(([note, role]) => `
           <button class="note-pill ${roleClass[role]} ${note === state.selectedNote ? "active" : ""}" type="button" data-note="${note}">
@@ -2792,7 +2746,7 @@
             <span>${roleText[role]}</span>
           </button>
         `).join("")
-        : `<div class="analysis-card"><strong>等待输入</strong><span>点击指板后显示识别出的组成音。</span></div>`;
+        : `<div class="analysis-card"><strong>等待输入</strong><span>点击指板录入你按的和弦。</span></div>`;
       renderAnchorGuide();
       renderCagedGuide();
       renderIntervalGuide();
@@ -2988,7 +2942,6 @@
 
     function render() {
       if (!state.selectedRootAnchor) resetChordLens();
-      el.fingeringInput.value = fretsToInputValue(state.inputFrets);
       renderChordControls();
       renderFretboard();
       renderVoicings();
@@ -2996,48 +2949,53 @@
       renderFingeringAnalysis();
     }
 
-    function setMode(mode) {
-      state.mode = mode;
-      document.querySelectorAll("[data-mode]").forEach(item => {
-        item.classList.toggle("active", item.dataset.mode === mode);
-      });
-      document.querySelectorAll("[data-panel]").forEach(panel => {
-        panel.classList.toggle("active", panel.dataset.panel === mode);
-      });
+    function loadChord(root, quality) {
+      state.root = root;
+      state.quality = quality;
+      state.voicingIndex = 0;
+      const chord = buildChord(root, quality);
+      const voicing = chord.voicings[0];
+      state.inputFrets = voicing && voicing.frets ? voicing.frets.slice() : [null, null, null, null, null, null];
+      el.fingeringInput.value = fretsToInputValue(state.inputFrets);
+      resetChordLens();
     }
 
-    function renderInputRecognitionView() {
-      renderChordControls();
-      renderFretboard();
-      renderFingeringAnalysis();
-      renderExplanation();
+    function commitInput() {
+      const recognition = getInputRecognition();
+      if (recognition && recognition.main) {
+        state.root = recognition.main.root;
+        state.quality = getQualityKeyForMatch(recognition.main);
+        state.voicingIndex = 0;
+        resetChordLens();
+      }
+      render();
     }
 
     el.rootPicker.addEventListener("click", event => {
       const button = event.target.closest("[data-root]");
       if (!button) return;
-      state.root = button.dataset.root;
-      state.voicingIndex = 0;
-      resetChordLens();
-      setMode("map");
+      loadChord(button.dataset.root, state.quality);
       render();
     });
 
     el.qualityPicker.addEventListener("click", event => {
       const button = event.target.closest("[data-quality]");
       if (!button) return;
-      state.quality = button.dataset.quality;
-      state.voicingIndex = 0;
-      resetChordLens();
-      setMode("map");
+      loadChord(state.root, button.dataset.quality);
       render();
     });
 
     el.voicingList.addEventListener("click", event => {
       const button = event.target.closest("[data-voicing-index]");
       if (!button) return;
-      state.voicingIndex = Number(button.dataset.voicingIndex);
-      state.selectedCaged = getCurrentVoicing().caged;
+      const index = Number(button.dataset.voicingIndex);
+      const voicing = getCurrentChord().voicings[index];
+      state.voicingIndex = index;
+      if (voicing && voicing.frets) {
+        state.inputFrets = voicing.frets.slice();
+        el.fingeringInput.value = fretsToInputValue(state.inputFrets);
+      }
+      if (voicing && voicing.caged) state.selectedCaged = voicing.caged;
       state.selectedRootAnchor = getVoicingRootAnchor();
       render();
     });
@@ -3080,62 +3038,36 @@
         const stringNumber = Number(selectedInput.dataset.inputString);
         state.inputFrets[6 - stringNumber] = null;
         el.fingeringInput.value = fretsToInputValue(state.inputFrets);
-        setMode("input");
-        renderInputRecognitionView();
+        commitInput();
         return;
       }
 
       const inputTarget = event.target.closest("[data-input-string], [data-string][data-fret]");
-      if (inputTarget) {
-        const stringNumber = Number(inputTarget.dataset.inputString || inputTarget.dataset.string);
-        const fret = Number(inputTarget.dataset.inputFret || inputTarget.dataset.fret);
-        if (Number.isInteger(stringNumber) && Number.isInteger(fret)) {
-          state.inputFrets[6 - stringNumber] = fret;
-          el.fingeringInput.value = fretsToInputValue(state.inputFrets);
-          playGuitarNote(stringNumber, fret);
-          setMode("input");
-          renderInputRecognitionView();
-        }
-        if (state.mode === "input") return;
+      if (!inputTarget) return;
+      const stringNumber = Number(inputTarget.dataset.inputString || inputTarget.dataset.string);
+      const fret = Number(inputTarget.dataset.inputFret || inputTarget.dataset.fret);
+      if (Number.isInteger(stringNumber) && Number.isInteger(fret)) {
+        state.inputFrets[6 - stringNumber] = fret;
+        el.fingeringInput.value = fretsToInputValue(state.inputFrets);
+        playGuitarNote(stringNumber, fret);
+        commitInput();
       }
-
-      const button = event.target.closest("[data-note]");
-      if (!button) return;
-      state.selectedNote = button.dataset.note;
-      if (button.dataset.note === getCurrentChord().root && button.dataset.string) {
-        state.selectedRootAnchor = {
-          stringNumber: Number(button.dataset.string),
-          fret: Number(button.dataset.fret)
-        };
-      }
-      render();
     });
 
-    document.querySelectorAll("[data-mode]").forEach(button => {
-      button.addEventListener("click", () => {
-        setMode(button.dataset.mode);
-        renderChordControls();
-        renderFretboard();
-        renderVoicings();
-        renderExplanation();
-        if (state.mode === "quiz") renderPrompt();
-      });
-    });
-
-    el.analyzeFingering.addEventListener("click", renderInputRecognitionView);
+    el.analyzeFingering.addEventListener("click", commitInput);
     el.fingeringInput.addEventListener("input", () => {
       const frets = parseFingering(el.fingeringInput.value);
       if (frets) {
         state.inputFrets = frets;
-        setMode("input");
+        commitInput();
+      } else {
+        renderFingeringAnalysis();
       }
-      renderInputRecognitionView();
     });
     el.clearFingering.addEventListener("click", () => {
       state.inputFrets = [null, null, null, null, null, null];
       el.fingeringInput.value = fretsToInputValue(state.inputFrets);
-      setMode("input");
-      renderInputRecognitionView();
+      commitInput();
     });
 
     el.muteRow.addEventListener("click", event => {
@@ -3144,8 +3076,7 @@
       const stringNumber = Number(button.dataset.muteString);
       state.inputFrets[6 - stringNumber] = null;
       el.fingeringInput.value = fretsToInputValue(state.inputFrets);
-      setMode("input");
-      renderInputRecognitionView();
+      commitInput();
     });
 
     let lastVerticalBoard = isVerticalFretboard();
@@ -3167,39 +3098,22 @@
       renderPrompt();
     });
 
+    const advancedToggle = document.getElementById("advancedToggle");
+    const advancedFold = document.getElementById("advancedFold");
+    advancedToggle.addEventListener("click", () => {
+      const willOpen = advancedFold.hasAttribute("hidden");
+      advancedFold.toggleAttribute("hidden", !willOpen);
+      advancedToggle.classList.toggle("open", willOpen);
+      advancedToggle.setAttribute("aria-expanded", String(willOpen));
+    });
+
+    loadChord(state.root, state.quality);
     render();
     renderPrompt();
 
     if ("serviceWorker" in navigator && location.protocol !== "file:") {
       navigator.serviceWorker.register("sw.js");
     }
-  </script>
-  <script>
-    (function () {
-      const sheet = document.getElementById("sideSheet");
-      const handle = document.getElementById("sheetHandle");
-      if (!sheet || !handle) return;
-      const phone = window.matchMedia("(max-width: 700px)");
-
-      function orderActivePanel() {
-        sheet.querySelectorAll(".mode-panel").forEach(panel => {
-          panel.style.order = panel.classList.contains("active") ? "-1" : "";
-        });
-      }
-
-      handle.addEventListener("click", () => sheet.classList.toggle("expanded"));
-
-      document.querySelectorAll("[data-mode]").forEach(button => {
-        button.addEventListener("click", () => {
-          orderActivePanel();
-          if (phone.matches) sheet.classList.add("expanded");
-        });
-      });
-
-      document.addEventListener("click", () => setTimeout(orderActivePanel, 0), true);
-      phone.addEventListener("change", () => sheet.classList.remove("expanded"));
-      orderActivePanel();
-    })();
   </script>
 </body>
 </html>
