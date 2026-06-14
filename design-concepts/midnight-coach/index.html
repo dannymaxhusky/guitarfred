@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GuitarFred UIUX Concept - Midnight Coach</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090c12;
+      --panel: #111722;
+      --panel-2: #171e2b;
+      --panel-3: #1d2635;
+      --line: rgba(255,255,255,.12);
+      --line-soft: rgba(255,255,255,.08);
+      --text: #f5f7fb;
+      --text-soft: #c5ccd8;
+      --muted: #8c96a8;
+      --teal: #62e6cf;
+      --coral: #f36b45;
+      --violet: #8d7cff;
+      --amber: #e7b64a;
+      --green: #30d182;
+      --blue: #5d86ff;
+      --radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; color: inherit; }
+    .page {
+      min-height: 100vh;
+      padding: 28px;
+      display: grid;
+      gap: 28px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .section-title h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .section-title span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .screen {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      background: #0d1119;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 30px 90px rgba(0,0,0,.42);
+    }
+    .desktop {
+      height: 920px;
+      display: grid;
+      grid-template-columns: 260px 1fr 340px;
+    }
+    .rail {
+      background: #0b0f17;
+      border-right: 1px solid var(--line);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand strong {
+      font-size: 18px;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--text-soft);
+      font-size: 12px;
+      background: rgba(255,255,255,.04);
+    }
+    .nav-group {
+      display: grid;
+      gap: 8px;
+    }
+    .nav-item {
+      min-height: 54px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      padding: 10px;
+      display: grid;
+      gap: 4px;
+      background: transparent;
+    }
+    .nav-item.active {
+      border-color: rgba(98,230,207,.42);
+      background: rgba(98,230,207,.08);
+    }
+    .nav-item.locked {
+      opacity: .56;
+      border-color: var(--line-soft);
+    }
+    .nav-item b {
+      font-size: 14px;
+    }
+    .nav-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .course-card {
+      margin-top: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      background: var(--panel);
+    }
+    .course-card h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+    .course-card p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .primary {
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: #07100e;
+      background: var(--teal);
+      font-weight: 700;
+    }
+    .main {
+      padding: 22px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+    .segmented {
+      display: inline-grid;
+      grid-template-columns: repeat(2, minmax(108px, auto));
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+    }
+    .segmented div {
+      padding: 8px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+    .segmented .on {
+      background: var(--text);
+      color: #10141d;
+      font-weight: 700;
+    }
+    .song-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-soft);
+      font-size: 13px;
+    }
+    .meter {
+      width: 132px;
+      height: 8px;
+      background: rgba(255,255,255,.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .meter i {
+      display: block;
+      width: 38%;
+      height: 100%;
+      background: var(--teal);
+    }
+    .hero-tool {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 14px;
+    }
+    .tool-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+    }
+    .tool-heading h2 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.1;
+    }
+    .tool-heading p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .fretboard {
+      position: relative;
+      min-height: 330px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #151b27, #10151f);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      padding-left: 72px;
+    }
+    .fretboard::before {
+      content: "";
+      position: absolute;
+      left: 72px;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: rgba(255,255,255,.55);
+    }
+    .string {
+      position: relative;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .string::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 2px;
+      background: rgba(220,232,248,.65);
+      box-shadow: 0 0 10px rgba(98,230,207,.16);
+    }
+    .string.wound::before {
+      height: 4px;
+      background: rgba(207,174,118,.72);
+    }
+    .frets {
+      position: absolute;
+      inset: 0 0 0 72px;
+      display: grid;
+      grid-template-columns: 1.4fr 1.3fr 1.2fr 1.1fr 1fr .92fr .86fr .8fr .75fr .7fr .66fr .62fr;
+      pointer-events: none;
+    }
+    .frets span {
+      border-right: 1px solid rgba(255,255,255,.12);
+    }
+    .labels {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 72px;
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+    }
+    .labels span {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .note {
+      position: absolute;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: white;
+      border: 2px solid rgba(255,255,255,.7);
+      box-shadow: 0 0 24px rgba(255,255,255,.16);
+    }
+    .note.a { left: 23px; top: 232px; background: var(--coral); }
+    .note.c { left: 140px; top: 76px; background: var(--teal); }
+    .note.e1 { left: 278px; top: 180px; background: var(--blue); }
+    .note.g { left: 22px; top: 128px; background: var(--amber); }
+    .callout {
+      position: absolute;
+      left: 178px;
+      top: 132px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.18);
+      color: var(--text-soft);
+      font-size: 12px;
+      background: rgba(9,12,18,.8);
+    }
+    .insights {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 14px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      min-height: 150px;
+    }
+    .panel h3 {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .chord-name {
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .tone-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .tone {
+      padding: 9px;
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      border: 1px solid var(--line-soft);
+    }
+    .tone b {
+      display: block;
+      font-size: 15px;
+    }
+    .tone span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .mini-board {
+      height: 58px;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      background: repeating-linear-gradient(90deg, transparent 0 22px, rgba(255,255,255,.1) 23px), repeating-linear-gradient(0deg, transparent 0 9px, rgba(255,255,255,.08) 10px);
+    }
+    .side {
+      padding: 22px;
+      border-left: 1px solid var(--line);
+      background: #0b0f17;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+    .coach-block {
+      border: 1px solid rgba(98,230,207,.26);
+      background: rgba(98,230,207,.07);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+    .coach-block h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .coach-block p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .stage-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .stage-card header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stage-card h4 {
+      margin: 0;
+      font-size: 15px;
+    }
+    .badge {
+      color: #0a1112;
+      background: var(--amber);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .practice-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-top: 1px solid var(--line-soft);
+    }
+    .practice-row span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .mobile-wrap {
+      width: 430px;
+      margin: 0 auto;
+      background: #0d1119;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 30px 90px rgba(0,0,0,.42);
+    }
+    .mobile {
+      min-height: 900px;
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .mobile-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mobile-head h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+    .mobile-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .mobile-tab {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 10px;
+      font-size: 13px;
+    }
+    .mobile-tab.on {
+      background: rgba(98,230,207,.1);
+      border-color: rgba(98,230,207,.42);
+    }
+    .mobile-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+    .now-chord {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+    .chord-grid {
+      height: 100px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: repeating-linear-gradient(90deg, transparent 0 17px, rgba(255,255,255,.12) 18px), repeating-linear-gradient(0deg, transparent 0 15px, rgba(255,255,255,.1) 16px);
+      position: relative;
+    }
+    .chord-dot {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--coral);
+    }
+    .chord-dot.d1 { left: 30px; top: 38px; }
+    .chord-dot.d2 { left: 50px; top: 38px; }
+    .chord-dot.d3 { left: 50px; top: 18px; }
+    .coach-tip {
+      border-left: 3px solid var(--teal);
+      padding-left: 12px;
+      color: var(--text-soft);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .step-list {
+      display: grid;
+      gap: 8px;
+    }
+    .step {
+      min-height: 50px;
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      background: var(--panel-2);
+    }
+    .step.done {
+      border-color: rgba(48,209,130,.45);
+    }
+    .step strong {
+      font-size: 14px;
+    }
+    .step span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .bottom-action {
+      position: sticky;
+      bottom: 0;
+      padding-top: 8px;
+      background: linear-gradient(180deg, rgba(13,17,25,0), #0d1119 35%);
+    }
+    @media (max-width: 900px) {
+      .page {
+        padding: 18px;
+        gap: 22px;
+      }
+      .section-title {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .section-title h1 {
+        line-height: 1.15;
+      }
+      .section-title span {
+        line-height: 1.4;
+      }
+      .desktop {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .rail, .side {
+        display: none;
+      }
+      .main {
+        padding: 16px;
+        grid-template-rows: auto;
+      }
+      .topbar,
+      .tool-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .song-status {
+        flex-wrap: wrap;
+      }
+      .meter {
+        width: min(132px, 42vw);
+      }
+      .pill {
+        max-width: 100%;
+        white-space: normal;
+        line-height: 1.35;
+      }
+      .tool-heading h2 {
+        font-size: 24px;
+      }
+      .fretboard {
+        min-height: 300px;
+        padding-left: 50px;
+      }
+      .fretboard::before {
+        left: 50px;
+      }
+      .frets {
+        inset: 0 0 0 50px;
+        grid-template-columns: repeat(7, 1fr);
+      }
+      .frets span:nth-child(n+8) {
+        display: none;
+      }
+      .labels {
+        width: 50px;
+      }
+      .labels span {
+        font-size: 13px;
+      }
+      .note {
+        width: 34px;
+        height: 34px;
+      }
+      .note.a {
+        left: 19px;
+        top: 211px;
+      }
+      .note.g {
+        left: 19px;
+        top: 117px;
+      }
+      .note.c {
+        left: 38%;
+        top: 76px;
+      }
+      .note.e1 {
+        left: auto;
+        right: 18%;
+        top: 176px;
+      }
+      .callout {
+        left: 50%;
+        top: 127px;
+        max-width: calc(100% - 76px);
+        white-space: normal;
+        transform: translateX(-50%);
+      }
+      .insights {
+        grid-template-columns: 1fr;
+      }
+      .panel {
+        min-height: auto;
+      }
+      .mobile-wrap {
+        width: min(430px, 100%);
+        border-radius: 20px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        padding: 16px 14px;
+      }
+      .screen {
+        border-radius: 8px;
+      }
+      .tone-list {
+        grid-template-columns: 1fr 1fr;
+      }
+      .mobile {
+        padding: 14px;
+      }
+      .now-chord {
+        grid-template-columns: 84px 1fr;
+        gap: 12px;
+      }
+      .step {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .bottom-action {
+        margin: 0 -14px -14px;
+        padding: 10px 14px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="section-title">
+      <h1>GuitarFred UIUX Concept</h1>
+      <span>方向：Midnight Coach · 工具和陪练合一</span>
+    </div>
+
+    <section class="screen desktop" aria-label="桌面版工作台概念">
+      <aside class="rail">
+        <div class="brand">
+          <strong>GuitarFred</strong>
+          <span class="pill">Beta</span>
+        </div>
+        <div class="segmented" aria-label="产品区域">
+          <div class="on">指板工具</div>
+          <div>歌曲陪练</div>
+        </div>
+        <nav class="nav-group" aria-label="学习关卡">
+          <div class="nav-item active"><b>1 识别和弦</b><span>从 Am7 开始理解音程</span></div>
+          <div class="nav-item"><b>2 和弦切换</b><span>Emaj7 到 C#m7</span></div>
+          <div class="nav-item"><b>3 节奏型</b><span>右手 16 分稳定扫弦</span></div>
+          <div class="nav-item locked"><b>4 分段练习</b><span>完成前 3 关解锁</span></div>
+          <div class="nav-item locked"><b>5 整曲串联</b><span>完整跟奏普通朋友</span></div>
+        </nav>
+        <div class="course-card">
+          <h3>当前歌曲</h3>
+          <p>普通朋友 · 陶喆<br>F 调 · Capo 夹 1 品 · 建议 80 BPM</p>
+          <button class="primary">继续陪练</button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="song-status">
+            <span>闯关进度 2/5</span>
+            <span class="meter"><i></i></span>
+          </div>
+          <span class="pill">可访问性：已为品位按钮命名</span>
+        </header>
+
+        <section class="hero-tool">
+          <div class="tool-heading">
+            <div>
+              <h2>智能指板工作台</h2>
+              <p>点品位识别和弦，同时给出音程、把位和下一步练习。</p>
+            </div>
+            <span class="pill">当前：Am7 · A C E G</span>
+          </div>
+
+          <div class="fretboard" aria-label="Am7 指板识别结果">
+            <div class="labels"><span>E</span><span>B</span><span>G</span><span>D</span><span>A</span><span>X</span></div>
+            <div class="frets"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="string"></div><div class="string"></div><div class="string wound"></div><div class="string wound"></div><div class="string wound"></div><div class="string wound"></div>
+            <div class="note a">A</div>
+            <div class="note c">C</div>
+            <div class="note e1">E</div>
+            <div class="note g">G</div>
+            <div class="callout">C 是小三度，决定暗色</div>
+          </div>
+        </section>
+
+        <section class="insights" aria-label="和弦解释">
+          <div class="panel">
+            <h3>识别结果</h3>
+            <div class="chord-name">Am7</div>
+            <p class="coach-tip">三度决定明暗，七度增加张力。换和弦时优先盯住 C 和 G 怎么移动。</p>
+          </div>
+          <div class="panel">
+            <h3>组成音</h3>
+            <div class="tone-list">
+              <div class="tone"><b>A</b><span>根音</span></div>
+              <div class="tone"><b>C</b><span>小三度</span></div>
+              <div class="tone"><b>E</b><span>五度</span></div>
+              <div class="tone"><b>G</b><span>小七度</span></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>推荐把位</h3>
+            <div class="mini-board"></div>
+            <p class="coach-tip">下一组建议练 3 弦 2 品根音，把 Am7 移到更靠近 Emaj7 的位置。</p>
+          </div>
+        </section>
+      </main>
+
+      <aside class="side">
+        <div class="coach-block">
+          <h3>今日教练建议</h3>
+          <p>先用指板确认 Am7 的 C 和 G，再进入歌曲陪练第 2 关，练 Emaj7 到 C#m7 的切换。</p>
+          <button class="primary">开始 5 分钟练习</button>
+        </div>
+        <div class="stage-card">
+          <header><h4>下一步</h4><span class="badge">推荐</span></header>
+          <div class="practice-row"><div><b>和弦切换</b><br><span>Emaj7 到 C#m7，60 BPM</span></div><span>04:00</span></div>
+          <div class="practice-row"><div><b>节奏型预习</b><br><span>只练右手，不换和弦</span></div><span>02:00</span></div>
+        </div>
+        <div class="stage-card">
+          <header><h4>导入新歌</h4><span class="pill">预览后保存</span></header>
+          <p class="coach-tip">新版导入先显示输入框和解析预览，示例格式收起到下方。</p>
+        </div>
+      </aside>
+    </section>
+
+    <div class="mobile-wrap">
+      <section class="mobile" aria-label="手机陪练概念">
+        <header class="mobile-head">
+          <h2>普通朋友</h2>
+          <span class="pill">2/5</span>
+        </header>
+        <div class="mobile-tabs">
+          <div class="mobile-tab on">今日练习</div>
+          <div class="mobile-tab">指板工具</div>
+        </div>
+        <article class="mobile-card">
+          <div class="now-chord">
+            <div class="chord-grid">
+              <span class="chord-dot d1"></span>
+              <span class="chord-dot d2"></span>
+              <span class="chord-dot d3"></span>
+            </div>
+            <div>
+              <span class="pill">当前和弦</span>
+              <div class="chord-name" style="font-size:38px;margin-top:10px">Emaj7</div>
+            </div>
+          </div>
+          <p class="coach-tip">这一关只看两个手指：1 指保持 3 弦 1 品，4 指落到 4 弦 1 品。</p>
+        </article>
+        <article class="mobile-card">
+          <h3 style="margin:0">闯关路径</h3>
+          <div class="step-list">
+            <div class="step done"><div><strong>认识和弦</strong><br><span>10/10 已完成</span></div><span>完成</span></div>
+            <div class="step"><div><strong>和弦切换</strong><br><span>当前：Emaj7 到 C#m7</span></div><span>继续</span></div>
+            <div class="step"><div><strong>节奏型</strong><br><span>完成第 2 关后解锁</span></div><span>锁定</span></div>
+          </div>
+        </article>
+        <article class="mobile-card">
+          <h3 style="margin:0">教练反馈</h3>
+          <p class="coach-tip">不要一次看 10 个和弦。今天只练 2 个切换，系统会在完成后自动解锁节奏型。</p>
+        </article>
+        <div class="bottom-action">
+          <button class="primary" style="width:100%;min-height:48px">开始跟练</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
