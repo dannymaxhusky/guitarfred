@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#17201b"/>
+  <rect x="94" y="92" width="324" height="328" rx="28" fill="#f5f2ea"/>
+  <path d="M144 132v248M196 132v248M252 132v248M312 132v248M370 132v248" stroke="#8d5730" stroke-width="13" stroke-linecap="round"/>
+  <path d="M114 165h302M114 220h302M114 278h302M114 340h302" stroke="#17201b" stroke-width="10" stroke-linecap="round" opacity=".7"/>
+  <circle cx="196" cy="220" r="28" fill="#d94d38"/>
+  <circle cx="312" cy="278" r="28" fill="#1b7f79"/>
+  <circle cx="252" cy="340" r="28" fill="#6f5aa7"/>
+  <text x="256" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="#f5f2ea">GF</text>
+</svg>

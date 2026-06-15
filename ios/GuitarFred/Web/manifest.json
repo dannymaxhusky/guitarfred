@@ -1,0 +1,19 @@
+{
+  "name": "GuitarFret",
+  "short_name": "GuitarFret",
+  "description": "在虚拟吉他指板上按出和弦，自动识别组成音、音程关系与不同弹法",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0A0E16",
+  "theme_color": "#0A0E16",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
