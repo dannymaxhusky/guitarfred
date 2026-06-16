@@ -53,7 +53,7 @@ private extension WKWebView {
             let indexURL = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "Web")
         else {
             loadHTMLString(
-                "<main style='font-family:-apple-system;padding:24px'><h1>GuitarFred</h1><p>Missing bundled app resources.</p></main>",
+                "<main style='font-family:-apple-system;padding:24px'><h1>GuitarFret</h1><p>Missing bundled app resources.</p></main>",
                 baseURL: nil
             )
             return

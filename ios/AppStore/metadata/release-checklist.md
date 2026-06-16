@@ -3,9 +3,9 @@
 ## 已在仓库中准备
 
 - Xcode 工程：`ios/GuitarFred.xcodeproj`
-- Bundle ID：`com.dannymaxhusky.guitarfred`
+- Bundle ID：`com.dannymaxhusky.guitarfret`
 - 版本号：`1.0`
-- Build：`1`
+- Build：`2`
 - App icon asset catalog：`ios/GuitarFred/Assets.xcassets/AppIcon.appiconset`
 - App Store 1024 icon：`ios/GuitarFred/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png`
 - App Store 截图：
@@ -17,9 +17,9 @@
 ## App Store Connect 手动步骤
 
 1. 打开 App Store Connect，创建新 App。
-2. Bundle ID 选择或创建 `com.dannymaxhusky.guitarfred`。
-3. SKU 建议填写 `guitarfred-ios-1`。
-4. 价格选择 Paid App，并设置为 USD 9.99 对应价格点。
+2. Bundle ID 选择或创建 `com.dannymaxhusky.guitarfret`。
+3. SKU 建议填写 `guitarfret-ios-1`。
+4. 价格选择 Paid App，目标为人民币 9.99；App Store Connect 使用中国大陆 (CNY) 最接近价格点 ¥10.00。
 5. 如果账号还没启用付费 App，先由 Account Holder 接受 Paid Apps Agreement。
 6. 上传 `ios/AppStore/screenshots/iphone-6.9/` 和 `ios/AppStore/screenshots/ipad-13/` 中的截图。
 7. 复制 `zh-Hans.md` 中的名称、副标题、推广文本、描述、关键词和审核备注。
