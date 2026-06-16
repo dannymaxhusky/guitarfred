@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0A0E16">
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
@@ -35,9 +35,15 @@
       box-sizing: border-box;
     }
 
+    html {
+      min-height: 100%;
+      background: var(--canvas);
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
+      min-height: 100svh;
       background: var(--canvas);
       color: var(--navy);
       -webkit-font-smoothing: antialiased;
@@ -1012,50 +1018,119 @@
 
     @media (max-width: 720px) {
       .page {
-        padding: 14px;
+        min-height: 100svh;
+        padding:
+          max(10px, env(safe-area-inset-top))
+          max(8px, env(safe-area-inset-right))
+          max(10px, env(safe-area-inset-bottom))
+          max(8px, env(safe-area-inset-left));
       }
 
       .app {
-        border-radius: 18px;
+        min-height: calc(100svh - max(10px, env(safe-area-inset-top)) - max(10px, env(safe-area-inset-bottom)));
+        border-radius: 16px;
       }
 
       .topbar {
         align-items: flex-start;
         flex-direction: column;
-        padding: 16px;
+        gap: 10px;
+        min-height: 0;
+        padding: 10px 12px 11px;
         position: relative;
       }
 
       .brand {
         width: 100%;
-        padding-right: 118px;
+        min-height: 36px;
+        gap: 9px;
+        padding-right: 106px;
+      }
+
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        box-shadow: 0 8px 16px rgba(31, 111, 107, .18);
+      }
+
+      .brand h1 {
+        max-width: 100%;
+        font-size: 18px;
+        line-height: 1.08;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .brand p {
+        display: none;
       }
 
       .toolbar {
         width: 100%;
+        gap: 8px;
         justify-content: flex-start;
       }
 
       .language-control {
         position: absolute;
-        top: 16px;
-        right: 16px;
+        top: 10px;
+        right: 12px;
+      }
+
+      .chip,
+      .ghost,
+      .language-select {
+        min-height: 32px;
+        padding: 6px 11px;
+        font-size: 12px;
+      }
+
+      .language-select {
+        min-width: 92px;
       }
 
       .workspace {
-        padding: 14px;
-        gap: 14px;
+        padding: 10px;
+        gap: 10px;
       }
 
       .fret-panel,
       .explain-card,
       .interval-card,
       .voicing-card {
-        padding: 14px;
+        padding: 10px;
+      }
+
+      .fret-panel {
+        gap: 9px;
+        border-radius: 16px;
+      }
+
+      .panel-head {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .panel-head h2,
+      .panel-head h3 {
+        font-size: 18px;
+      }
+
+      .panel-head p {
+        display: none;
+      }
+
+      #tuningChip {
+        flex: 0 0 auto;
+        max-width: 58%;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .result-card {
-        min-height: 150px;
+        min-height: 118px;
         padding: 18px 92px 18px 18px;
         border-radius: 18px;
       }
@@ -1083,20 +1158,20 @@
       }
 
       .compact-result {
-        min-height: 74px;
-        padding: 14px;
-        border-radius: 18px;
+        min-height: 58px;
+        padding: 10px 12px;
+        border-radius: 14px;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         justify-content: space-between;
-        gap: 14px;
+        gap: 12px;
         color: #fff;
         background: linear-gradient(135deg, #ffb199 0%, #ff7e6b 58%, #e8604c 100%);
-        box-shadow: 0 14px 30px rgba(255, 126, 107, .2);
+        box-shadow: 0 10px 22px rgba(255, 126, 107, .18);
       }
 
       .compact-result b {
-        font-size: 38px;
+        font-size: 34px;
         line-height: 1;
         font-weight: 900;
       }
@@ -1105,12 +1180,8 @@
         max-width: 50%;
         text-align: right;
         font-size: 12px;
-        line-height: 1.4;
+        line-height: 1.25;
         font-weight: 900;
-      }
-
-      .panel-head {
-        flex-direction: column;
       }
 
       .analysis {
@@ -1130,7 +1201,7 @@
         display: grid;
         position: relative;
         border: 1px solid var(--line-strong);
-        border-radius: 18px;
+        border-radius: 14px;
         overflow: hidden;
         background: linear-gradient(180deg, #fffaf3, #fbf4e9);
       }
@@ -1138,15 +1209,15 @@
       .phone-head,
       .phone-fret-row {
         display: grid;
-        grid-template-columns: 48px repeat(6, 1fr);
+        grid-template-columns: 42px repeat(6, 1fr);
       }
 
       .phone-head {
-        min-height: 38px;
+        min-height: 30px;
         color: var(--muted);
         background: rgba(255, 255, 255, .62);
         border-bottom: 1px solid var(--line);
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 900;
       }
 
@@ -1165,7 +1236,7 @@
         z-index: 3;
         color: var(--navy);
         background: rgba(36, 48, 71, .06);
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 900;
       }
 
@@ -1196,9 +1267,9 @@
 
       .phone-string-wave {
         position: absolute;
-        left: 48px;
+        left: 42px;
         right: 0;
-        top: 38px;
+        top: 30px;
         bottom: 0;
         pointer-events: none;
         z-index: 1;
@@ -1258,14 +1329,14 @@
       }
 
       .phone-cell.selected .dot {
-        width: 44px;
-        min-width: 44px;
-        height: 44px;
-        min-height: 44px;
+        width: 38px;
+        min-width: 38px;
+        height: 38px;
+        min-height: 38px;
         color: #fff;
         background: var(--coral);
         border-color: rgba(255, 255, 255, .92);
-        box-shadow: 0 10px 18px rgba(255, 126, 107, .26);
+        box-shadow: 0 8px 16px rgba(255, 126, 107, .24);
         transform: scale(1.03);
       }
 
@@ -1275,10 +1346,10 @@
       }
 
       .phone-cell.open-selected .dot {
-        width: 38px;
-        min-width: 38px;
-        height: 30px;
-        min-height: 30px;
+        width: 34px;
+        min-width: 34px;
+        height: 28px;
+        min-height: 28px;
         border-radius: 999px;
         color: var(--coral-dark);
         background: rgba(255, 255, 255, .88);
@@ -1328,6 +1399,10 @@
         animation: rippleOut .48s ease-out both;
         z-index: 1;
         pointer-events: none;
+      }
+
+      .selected-strip {
+        display: none;
       }
 
       .interval-row {
@@ -1902,7 +1977,7 @@
 
     const STRING_DISPLAY_ORDER = [5, 4, 3, 2, 1, 0];
 
-    const FRET_ROW_HEIGHTS = [38, 56, 53, 50, 47, 45, 43, 41, 39, 37, 35, 34, 33];
+    const FRET_ROW_HEIGHTS = [34, 44, 42, 40, 38, 36, 34, 32, 31, 30, 29, 28, 28];
 
     const QUALITIES = [
       { suffix: "m7", nameKey: "minor7", intervals: [0, 3, 7, 10], defining: [3, 10], priority: 12 },

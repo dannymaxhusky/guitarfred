@@ -2,3 +2,4 @@
 .codebuddy/
 .playwright-cli/
 output/
+build/
