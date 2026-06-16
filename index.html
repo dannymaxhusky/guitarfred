@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0A0E16">
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
@@ -38,6 +38,8 @@
     html {
       min-height: 100%;
       background: var(--canvas);
+      -webkit-text-size-adjust: 100%;
+      touch-action: manipulation;
     }
 
     body {
@@ -47,12 +49,15 @@
       background: var(--canvas);
       color: var(--navy);
       -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+      touch-action: manipulation;
     }
 
     button {
       border: 0;
       font: inherit;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     .page {
@@ -1227,6 +1232,19 @@
         place-items: center;
       }
 
+      .phone-head span {
+        min-width: 0;
+        padding: 0 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 1;
+      }
+
+      .phone-head span:first-child {
+        font-size: 10px;
+      }
+
       .phone-fret-row + .phone-fret-row {
         border-top: 1px solid rgba(36, 48, 71, .08);
       }
@@ -1247,6 +1265,7 @@
         place-items: center;
         background: transparent;
         border-left: 1px solid rgba(36, 48, 71, .12);
+        touch-action: manipulation;
       }
 
       .phone-cell::before {
@@ -1262,7 +1281,7 @@
       }
 
       .phone-cell.vibrating::before {
-        opacity: 0;
+        animation: phoneStringQuiver 150ms ease-in-out infinite;
       }
 
       .phone-string-wave {
@@ -1308,7 +1327,22 @@
 
       .phone-fretboard.vibrating .phone-wave-glow,
       .phone-fretboard.vibrating .phone-wave-core {
-        opacity: 1;
+        opacity: 0;
+      }
+
+      @keyframes phoneStringQuiver {
+        0%,
+        100% {
+          transform: translateX(-50%);
+        }
+
+        25% {
+          transform: translateX(calc(-50% - 1.5px));
+        }
+
+        75% {
+          transform: translateX(calc(-50% + 1.5px));
+        }
       }
 
       .phone-cell[data-string="0"]::before,
@@ -1536,6 +1570,7 @@
         collapse: "收起",
         stringFretHeader: "弦 / 品",
         fretStringHeader: "品 / 弦",
+        phoneFretStringHeader: "品/弦",
         openString: "空弦",
         noNotes: "还没有选择音",
         noNotesShort: "暂无音",
@@ -1632,6 +1667,7 @@
         collapse: "Collapse",
         stringFretHeader: "String / Fret",
         fretStringHeader: "Fret / String",
+        phoneFretStringHeader: "Fr/Str",
         openString: "Open",
         noNotes: "No notes selected",
         noNotesShort: "No notes",
@@ -1728,6 +1764,7 @@
         collapse: "Cerrar",
         stringFretHeader: "Cuerda / Traste",
         fretStringHeader: "Traste / Cuerda",
+        phoneFretStringHeader: "Tr/Cda",
         openString: "Al aire",
         noNotes: "No hay notas seleccionadas",
         noNotesShort: "Sin notas",
@@ -1824,6 +1861,7 @@
         collapse: "閉じる",
         stringFretHeader: "弦 / フレット",
         fretStringHeader: "フレット / 弦",
+        phoneFretStringHeader: "品/弦",
         openString: "開放弦",
         noNotes: "まだ音が選択されていません",
         noNotesShort: "音なし",
@@ -2212,6 +2250,7 @@
     const toggleVoicings = document.getElementById("toggleVoicings");
     const languageSelect = document.getElementById("languageSelect");
     let audioContext;
+    let chordPlaybackToken = 0;
 
     function applyStaticCopy() {
       languageSelect.value = locale;
@@ -2414,19 +2453,54 @@
       requestAnimationFrame(frame);
     }
 
-    function playPluck(stringIndex, fret) {
+    async function ensureAudioContext() {
       const AudioCtor = window.AudioContext || window.webkitAudioContext;
-      const freq = frequencyAt(stringIndex, fret);
       if (!AudioCtor) {
+        return null;
+      }
+
+      if (audioContext && (audioContext.state === "closed" || audioContext.state === "interrupted")) {
+        audioContext = null;
+      }
+
+      audioContext = audioContext || new AudioCtor();
+      if (audioContext.state !== "running") {
+        try {
+          await audioContext.resume();
+        } catch (error) {
+          audioContext = null;
+          return null;
+        }
+      }
+
+      return audioContext.state === "running" ? audioContext : null;
+    }
+
+    function unlockAudioFromGesture() {
+      ensureAudioContext().catch(() => {
+        audioContext = null;
+      });
+    }
+
+    function markAudioContextStale() {
+      if (audioContext && audioContext.state !== "running") {
+        audioContext = null;
+      }
+    }
+
+    async function playPluck(stringIndex, fret) {
+      const freq = frequencyAt(stringIndex, fret);
+      const context = await ensureAudioContext();
+      if (!context) {
         playFallbackPluck(freq);
         return;
       }
-      audioContext = audioContext || new AudioCtor();
-      const now = audioContext.currentTime;
-      const osc = audioContext.createOscillator();
-      const overtone = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      const filter = audioContext.createBiquadFilter();
+
+      const now = context.currentTime + .004;
+      const osc = context.createOscillator();
+      const overtone = context.createOscillator();
+      const gain = context.createGain();
+      const filter = context.createBiquadFilter();
 
       osc.type = "triangle";
       osc.frequency.setValueAtTime(freq, now);
@@ -2443,39 +2517,27 @@
       osc.connect(filter);
       overtone.connect(filter);
       filter.connect(gain);
-      gain.connect(audioContext.destination);
+      gain.connect(context.destination);
       osc.start(now);
       overtone.start(now);
       osc.stop(now + .74);
       overtone.stop(now + .42);
     }
 
-    function scheduleChordTone(context, freq, startTime, gainPeak) {
-      const osc = context.createOscillator();
-      const overtone = context.createOscillator();
-      const gain = context.createGain();
-      const filter = context.createBiquadFilter();
+    function showPlayedString(note, token) {
+      const key = `${note.stringIndex}-${note.fret}`;
+      state.lastHitKey = key;
+      state.lastHitString = note.stringIndex;
+      update();
+      startPhysicalStringWave(note.stringIndex, note.fret);
 
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(freq, startTime);
-      overtone.type = "sine";
-      overtone.frequency.setValueAtTime(freq * 2.01, startTime);
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(Math.min(3400, freq * 7), startTime);
-      filter.frequency.exponentialRampToValueAtTime(Math.max(820, freq * 2.7), startTime + .48);
-
-      gain.gain.setValueAtTime(.0001, startTime);
-      gain.gain.exponentialRampToValueAtTime(gainPeak, startTime + .014);
-      gain.gain.exponentialRampToValueAtTime(.001, startTime + .9);
-
-      osc.connect(filter);
-      overtone.connect(filter);
-      filter.connect(gain);
-      gain.connect(context.destination);
-      osc.start(startTime);
-      overtone.start(startTime);
-      osc.stop(startTime + .92);
-      overtone.stop(startTime + .5);
+      window.setTimeout(() => {
+        if (chordPlaybackToken === token && state.lastHitKey === key) {
+          state.lastHitKey = null;
+          state.lastHitString = null;
+          update();
+        }
+      }, 620);
     }
 
     function playChord(notes) {
@@ -2486,25 +2548,17 @@
 
       if (!playable.length) return;
 
-      const AudioCtor = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtor) {
-        playable.forEach((note, index) => {
-          window.setTimeout(() => {
-            playFallbackPluck(frequencyAt(note.stringIndex, note.fret));
-          }, index * 24);
-        });
-        return;
-      }
+      const token = chordPlaybackToken + 1;
+      chordPlaybackToken = token;
+      const stepMs = 110;
+      unlockAudioFromGesture();
 
-      audioContext = audioContext || new AudioCtor();
-      if (audioContext.state === "suspended") {
-        audioContext.resume();
-      }
-
-      const started = audioContext.currentTime + .025;
-      const peak = Math.min(.16, .48 / Math.max(3, playable.length));
       playable.forEach((note, index) => {
-        scheduleChordTone(audioContext, frequencyAt(note.stringIndex, note.fret), started + index * .022, peak);
+        window.setTimeout(() => {
+          if (chordPlaybackToken !== token) return;
+          playPluck(note.stringIndex, note.fret);
+          showPlayedString(note, token);
+        }, index * stepMs);
       });
     }
 
@@ -2741,6 +2795,7 @@
     }
 
     function handleFretClick(stringIndex, fret) {
+      chordPlaybackToken += 1;
       const key = `${stringIndex}-${fret}`;
       const nextFret = state.selected[stringIndex] === fret ? null : fret;
       state.selected[stringIndex] = nextFret;
@@ -2852,7 +2907,7 @@
       const head = document.createElement("div");
       head.className = "phone-head";
       const corner = document.createElement("span");
-      corner.textContent = TEXT.fretStringHeader;
+      corner.textContent = TEXT.phoneFretStringHeader || TEXT.fretStringHeader;
       head.appendChild(corner);
       STRING_DISPLAY_ORDER.forEach((stringIndex) => {
         const label = document.createElement("span");
@@ -3229,12 +3284,27 @@
       renderVoicings(analysis);
     }
 
+    let lastTouchEnd = 0;
+    document.addEventListener("touchend", (event) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 320) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, { passive: false });
+
+    document.addEventListener("gesturestart", (event) => {
+      event.preventDefault();
+    });
+
     document.getElementById("demoBtn").addEventListener("click", () => {
+      chordPlaybackToken += 1;
       state.selected = [null, 0, 2, 0, 1, 0];
       update();
     });
 
     document.getElementById("clearBtn").addEventListener("click", () => {
+      chordPlaybackToken += 1;
       state.selected = [null, null, null, null, null, null];
       update();
     });
