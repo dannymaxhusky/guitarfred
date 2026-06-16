@@ -3284,6 +3284,27 @@
       renderVoicings(analysis);
     }
 
+    document.addEventListener("pointerdown", (event) => {
+      if (event.target.closest("button, select, .phone-cell, .string-cell, .voicing-option")) {
+        unlockAudioFromGesture();
+      }
+    }, { passive: true, capture: true });
+
+    document.addEventListener("touchstart", (event) => {
+      if (event.target.closest("button, select, .phone-cell, .string-cell, .voicing-option")) {
+        unlockAudioFromGesture();
+      }
+    }, { passive: true, capture: true });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        markAudioContextStale();
+      }
+    });
+
+    window.addEventListener("pageshow", markAudioContextStale);
+    window.addEventListener("focus", markAudioContextStale);
+
     let lastTouchEnd = 0;
     document.addEventListener("touchend", (event) => {
       const now = Date.now();

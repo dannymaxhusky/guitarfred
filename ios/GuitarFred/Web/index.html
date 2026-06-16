@@ -1281,7 +1281,7 @@
       }
 
       .phone-cell.vibrating::before {
-        opacity: 0;
+        animation: phoneStringQuiver 150ms ease-in-out infinite;
       }
 
       .phone-string-wave {
@@ -1327,7 +1327,22 @@
 
       .phone-fretboard.vibrating .phone-wave-glow,
       .phone-fretboard.vibrating .phone-wave-core {
-        opacity: 1;
+        opacity: 0;
+      }
+
+      @keyframes phoneStringQuiver {
+        0%,
+        100% {
+          transform: translateX(-50%);
+        }
+
+        25% {
+          transform: translateX(calc(-50% - 1.5px));
+        }
+
+        75% {
+          transform: translateX(calc(-50% + 1.5px));
+        }
       }
 
       .phone-cell[data-string="0"]::before,
@@ -2438,22 +2453,54 @@
       requestAnimationFrame(frame);
     }
 
-    function playPluck(stringIndex, fret) {
+    async function ensureAudioContext() {
       const AudioCtor = window.AudioContext || window.webkitAudioContext;
-      const freq = frequencyAt(stringIndex, fret);
       if (!AudioCtor) {
+        return null;
+      }
+
+      if (audioContext && (audioContext.state === "closed" || audioContext.state === "interrupted")) {
+        audioContext = null;
+      }
+
+      audioContext = audioContext || new AudioCtor();
+      if (audioContext.state !== "running") {
+        try {
+          await audioContext.resume();
+        } catch (error) {
+          audioContext = null;
+          return null;
+        }
+      }
+
+      return audioContext.state === "running" ? audioContext : null;
+    }
+
+    function unlockAudioFromGesture() {
+      ensureAudioContext().catch(() => {
+        audioContext = null;
+      });
+    }
+
+    function markAudioContextStale() {
+      if (audioContext && audioContext.state !== "running") {
+        audioContext = null;
+      }
+    }
+
+    async function playPluck(stringIndex, fret) {
+      const freq = frequencyAt(stringIndex, fret);
+      const context = await ensureAudioContext();
+      if (!context) {
         playFallbackPluck(freq);
         return;
       }
-      audioContext = audioContext || new AudioCtor();
-      if (audioContext.state === "suspended") {
-        audioContext.resume();
-      }
-      const now = audioContext.currentTime;
-      const osc = audioContext.createOscillator();
-      const overtone = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      const filter = audioContext.createBiquadFilter();
+
+      const now = context.currentTime + .004;
+      const osc = context.createOscillator();
+      const overtone = context.createOscillator();
+      const gain = context.createGain();
+      const filter = context.createBiquadFilter();
 
       osc.type = "triangle";
       osc.frequency.setValueAtTime(freq, now);
@@ -2470,7 +2517,7 @@
       osc.connect(filter);
       overtone.connect(filter);
       filter.connect(gain);
-      gain.connect(audioContext.destination);
+      gain.connect(context.destination);
       osc.start(now);
       overtone.start(now);
       osc.stop(now + .74);
@@ -2504,13 +2551,7 @@
       const token = chordPlaybackToken + 1;
       chordPlaybackToken = token;
       const stepMs = 110;
-      const AudioCtor = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtor) {
-        audioContext = audioContext || new AudioCtor();
-        if (audioContext.state === "suspended") {
-          audioContext.resume();
-        }
-      }
+      unlockAudioFromGesture();
 
       playable.forEach((note, index) => {
         window.setTimeout(() => {
@@ -3242,6 +3283,27 @@
       renderIntervals(notes, analysis);
       renderVoicings(analysis);
     }
+
+    document.addEventListener("pointerdown", (event) => {
+      if (event.target.closest("button, select, .phone-cell, .string-cell, .voicing-option")) {
+        unlockAudioFromGesture();
+      }
+    }, { passive: true, capture: true });
+
+    document.addEventListener("touchstart", (event) => {
+      if (event.target.closest("button, select, .phone-cell, .string-cell, .voicing-option")) {
+        unlockAudioFromGesture();
+      }
+    }, { passive: true, capture: true });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        markAudioContextStale();
+      }
+    });
+
+    window.addEventListener("pageshow", markAudioContextStale);
+    window.addEventListener("focus", markAudioContextStale);
 
     let lastTouchEnd = 0;
     document.addEventListener("touchend", (event) => {
