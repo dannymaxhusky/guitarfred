@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0A0E16">
+  <meta name="theme-color" content="#EEF1F5">
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
@@ -75,6 +75,9 @@
     }
 
     .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
       min-height: 60px;
       padding: 12px 20px;
       display: flex;
@@ -83,6 +86,8 @@
       gap: 16px;
       border-bottom: 1px solid var(--line);
       background: rgba(255, 255, 255, .58);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
     .brand {
@@ -1038,6 +1043,175 @@
       .why { font-size: 13px; line-height: 1.55; }
     }
 
+    @media (min-width: 900px) and (orientation: landscape) and (max-height: 900px) {
+      :root {
+        --fret-cols: 52px 36px 1.78fr 1.68fr 1.58fr 1.48fr 1.38fr 1.3fr 1.22fr 1.15fr 1.08fr 1.02fr .98fr .94fr;
+      }
+
+      .page {
+        min-height: 100svh;
+        padding: 10px 12px;
+      }
+
+      .app {
+        min-height: calc(100svh - 20px);
+        border-radius: 18px;
+      }
+
+      .workspace {
+        grid-template-columns: minmax(0, 1.42fr) minmax(320px, .78fr);
+        gap: 10px;
+        padding: 10px;
+      }
+
+      .fret-panel {
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .fret-scroll {
+        overflow-x: hidden;
+      }
+
+      .fretboard {
+        min-width: 0;
+        width: 100%;
+        border-radius: 14px;
+      }
+
+      .string-row {
+        min-height: 33px;
+      }
+
+      .fret-numbers {
+        min-height: 29px;
+      }
+
+      .string-row::after,
+      .string-wave {
+        left: 52px;
+      }
+
+      .dot {
+        width: 38px;
+        min-width: 38px;
+        height: 38px;
+        min-height: 38px;
+      }
+
+      .dot-note {
+        font-size: 12px;
+      }
+
+      .dot-interval {
+        font-size: 9px;
+      }
+
+      .string-cell.open-selected .dot {
+        width: 44px;
+        min-width: 44px;
+        height: 28px;
+        min-height: 28px;
+      }
+
+      .analysis {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "result"
+          "intervals"
+          "explain"
+          "voicings";
+        gap: 8px;
+      }
+
+      .result-card {
+        min-height: 104px;
+        padding: 12px 76px 12px 14px;
+        border-radius: 16px;
+      }
+
+      .chord-name {
+        font-size: clamp(30px, 3vw, 42px);
+      }
+
+      .chord-play {
+        right: 14px;
+        width: 50px;
+        height: 50px;
+        min-height: 50px;
+      }
+
+      .chord-play-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .chord-meta span {
+        min-height: 21px;
+        padding: 4px 7px;
+        font-size: 10px;
+      }
+
+      .play-mode {
+        margin-top: 6px;
+      }
+
+      .explain-card,
+      .interval-card,
+      .voicing-card {
+        padding: 10px;
+        border-radius: 14px;
+      }
+
+      .why {
+        margin-top: 7px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .interval-list,
+      .voicing-list {
+        margin-top: 8px;
+        gap: 6px;
+      }
+
+      .interval-row {
+        min-height: 34px;
+        grid-template-columns: 36px 1fr auto;
+        gap: 7px;
+        padding: 5px 7px;
+      }
+
+      .note-token {
+        width: 26px;
+        height: 26px;
+      }
+
+      .interval-copy span {
+        display: none;
+      }
+
+      .interval-badge {
+        min-height: 25px;
+        padding: 5px 8px;
+        font-size: 11px;
+      }
+
+      .voicing-option {
+        padding: 8px;
+        grid-template-columns: minmax(0, 1fr) minmax(82px, 92px);
+        gap: 8px;
+      }
+
+      .voicing-option p {
+        display: none;
+      }
+
+      .chord-chart {
+        max-width: 92px;
+      }
+    }
+
     @media (max-width: 1040px) {
       .analysis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1068,7 +1242,6 @@
         gap: 10px;
         min-height: 0;
         padding: 10px 12px 11px;
-        position: relative;
       }
 
       .brand {
@@ -1319,7 +1492,7 @@
       }
 
       .phone-cell.vibrating::before {
-        animation: phoneStringQuiver 150ms ease-in-out infinite;
+        opacity: 0;
       }
 
       .phone-string-wave {
@@ -1363,24 +1536,9 @@
         stroke-width: 4.5;
       }
 
-      .phone-fretboard.vibrating .phone-wave-glow,
-      .phone-fretboard.vibrating .phone-wave-core {
-        opacity: 0;
-      }
-
-      @keyframes phoneStringQuiver {
-        0%,
-        100% {
-          transform: translateX(-50%);
-        }
-
-        25% {
-          transform: translateX(calc(-50% - 1.5px));
-        }
-
-        75% {
-          transform: translateX(calc(-50% + 1.5px));
-        }
+      .phone-wave-glow.is-vibrating,
+      .phone-wave-core.is-vibrating {
+        opacity: 1;
       }
 
       .phone-cell[data-string="0"]::before,
@@ -2068,6 +2226,7 @@
     ];
 
     const STRING_DISPLAY_ORDER = [5, 4, 3, 2, 1, 0];
+    const PHONE_STRING_DISPLAY_ORDER = [0, 1, 2, 3, 4, 5];
 
     const FRET_ROW_HEIGHTS = [34, 44, 42, 40, 38, 36, 34, 32, 31, 30, 29, 28, 28];
 
@@ -2470,7 +2629,7 @@
     function verticalWavePath(progress, stringIndex) {
       const height = 1000;
       const columnWidth = 100;
-      const visualIndex = STRING_DISPLAY_ORDER.indexOf(stringIndex);
+      const visualIndex = PHONE_STRING_DISPLAY_ORDER.indexOf(stringIndex);
       const centerX = visualIndex * columnWidth + columnWidth / 2;
       const decay = Math.pow(1 - progress, 2.2);
       const phase = progress * Math.PI * 10;
@@ -2499,9 +2658,17 @@
       });
     }
 
-    function setPhoneWavePath(path) {
-      phoneFretboard.querySelectorAll(".phone-wave-glow, .phone-wave-core").forEach((el) => {
+    function setPhoneWavePath(stringIndex, path) {
+      phoneFretboard.querySelectorAll(`.phone-wave-glow[data-string="${stringIndex}"], .phone-wave-core[data-string="${stringIndex}"]`).forEach((el) => {
         el.setAttribute("d", path);
+        el.classList.add("is-vibrating");
+      });
+    }
+
+    function clearPhoneWavePath(stringIndex) {
+      phoneFretboard.querySelectorAll(`.phone-wave-glow[data-string="${stringIndex}"], .phone-wave-core[data-string="${stringIndex}"]`).forEach((el) => {
+        el.classList.remove("is-vibrating");
+        el.removeAttribute("d");
       });
     }
 
@@ -2530,9 +2697,11 @@
       const frame = (now) => {
         const progress = Math.min(1, (now - started) / duration);
         setDesktopWavePath(stringIndex, horizontalWavePath(progress, peak));
-        setPhoneWavePath(verticalWavePath(progress, stringIndex));
+        setPhoneWavePath(stringIndex, verticalWavePath(progress, stringIndex));
         if (progress < 1 && isStringVibrating(stringIndex)) {
           requestAnimationFrame(frame);
+        } else {
+          clearPhoneWavePath(stringIndex);
         }
       };
 
@@ -3056,7 +3225,7 @@
       const corner = document.createElement("span");
       corner.textContent = TEXT.phoneFretStringHeader || TEXT.fretStringHeader;
       head.appendChild(corner);
-      STRING_DISPLAY_ORDER.forEach((stringIndex) => {
+      PHONE_STRING_DISPLAY_ORDER.forEach((stringIndex) => {
         const label = document.createElement("span");
         label.textContent = phoneStringLabel(stringIndex);
         head.appendChild(label);
@@ -3074,7 +3243,7 @@
         label.textContent = fretDisplay(fret);
         row.appendChild(label);
 
-        STRING_DISPLAY_ORDER.forEach((stringIndex) => {
+        PHONE_STRING_DISPLAY_ORDER.forEach((stringIndex) => {
           const translatedStringLabel = stringLabel(stringIndex);
           const pc = noteAt(stringIndex, fret);
           const selected = state.selected[stringIndex] === fret;
@@ -3114,12 +3283,16 @@
       wave.classList.add("phone-string-wave");
       wave.setAttribute("viewBox", "0 0 600 1000");
       wave.setAttribute("preserveAspectRatio", "none");
-      const waveGlow = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      waveGlow.classList.add("phone-wave-glow");
-      const waveCore = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      waveCore.classList.add("phone-wave-core");
-      wave.appendChild(waveGlow);
-      wave.appendChild(waveCore);
+      PHONE_STRING_DISPLAY_ORDER.forEach((stringIndex) => {
+        const waveGlow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        waveGlow.classList.add("phone-wave-glow");
+        waveGlow.dataset.string = String(stringIndex);
+        const waveCore = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        waveCore.classList.add("phone-wave-core");
+        waveCore.dataset.string = String(stringIndex);
+        wave.appendChild(waveGlow);
+        wave.appendChild(waveCore);
+      });
       phoneFretboard.appendChild(wave);
     }
 

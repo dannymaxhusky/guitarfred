@@ -18,7 +18,7 @@ struct ContentView: UIViewRepresentable {
         webView.isOpaque = false
         webView.backgroundColor = UIColor(red: 0.933, green: 0.945, blue: 0.961, alpha: 1)
         webView.scrollView.backgroundColor = webView.backgroundColor
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.contentInsetAdjustmentBehavior = .automatic
         webView.loadBundledApp()
         return webView
     }
