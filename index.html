@@ -388,10 +388,10 @@
     }
 
     .dot {
-      width: 36px;
-      min-width: 36px;
-      height: 36px;
-      min-height: 36px;
+      width: 46px;
+      min-width: 46px;
+      height: 46px;
+      min-height: 46px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -460,10 +460,6 @@
     }
 
     .string-cell.selected .dot {
-      width: 46px;
-      min-width: 46px;
-      height: 46px;
-      min-height: 46px;
       color: #fff;
       background: var(--coral);
       border-color: rgba(255, 255, 255, .92);
@@ -515,10 +511,6 @@
     }
 
     .dot.mute-dot {
-      width: 34px;
-      min-width: 34px;
-      height: 34px;
-      min-height: 34px;
       color: var(--coral-dark);
       background: rgba(255, 126, 107, .14);
       border-color: rgba(232, 96, 76, .72);
@@ -758,6 +750,40 @@
       background: rgba(255, 255, 255, .2);
       font-size: 11px;
       font-weight: 900;
+    }
+
+    .play-mode {
+      position: relative;
+      z-index: 1;
+      width: fit-content;
+      margin-top: 8px;
+      padding: 3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .22);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18);
+    }
+
+    .play-mode-option {
+      min-width: 54px;
+      min-height: 26px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      color: rgba(255, 255, 255, .78);
+      background: transparent;
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+      touch-action: manipulation;
+    }
+
+    .play-mode-option.is-active {
+      color: var(--coral-dark);
+      background: rgba(255, 255, 255, .94);
+      box-shadow: 0 6px 12px rgba(36, 48, 71, .12);
     }
 
     .explain-card,
@@ -1162,6 +1188,18 @@
         border-left-width: 13px;
       }
 
+      .play-mode {
+        margin-top: 6px;
+        padding: 2px;
+      }
+
+      .play-mode-option {
+        min-width: 46px;
+        min-height: 24px;
+        padding: 4px 7px;
+        font-size: 10px;
+      }
+
       .compact-result {
         min-height: 58px;
         padding: 10px 12px;
@@ -1362,11 +1400,14 @@
         background: rgba(255, 255, 255, .7);
       }
 
-      .phone-cell.selected .dot {
+      .phone-cell .dot {
         width: 38px;
         min-width: 38px;
         height: 38px;
         min-height: 38px;
+      }
+
+      .phone-cell.selected .dot {
         color: #fff;
         background: var(--coral);
         border-color: rgba(255, 255, 255, .92);
@@ -1380,8 +1421,6 @@
       }
 
       .phone-cell.open-selected .dot {
-        width: 34px;
-        min-width: 34px;
         height: 28px;
         min-height: 28px;
         border-radius: 999px;
@@ -1390,7 +1429,6 @@
         border-color: rgba(232, 96, 76, .68);
         border-style: dashed;
         box-shadow: 0 7px 14px rgba(255, 126, 107, .14);
-        margin-left: -6px;
         transform: none;
       }
 
@@ -1513,6 +1551,10 @@
               <span class="chord-play-label" id="chordPlayLabel">播放和弦</span>
             </button>
             <div class="chord-meta" id="chordMeta"></div>
+            <div class="play-mode" id="playModeControl" role="group" aria-label="播放模式">
+              <button class="play-mode-option" type="button" data-play-mode="stack" id="playModeStack">完整</button>
+              <button class="play-mode-option" type="button" data-play-mode="arpeggio" id="playModeArpeggio">逐弦</button>
+            </div>
           </section>
 
           <section class="panel explain-card">
@@ -1563,6 +1605,9 @@
         resultWaiting: "等待点按",
         playChord: "播放和弦",
         playChordAria: (symbol) => `播放 ${symbol} 和弦`,
+        playModeLabel: "播放模式",
+        playModeStack: "完整",
+        playModeArpeggio: "逐弦",
         noPlayableChord: "当前没有可播放和弦",
         intervalTitle: "每个音到根音的音程",
         voicingDefaultTitle: "同和弦其他按法",
@@ -1660,6 +1705,9 @@
         resultWaiting: "Tap notes",
         playChord: "Play chord",
         playChordAria: (symbol) => `Play ${symbol} chord`,
+        playModeLabel: "Playback mode",
+        playModeStack: "Full",
+        playModeArpeggio: "Strings",
         noPlayableChord: "No playable chord yet",
         intervalTitle: "Intervals from each note to the root",
         voicingDefaultTitle: "Other voicings",
@@ -1757,6 +1805,9 @@
         resultWaiting: "Toca notas",
         playChord: "Reproducir acorde",
         playChordAria: (symbol) => `Reproducir acorde ${symbol}`,
+        playModeLabel: "Modo de reproducción",
+        playModeStack: "Completo",
+        playModeArpeggio: "Cuerdas",
         noPlayableChord: "Todavía no hay un acorde reproducible",
         intervalTitle: "Intervalos de cada nota hacia la raíz",
         voicingDefaultTitle: "Otras posiciones",
@@ -1854,6 +1905,9 @@
         resultWaiting: "音をタップ",
         playChord: "コードを再生",
         playChordAria: (symbol) => `${symbol} コードを再生`,
+        playModeLabel: "再生モード",
+        playModeStack: "同時",
+        playModeArpeggio: "弦ごと",
         noPlayableChord: "再生できるコードがまだありません",
         intervalTitle: "各音からルートまでの音程",
         voicingDefaultTitle: "別の押さえ方",
@@ -2223,11 +2277,21 @@
       ]
     };
 
+    function storedPlayMode() {
+      try {
+        return localStorage.getItem("guitarfret-play-mode") === "stack" ? "stack" : "arpeggio";
+      } catch (error) {
+        return "arpeggio";
+      }
+    }
+
     const state = {
       selected: [null, 0, 2, 0, 1, 0],
+      playMode: storedPlayMode(),
       voicingsOpen: false,
       lastHitKey: null,
-      lastHitString: null
+      lastHitString: null,
+      lastHitStrings: []
     };
 
     const fretboard = document.getElementById("fretboard");
@@ -2247,6 +2311,8 @@
     const voicingList = document.getElementById("voicingList");
     const chordPlayBtn = document.getElementById("chordPlayBtn");
     const chordPlayLabel = document.getElementById("chordPlayLabel");
+    const playModeControl = document.getElementById("playModeControl");
+    const playModeButtons = Array.from(document.querySelectorAll(".play-mode-option"));
     const toggleVoicings = document.getElementById("toggleVoicings");
     const languageSelect = document.getElementById("languageSelect");
     let audioContext;
@@ -2272,6 +2338,9 @@
       document.getElementById("analysisPanel").setAttribute("aria-label", TEXT.analysisLabel);
       document.getElementById("resultCard").setAttribute("aria-label", TEXT.resultCardLabel);
       chordPlayLabel.textContent = TEXT.playChord;
+      playModeControl.setAttribute("aria-label", TEXT.playModeLabel);
+      document.getElementById("playModeStack").textContent = TEXT.playModeStack;
+      document.getElementById("playModeArpeggio").textContent = TEXT.playModeArpeggio;
       document.getElementById("intervalTitle").textContent = TEXT.intervalTitle;
       voicingTitle.textContent = TEXT.voicingDefaultTitle;
       toggleVoicings.textContent = TEXT.expand;
@@ -2436,6 +2505,23 @@
       });
     }
 
+    function setHitState(key, stringIndexes) {
+      const uniqueStrings = Array.from(new Set(stringIndexes));
+      state.lastHitKey = key;
+      state.lastHitString = uniqueStrings.length === 1 ? uniqueStrings[0] : null;
+      state.lastHitStrings = uniqueStrings;
+    }
+
+    function clearHitState() {
+      state.lastHitKey = null;
+      state.lastHitString = null;
+      state.lastHitStrings = [];
+    }
+
+    function isStringVibrating(stringIndex) {
+      return state.lastHitStrings.includes(stringIndex) || state.lastHitString === stringIndex;
+    }
+
     function startPhysicalStringWave(stringIndex, fret) {
       const started = performance.now();
       const duration = 860;
@@ -2445,7 +2531,7 @@
         const progress = Math.min(1, (now - started) / duration);
         setDesktopWavePath(stringIndex, horizontalWavePath(progress, peak));
         setPhoneWavePath(verticalWavePath(progress, stringIndex));
-        if (progress < 1 && state.lastHitString === stringIndex) {
+        if (progress < 1 && isStringVibrating(stringIndex)) {
           requestAnimationFrame(frame);
         }
       };
@@ -2526,18 +2612,86 @@
 
     function showPlayedString(note, token) {
       const key = `${note.stringIndex}-${note.fret}`;
-      state.lastHitKey = key;
-      state.lastHitString = note.stringIndex;
+      setHitState(key, [note.stringIndex]);
       update();
       startPhysicalStringWave(note.stringIndex, note.fret);
 
       window.setTimeout(() => {
         if (chordPlaybackToken === token && state.lastHitKey === key) {
-          state.lastHitKey = null;
-          state.lastHitString = null;
+          clearHitState();
           update();
         }
       }, 620);
+    }
+
+    function showPlayedStrings(notes, token) {
+      setHitState("stack", notes.map((note) => note.stringIndex));
+      update();
+      notes.forEach((note) => startPhysicalStringWave(note.stringIndex, note.fret));
+
+      window.setTimeout(() => {
+        if (chordPlaybackToken === token && state.lastHitKey === "stack") {
+          clearHitState();
+          update();
+        }
+      }, 720);
+    }
+
+    function scheduleStackTone(context, freq, startTime, gainPeak) {
+      const osc = context.createOscillator();
+      const overtone = context.createOscillator();
+      const gain = context.createGain();
+      const filter = context.createBiquadFilter();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, startTime);
+      overtone.type = "sine";
+      overtone.frequency.setValueAtTime(freq * 2.01, startTime);
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(Math.min(3400, freq * 7), startTime);
+      filter.frequency.exponentialRampToValueAtTime(Math.max(820, freq * 2.7), startTime + .48);
+
+      gain.gain.setValueAtTime(.0001, startTime);
+      gain.gain.exponentialRampToValueAtTime(gainPeak, startTime + .014);
+      gain.gain.exponentialRampToValueAtTime(.001, startTime + .9);
+
+      osc.connect(filter);
+      overtone.connect(filter);
+      filter.connect(gain);
+      gain.connect(context.destination);
+      osc.start(startTime);
+      overtone.start(startTime);
+      osc.stop(startTime + .92);
+      overtone.stop(startTime + .5);
+    }
+
+    async function playChordStack(playable, token) {
+      showPlayedStrings(playable, token);
+      const context = await ensureAudioContext();
+      if (chordPlaybackToken !== token) return;
+
+      if (!context) {
+        playable.forEach((note) => playFallbackPluck(frequencyAt(note.stringIndex, note.fret)));
+        return;
+      }
+
+      const startTime = context.currentTime + .025;
+      const peak = Math.min(.16, .48 / Math.max(3, playable.length));
+      playable.forEach((note) => {
+        scheduleStackTone(context, frequencyAt(note.stringIndex, note.fret), startTime, peak);
+      });
+    }
+
+    function playChordArpeggio(playable, token) {
+      const stepMs = 110;
+      unlockAudioFromGesture();
+      playable.forEach((note, index) => {
+        window.setTimeout(() => {
+          if (chordPlaybackToken !== token) return;
+          playPluck(note.stringIndex, note.fret);
+          showPlayedString(note, token);
+        }, index * stepMs);
+      });
     }
 
     function playChord(notes) {
@@ -2550,16 +2704,12 @@
 
       const token = chordPlaybackToken + 1;
       chordPlaybackToken = token;
-      const stepMs = 110;
-      unlockAudioFromGesture();
+      if (state.playMode === "stack") {
+        playChordStack(playable, token);
+        return;
+      }
 
-      playable.forEach((note, index) => {
-        window.setTimeout(() => {
-          if (chordPlaybackToken !== token) return;
-          playPluck(note.stringIndex, note.fret);
-          showPlayedString(note, token);
-        }, index * stepMs);
-      });
+      playChordArpeggio(playable, token);
     }
 
     function uniqueByPitch(notes) {
@@ -2801,21 +2951,18 @@
       state.selected[stringIndex] = nextFret;
 
       if (nextFret === null) {
-        state.lastHitKey = null;
-        state.lastHitString = null;
+        clearHitState();
         update();
         return;
       }
 
-      state.lastHitKey = key;
-      state.lastHitString = stringIndex;
+      setHitState(key, [stringIndex]);
       playPluck(stringIndex, nextFret);
       update();
       startPhysicalStringWave(stringIndex, nextFret);
       window.setTimeout(() => {
         if (state.lastHitKey === key) {
-          state.lastHitKey = null;
-          state.lastHitString = null;
+          clearHitState();
           update();
         }
       }, 900);
@@ -2842,7 +2989,7 @@
         row.className = "string-row";
         row.dataset.string = stringIndex;
         if (stringIndex <= 2) row.classList.add("wound");
-        if (state.lastHitString === stringIndex) row.classList.add("vibrating");
+        if (isStringVibrating(stringIndex)) row.classList.add("vibrating");
 
         const label = document.createElement("div");
         label.className = "string-label";
@@ -2883,7 +3030,7 @@
           if (selected) cell.classList.add("selected");
           if (openSelected) cell.classList.add("open-selected");
           if (selected && pc === analysis.rootPc) cell.classList.add("root");
-          if (state.lastHitString === stringIndex) cell.classList.add("vibrating");
+          if (isStringVibrating(stringIndex)) cell.classList.add("vibrating");
           if (state.lastHitKey === `${stringIndex}-${fret}`) cell.classList.add("hit");
 
           cell.appendChild(mutedOpen ? createMuteDot() : openSelected ? createOpenDot(noteName(pc), intervalFor(pc, analysis.rootPc)) : createDot(noteName(pc), selected ? intervalFor(pc, analysis.rootPc) : ""));
@@ -2901,8 +3048,8 @@
 
     function renderPhoneFretboard(analysis) {
       phoneFretboard.innerHTML = "";
-      phoneFretboard.classList.toggle("vibrating", state.lastHitString !== null);
-      phoneFretboard.classList.toggle("wave-wound", state.lastHitString !== null && state.lastHitString <= 2);
+      phoneFretboard.classList.toggle("vibrating", state.lastHitStrings.length > 0 || state.lastHitString !== null);
+      phoneFretboard.classList.toggle("wave-wound", state.lastHitStrings.some((stringIndex) => stringIndex <= 2) || (state.lastHitString !== null && state.lastHitString <= 2));
 
       const head = document.createElement("div");
       head.className = "phone-head";
@@ -2950,7 +3097,7 @@
           if (selected) cell.classList.add("selected");
           if (openSelected) cell.classList.add("open-selected");
           if (selected && pc === analysis.rootPc) cell.classList.add("root");
-          if (state.lastHitString === stringIndex) cell.classList.add("vibrating");
+          if (isStringVibrating(stringIndex)) cell.classList.add("vibrating");
           if (state.lastHitKey === `${stringIndex}-${fret}`) cell.classList.add("hit");
 
           cell.appendChild(mutedOpen ? createMuteDot() : openSelected ? createOpenDot(noteName(pc), intervalFor(pc, analysis.rootPc)) : createDot(noteName(pc), selected ? intervalFor(pc, analysis.rootPc) : ""));
@@ -3011,6 +3158,7 @@
       chordPlayBtn.hidden = !canPlayChord;
       chordPlayBtn.disabled = !canPlayChord;
       chordPlayBtn.setAttribute("aria-label", canPlayChord ? TEXT.playChordAria(analysis.symbol) : TEXT.noPlayableChord);
+      playModeControl.hidden = !canPlayChord;
 
       [
         analysis.quality,
@@ -3056,6 +3204,14 @@
         intervals: intervalText,
         quality: analysis.quality,
         bass: bassText
+      });
+    }
+
+    function renderPlayMode() {
+      playModeButtons.forEach((button) => {
+        const active = button.dataset.playMode === state.playMode;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
       });
     }
 
@@ -3280,6 +3436,7 @@
       renderPhoneFretboard(analysis);
       renderSelected(notes, analysis);
       renderResult(notes, analysis);
+      renderPlayMode();
       renderIntervals(notes, analysis);
       renderVoicings(analysis);
     }
@@ -3320,12 +3477,14 @@
 
     document.getElementById("demoBtn").addEventListener("click", () => {
       chordPlaybackToken += 1;
+      clearHitState();
       state.selected = [null, 0, 2, 0, 1, 0];
       update();
     });
 
     document.getElementById("clearBtn").addEventListener("click", () => {
       chordPlaybackToken += 1;
+      clearHitState();
       state.selected = [null, null, null, null, null, null];
       update();
     });
@@ -3337,6 +3496,21 @@
 
     chordPlayBtn.addEventListener("click", () => {
       playChord(selectedNotes());
+    });
+
+    playModeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const nextMode = button.dataset.playMode === "stack" ? "stack" : "arpeggio";
+        if (state.playMode === nextMode) return;
+        chordPlaybackToken += 1;
+        clearHitState();
+        state.playMode = nextMode;
+        try {
+          localStorage.setItem("guitarfret-play-mode", nextMode);
+        } catch (error) {}
+        renderPlayMode();
+        update();
+      });
     });
 
     languageSelect.addEventListener("change", (event) => {
