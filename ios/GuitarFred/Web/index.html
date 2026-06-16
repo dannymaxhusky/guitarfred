@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GuitarFred - Chord Inspector</title>
+  <title>GuitarFret - Chord Inspector</title>
   <style>
     :root {
       color-scheme: light;
@@ -120,7 +120,8 @@
 
     .chip,
     .ghost,
-    .primary {
+    .primary,
+    .language-select {
       min-height: 36px;
       border-radius: 999px;
       padding: 8px 14px;
@@ -142,6 +143,24 @@
     .ghost {
       color: var(--navy);
       background: #f4f0e8;
+    }
+
+    .language-control {
+      flex: 0 0 auto;
+    }
+
+    .language-select {
+      min-width: 104px;
+      border: 0;
+      color: var(--navy);
+      background: #fff;
+      box-shadow: inset 0 0 0 1px rgba(36, 48, 71, .14);
+      cursor: pointer;
+    }
+
+    .language-select:focus-visible {
+      outline: 3px solid rgba(31, 111, 107, .28);
+      outline-offset: 2px;
     }
 
     .primary {
@@ -1000,10 +1019,23 @@
         align-items: flex-start;
         flex-direction: column;
         padding: 16px;
+        position: relative;
+      }
+
+      .brand {
+        width: 100%;
+        padding-right: 118px;
       }
 
       .toolbar {
+        width: 100%;
         justify-content: flex-start;
+      }
+
+      .language-control {
+        position: absolute;
+        top: 16px;
+        right: 16px;
       }
 
       .workspace {
@@ -1311,30 +1343,38 @@
 </head>
 <body>
   <div class="page">
-    <main class="app" aria-label="GuitarFred 和弦分析器">
+    <main class="app" id="appShell" aria-label="GuitarFret 和弦分析器">
       <header class="topbar">
         <div class="brand">
           <div class="brand-mark">G</div>
           <div>
-            <h1>GuitarFred Chord Inspector</h1>
-        <p>标准调弦 · 实时和弦分析</p>
+            <h1 id="appTitle">GuitarFret Chord Inspector</h1>
+        <p id="brandTagline">标准调弦 · 实时和弦分析</p>
           </div>
         </div>
-        <div class="toolbar" aria-label="快捷操作">
+        <div class="toolbar" id="toolbar" aria-label="快捷操作">
           <span class="chip" id="selectionCount">已选择 5 个音</span>
           <button class="ghost" type="button" id="demoBtn">Am7 示例</button>
           <button class="ghost" type="button" id="clearBtn">清空</button>
+          <label class="language-control" for="languageSelect">
+            <select class="language-select" id="languageSelect" aria-label="选择语言">
+              <option value="zh-Hans">中文</option>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="ja">日本語</option>
+            </select>
+          </label>
         </div>
       </header>
 
       <section class="workspace">
-        <section class="panel fret-panel" aria-label="可点按指板">
+        <section class="panel fret-panel" id="fretPanel" aria-label="可点按指板">
           <div class="panel-head">
             <div>
-              <h2>指板</h2>
-              <p>当前指法以每根弦一个音建模。</p>
+              <h2 id="fretTitle">指板</h2>
+              <p id="fretDescription">当前指法以每根弦一个音建模。</p>
             </div>
-            <span class="chip">标准调弦 E A D G B E</span>
+            <span class="chip" id="tuningChip">标准调弦 E A D G B E</span>
           </div>
 
           <div class="compact-result" aria-live="polite">
@@ -1351,13 +1391,13 @@
           <div class="selected-strip" id="selectedStrip" aria-label="当前选择"></div>
         </section>
 
-        <aside class="analysis" aria-label="实时和弦分析">
-          <section class="result-card" aria-label="识别结果">
+        <aside class="analysis" id="analysisPanel" aria-label="实时和弦分析">
+          <section class="result-card" id="resultCard" aria-label="识别结果">
             <div class="eyebrow" id="resultState">实时识别</div>
             <div class="chord-name" id="chordName">Am7</div>
             <button class="chord-play" id="chordPlayBtn" type="button" aria-label="播放当前和弦">
               <span class="chord-play-icon" aria-hidden="true"></span>
-              <span class="chord-play-label">播放和弦</span>
+              <span class="chord-play-label" id="chordPlayLabel">播放和弦</span>
             </button>
             <div class="chord-meta" id="chordMeta"></div>
           </section>
@@ -1368,7 +1408,7 @@
           </section>
 
           <section class="panel interval-card">
-            <h3>每个音到根音的音程</h3>
+            <h3 id="intervalTitle">每个音到根音的音程</h3>
             <div class="interval-list" id="intervalList"></div>
           </section>
 
@@ -1386,13 +1426,474 @@
 
   <script>
     const NOTE_NAMES = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+    const I18N = {
+      "zh-Hans": {
+        htmlLang: "zh-CN",
+        documentTitle: "GuitarFret - 和弦分析器",
+        appTitle: "GuitarFret Chord Inspector",
+        appLabel: "GuitarFret 和弦分析器",
+        tagline: "标准调弦 · 实时和弦分析",
+        toolbarLabel: "快捷操作",
+        languageLabel: "选择语言",
+        selectedCount: (count) => `已选择 ${count} 个音`,
+        demo: "Am7 示例",
+        clear: "清空",
+        fretPanelLabel: "可点按指板",
+        fretTitle: "指板",
+        fretDescription: "当前指法以每根弦一个音建模。",
+        tuning: "标准调弦 E A D G B E",
+        phoneFretboardLabel: "手机竖向指板",
+        selectedStripLabel: "当前选择",
+        analysisLabel: "实时和弦分析",
+        resultCardLabel: "识别结果",
+        resultLive: "实时识别",
+        resultWaiting: "等待点按",
+        playChord: "播放和弦",
+        playChordAria: (symbol) => `播放 ${symbol} 和弦`,
+        noPlayableChord: "当前没有可播放和弦",
+        intervalTitle: "每个音到根音的音程",
+        voicingDefaultTitle: "同和弦其他按法",
+        expand: "展开",
+        collapse: "收起",
+        stringFretHeader: "弦 / 品",
+        fretStringHeader: "品 / 弦",
+        openString: "空弦",
+        noNotes: "还没有选择音",
+        noNotesShort: "暂无音",
+        notPlayed: "不弹奏",
+        needMoreNotesSymbol: "选择更多音",
+        noChordQuality: "尚未形成和弦",
+        needAtLeastTwo: "需要至少 2 个不同音",
+        unknownSymbol: "未识别组合",
+        noCommonChord: "未匹配到常见和弦",
+        cannotFindRoot: "无法可靠判断根音",
+        completeMatch: "完整匹配",
+        omitted: (items) => `省略了 ${items}`,
+        extensions: (items) => `含 ${items} 延伸音`,
+        whyTitle: (symbol) => `为什么是 ${symbol}`,
+        whyNoNotes: "在左侧指板点按几个位置后，这里会解释当前音集合为什么构成某个和弦。",
+        whyOneNote: "当前只有一个不同音，还不能判断和弦。至少再选一个三度或五度。",
+        whyUnknown: "这组音没有清晰的三度、五度或七度骨架，系统暂时不强行指定根音。继续补充关键音程后会重新判断。",
+        whyCopy: ({ notes, root, intervals, quality, bass }) => `你选中的音是 ${notes}。以 ${root} 为根音，${intervals}，所以系统识别为 ${quality}。${bass}`,
+        noteIsInterval: (note, interval) => `${note} 是 ${interval}`,
+        bassCopy: (bass, symbol) => `最低音是 ${bass}，所以显示为 ${symbol}。`,
+        intervalEmpty: "选择音后会在这里显示每个音和根音之间的音程。",
+        intervalNoRoot: "当前音集合还不能可靠判断根音，因此暂不计算到根音的音程。",
+        voicingTitle: (symbol) => `${symbol} 的其他按法`,
+        voicingEmpty: "这个和弦暂时没有收录其他按法。换一个常见和弦，或继续补全音程后再看。",
+        stringLabel: (number, note) => `${number}弦 ${note}`,
+        phoneStringLabel: (number, note) => `${number}${note}`,
+        position: (label, fret) => `${label} · ${fret}品`,
+        ariaFret: (label, fret, note) => `${label} ${fret}品 ${note}`,
+        ariaOpen: (label, note) => `${label} 空弦 ${note}`,
+        ariaMuted: (label) => `${label} X 不弹奏`,
+        diagramMuted: (number) => `${number}弦不弹`,
+        diagramFret: (number, fret) => `${number}弦${fret}品`,
+        listSeparator: "、",
+        phraseSeparator: "，",
+        qualityNames: {
+          minor7: "小七和弦",
+          major7: "大七和弦",
+          dominant7: "属七和弦",
+          halfDiminished7: "半减七和弦",
+          minor: "小三和弦",
+          major: "大三和弦",
+          diminished: "减三和弦",
+          augmented: "增三和弦",
+          sus2: "挂二和弦",
+          sus4: "挂四和弦",
+          six: "六和弦",
+          minor6: "小六和弦",
+          add9: "加九和弦",
+          power: "五和弦"
+        },
+        intervalNames: {
+          0: ["根音", "和弦中心"],
+          1: ["小二度", "紧张半音"],
+          2: ["大二度 / 九度", "延展色彩"],
+          3: ["小三度", "决定小调色彩"],
+          4: ["大三度", "决定大调色彩"],
+          5: ["纯四度", "悬挂感"],
+          6: ["减五度 / 增四度", "强张力"],
+          7: ["纯五度", "稳定骨架"],
+          8: ["小六度", "柔和张力"],
+          9: ["大六度", "明亮延展"],
+          10: ["小七度", "七和弦张力"],
+          11: ["大七度", "柔亮张力"]
+        },
+        intervalShort: { 0: "根", 1: "小2", 2: "大2", 3: "小3", 4: "大3", 5: "纯4", 6: "减5", 7: "纯5", 8: "小6", 9: "大6", 10: "小7", 11: "大7" }
+      },
+      en: {
+        htmlLang: "en",
+        documentTitle: "GuitarFret - Chord Inspector",
+        appTitle: "GuitarFret Chord Inspector",
+        appLabel: "GuitarFret chord analyzer",
+        tagline: "Standard tuning · Real-time chord analysis",
+        toolbarLabel: "Quick actions",
+        languageLabel: "Choose language",
+        selectedCount: (count) => `Selected ${count} note${count === 1 ? "" : "s"}`,
+        demo: "Am7 example",
+        clear: "Clear",
+        fretPanelLabel: "Tap-enabled fretboard",
+        fretTitle: "Fretboard",
+        fretDescription: "The current voicing uses one note per string.",
+        tuning: "Standard tuning E A D G B E",
+        phoneFretboardLabel: "Vertical iPhone fretboard",
+        selectedStripLabel: "Current selection",
+        analysisLabel: "Real-time chord analysis",
+        resultCardLabel: "Recognition result",
+        resultLive: "Live analysis",
+        resultWaiting: "Tap notes",
+        playChord: "Play chord",
+        playChordAria: (symbol) => `Play ${symbol} chord`,
+        noPlayableChord: "No playable chord yet",
+        intervalTitle: "Intervals from each note to the root",
+        voicingDefaultTitle: "Other voicings",
+        expand: "Expand",
+        collapse: "Collapse",
+        stringFretHeader: "String / Fret",
+        fretStringHeader: "Fret / String",
+        openString: "Open",
+        noNotes: "No notes selected",
+        noNotesShort: "No notes",
+        notPlayed: "muted",
+        needMoreNotesSymbol: "Select more notes",
+        noChordQuality: "No chord yet",
+        needAtLeastTwo: "Needs at least 2 different notes",
+        unknownSymbol: "Unrecognized shape",
+        noCommonChord: "No common chord matched",
+        cannotFindRoot: "Cannot determine the root reliably",
+        completeMatch: "Complete match",
+        omitted: (items) => `omits ${items}`,
+        extensions: (items) => `includes ${items} extension tones`,
+        whyTitle: (symbol) => `Why ${symbol}`,
+        whyNoNotes: "Tap a few positions on the fretboard and this panel will explain why the notes form a chord.",
+        whyOneNote: "There is only one unique note, so the app cannot identify a chord yet. Add a third or fifth.",
+        whyUnknown: "These notes do not form a clear third, fifth, or seventh framework, so the app does not force a root yet.",
+        whyCopy: ({ notes, root, intervals, quality, bass }) => `You selected ${notes}. With ${root} as the root, ${intervals}, so the app identifies this as a ${quality}. ${bass}`,
+        noteIsInterval: (note, interval) => `${note} is the ${interval}`,
+        bassCopy: (bass, symbol) => `The lowest note is ${bass}, so it is shown as ${symbol}.`,
+        intervalEmpty: "After you select notes, this panel shows the interval between each note and the root.",
+        intervalNoRoot: "The app cannot determine a reliable root yet, so root intervals are not shown.",
+        voicingTitle: (symbol) => `Other ${symbol} voicings`,
+        voicingEmpty: "No alternate voicings are stored for this chord yet. Try a common chord or add clearer intervals.",
+        stringLabel: (number, note) => `String ${number} ${note}`,
+        phoneStringLabel: (number, note) => `${number}${note}`,
+        position: (label, fret) => `${label} · ${fret === 0 ? "open" : `fret ${fret}`}`,
+        ariaFret: (label, fret, note) => `${label}, fret ${fret}, ${note}`,
+        ariaOpen: (label, note) => `${label}, open ${note}`,
+        ariaMuted: (label) => `${label}, muted`,
+        diagramMuted: (number) => `string ${number} muted`,
+        diagramFret: (number, fret) => `string ${number} fret ${fret}`,
+        listSeparator: ", ",
+        phraseSeparator: ", ",
+        qualityNames: {
+          minor7: "minor seventh chord",
+          major7: "major seventh chord",
+          dominant7: "dominant seventh chord",
+          halfDiminished7: "half-diminished seventh chord",
+          minor: "minor triad",
+          major: "major triad",
+          diminished: "diminished triad",
+          augmented: "augmented triad",
+          sus2: "suspended second chord",
+          sus4: "suspended fourth chord",
+          six: "sixth chord",
+          minor6: "minor sixth chord",
+          add9: "add-nine chord",
+          power: "power chord"
+        },
+        intervalNames: {
+          0: ["root", "chord center"],
+          1: ["minor second", "half-step tension"],
+          2: ["major second / ninth", "color extension"],
+          3: ["minor third", "defines minor color"],
+          4: ["major third", "defines major color"],
+          5: ["perfect fourth", "suspended color"],
+          6: ["diminished fifth / tritone", "strong tension"],
+          7: ["perfect fifth", "stable frame"],
+          8: ["minor sixth", "soft tension"],
+          9: ["major sixth", "bright extension"],
+          10: ["minor seventh", "seventh-chord tension"],
+          11: ["major seventh", "bright tension"]
+        },
+        intervalShort: { 0: "R", 1: "m2", 2: "M2", 3: "m3", 4: "M3", 5: "P4", 6: "b5", 7: "P5", 8: "m6", 9: "M6", 10: "m7", 11: "M7" }
+      },
+      es: {
+        htmlLang: "es",
+        documentTitle: "GuitarFret - Inspector de acordes",
+        appTitle: "GuitarFret Inspector de acordes",
+        appLabel: "Analizador de acordes GuitarFret",
+        tagline: "Afinación estándar · Análisis de acordes en tiempo real",
+        toolbarLabel: "Acciones rápidas",
+        languageLabel: "Elegir idioma",
+        selectedCount: (count) => `${count} nota${count === 1 ? "" : "s"} seleccionada${count === 1 ? "" : "s"}`,
+        demo: "Ejemplo Am7",
+        clear: "Borrar",
+        fretPanelLabel: "Diapasón interactivo",
+        fretTitle: "Diapasón",
+        fretDescription: "La digitación actual usa una nota por cuerda.",
+        tuning: "Afinación estándar E A D G B E",
+        phoneFretboardLabel: "Diapasón vertical para iPhone",
+        selectedStripLabel: "Selección actual",
+        analysisLabel: "Análisis de acordes en tiempo real",
+        resultCardLabel: "Resultado de reconocimiento",
+        resultLive: "Análisis en vivo",
+        resultWaiting: "Toca notas",
+        playChord: "Reproducir acorde",
+        playChordAria: (symbol) => `Reproducir acorde ${symbol}`,
+        noPlayableChord: "Todavía no hay un acorde reproducible",
+        intervalTitle: "Intervalos de cada nota hacia la raíz",
+        voicingDefaultTitle: "Otras posiciones",
+        expand: "Abrir",
+        collapse: "Cerrar",
+        stringFretHeader: "Cuerda / Traste",
+        fretStringHeader: "Traste / Cuerda",
+        openString: "Al aire",
+        noNotes: "No hay notas seleccionadas",
+        noNotesShort: "Sin notas",
+        notPlayed: "silenciada",
+        needMoreNotesSymbol: "Selecciona más notas",
+        noChordQuality: "Aún no hay acorde",
+        needAtLeastTwo: "Se necesitan al menos 2 notas distintas",
+        unknownSymbol: "Forma no reconocida",
+        noCommonChord: "No coincide con un acorde común",
+        cannotFindRoot: "No se puede determinar la raíz con fiabilidad",
+        completeMatch: "Coincidencia completa",
+        omitted: (items) => `omite ${items}`,
+        extensions: (items) => `incluye ${items} como extensiones`,
+        whyTitle: (symbol) => `Por qué es ${symbol}`,
+        whyNoNotes: "Toca varias posiciones del diapasón y aquí se explicará por qué esas notas forman un acorde.",
+        whyOneNote: "Solo hay una nota distinta, así que todavía no se puede identificar un acorde. Añade una tercera o una quinta.",
+        whyUnknown: "Estas notas no forman una estructura clara de tercera, quinta o séptima, así que la app no fuerza una raíz.",
+        whyCopy: ({ notes, root, intervals, quality, bass }) => `Seleccionaste ${notes}. Con ${root} como raíz, ${intervals}; por eso la app lo identifica como ${quality}. ${bass}`,
+        noteIsInterval: (note, interval) => `${note} es ${interval}`,
+        bassCopy: (bass, symbol) => `La nota más grave es ${bass}, por eso se muestra como ${symbol}.`,
+        intervalEmpty: "Después de seleccionar notas, aquí verás el intervalo entre cada nota y la raíz.",
+        intervalNoRoot: "La app todavía no puede determinar una raíz fiable, así que no muestra intervalos hacia la raíz.",
+        voicingTitle: (symbol) => `Otras posiciones de ${symbol}`,
+        voicingEmpty: "Aún no hay posiciones alternativas guardadas para este acorde. Prueba un acorde común o añade intervalos más claros.",
+        stringLabel: (number, note) => `Cuerda ${number} ${note}`,
+        phoneStringLabel: (number, note) => `${number}${note}`,
+        position: (label, fret) => `${label} · ${fret === 0 ? "al aire" : `traste ${fret}`}`,
+        ariaFret: (label, fret, note) => `${label}, traste ${fret}, ${note}`,
+        ariaOpen: (label, note) => `${label}, al aire ${note}`,
+        ariaMuted: (label) => `${label}, silenciada`,
+        diagramMuted: (number) => `cuerda ${number} silenciada`,
+        diagramFret: (number, fret) => `cuerda ${number} traste ${fret}`,
+        listSeparator: ", ",
+        phraseSeparator: "; ",
+        qualityNames: {
+          minor7: "acorde menor séptima",
+          major7: "acorde mayor séptima",
+          dominant7: "acorde séptima dominante",
+          halfDiminished7: "acorde semidisminuido",
+          minor: "triada menor",
+          major: "triada mayor",
+          diminished: "triada disminuida",
+          augmented: "triada aumentada",
+          sus2: "acorde suspendido de segunda",
+          sus4: "acorde suspendido de cuarta",
+          six: "acorde sexta",
+          minor6: "acorde menor sexta",
+          add9: "acorde add9",
+          power: "quinta"
+        },
+        intervalNames: {
+          0: ["raíz", "centro del acorde"],
+          1: ["segunda menor", "tensión de semitono"],
+          2: ["segunda mayor / novena", "color extendido"],
+          3: ["tercera menor", "define el color menor"],
+          4: ["tercera mayor", "define el color mayor"],
+          5: ["cuarta justa", "color suspendido"],
+          6: ["quinta disminuida / tritono", "tensión fuerte"],
+          7: ["quinta justa", "estructura estable"],
+          8: ["sexta menor", "tensión suave"],
+          9: ["sexta mayor", "extensión brillante"],
+          10: ["séptima menor", "tensión de séptima"],
+          11: ["séptima mayor", "tensión brillante"]
+        },
+        intervalShort: { 0: "R", 1: "2m", 2: "2M", 3: "3m", 4: "3M", 5: "4J", 6: "b5", 7: "5J", 8: "6m", 9: "6M", 10: "7m", 11: "7M" }
+      },
+      ja: {
+        htmlLang: "ja",
+        documentTitle: "GuitarFret - コードインスペクター",
+        appTitle: "GuitarFret コードインスペクター",
+        appLabel: "GuitarFret コード解析ツール",
+        tagline: "標準チューニング · リアルタイムコード解析",
+        toolbarLabel: "クイック操作",
+        languageLabel: "言語を選択",
+        selectedCount: (count) => `${count} 音を選択中`,
+        demo: "Am7 例",
+        clear: "クリア",
+        fretPanelLabel: "タップできる指板",
+        fretTitle: "指板",
+        fretDescription: "現在の押さえ方は各弦 1 音として解析します。",
+        tuning: "標準チューニング E A D G B E",
+        phoneFretboardLabel: "iPhone 用の縦向き指板",
+        selectedStripLabel: "現在の選択",
+        analysisLabel: "リアルタイムコード解析",
+        resultCardLabel: "解析結果",
+        resultLive: "リアルタイム解析",
+        resultWaiting: "音をタップ",
+        playChord: "コードを再生",
+        playChordAria: (symbol) => `${symbol} コードを再生`,
+        noPlayableChord: "再生できるコードがまだありません",
+        intervalTitle: "各音からルートまでの音程",
+        voicingDefaultTitle: "別の押さえ方",
+        expand: "展開",
+        collapse: "閉じる",
+        stringFretHeader: "弦 / フレット",
+        fretStringHeader: "フレット / 弦",
+        openString: "開放弦",
+        noNotes: "まだ音が選択されていません",
+        noNotesShort: "音なし",
+        notPlayed: "ミュート",
+        needMoreNotesSymbol: "さらに音を選択",
+        noChordQuality: "まだコード未成立",
+        needAtLeastTwo: "少なくとも 2 つの異なる音が必要です",
+        unknownSymbol: "未認識の形",
+        noCommonChord: "一般的なコードに一致しません",
+        cannotFindRoot: "ルートを確実に判断できません",
+        completeMatch: "完全一致",
+        omitted: (items) => `${items} を省略`,
+        extensions: (items) => `${items} の拡張音を含む`,
+        whyTitle: (symbol) => `${symbol} と判定した理由`,
+        whyNoNotes: "左の指板でいくつかの位置をタップすると、その音集合がコードになる理由をここで説明します。",
+        whyOneNote: "異なる音が 1 つだけなので、まだコード判定はできません。3 度または 5 度を追加してください。",
+        whyUnknown: "この音集合には明確な 3 度、5 度、7 度の骨格がないため、ルートを無理に指定しません。",
+        whyCopy: ({ notes, root, intervals, quality, bass }) => `選択した音は ${notes} です。${root} をルートにすると、${intervals} なので、${quality} と判定します。${bass}`,
+        noteIsInterval: (note, interval) => `${note} は ${interval}`,
+        bassCopy: (bass, symbol) => `最低音は ${bass} なので ${symbol} と表示します。`,
+        intervalEmpty: "音を選択すると、各音とルートの音程をここに表示します。",
+        intervalNoRoot: "まだルートを確実に判断できないため、ルートまでの音程は表示しません。",
+        voicingTitle: (symbol) => `${symbol} の別の押さえ方`,
+        voicingEmpty: "このコードの別の押さえ方はまだ登録されていません。一般的なコードを試すか、音程を補ってください。",
+        stringLabel: (number, note) => `${number}弦 ${note}`,
+        phoneStringLabel: (number, note) => `${number}${note}`,
+        position: (label, fret) => `${label} · ${fret === 0 ? "開放" : `${fret}フレット`}`,
+        ariaFret: (label, fret, note) => `${label} ${fret}フレット ${note}`,
+        ariaOpen: (label, note) => `${label} 開放弦 ${note}`,
+        ariaMuted: (label) => `${label} X ミュート`,
+        diagramMuted: (number) => `${number}弦ミュート`,
+        diagramFret: (number, fret) => `${number}弦${fret}フレット`,
+        listSeparator: "、",
+        phraseSeparator: "、",
+        qualityNames: {
+          minor7: "マイナーセブンスコード",
+          major7: "メジャーセブンスコード",
+          dominant7: "ドミナントセブンスコード",
+          halfDiminished7: "ハーフディミニッシュコード",
+          minor: "マイナートライアド",
+          major: "メジャートライアド",
+          diminished: "ディミニッシュトライアド",
+          augmented: "オーギュメントトライアド",
+          sus2: "サスツーコード",
+          sus4: "サスフォーコード",
+          six: "シックスコード",
+          minor6: "マイナーシックスコード",
+          add9: "アドナインコード",
+          power: "パワーコード"
+        },
+        intervalNames: {
+          0: ["ルート", "コード中心"],
+          1: ["短2度", "半音の緊張"],
+          2: ["長2度 / 9度", "拡張の色彩"],
+          3: ["短3度", "マイナー感を決める"],
+          4: ["長3度", "メジャー感を決める"],
+          5: ["完全4度", "サスペンド感"],
+          6: ["減5度 / 増4度", "強い緊張"],
+          7: ["完全5度", "安定した骨格"],
+          8: ["短6度", "やわらかい緊張"],
+          9: ["長6度", "明るい拡張"],
+          10: ["短7度", "セブンスの緊張"],
+          11: ["長7度", "明るい緊張"]
+        },
+        intervalShort: { 0: "根", 1: "短2", 2: "長2", 3: "短3", 4: "長3", 5: "完4", 6: "減5", 7: "完5", 8: "短6", 9: "長6", 10: "短7", 11: "長7" }
+      }
+    };
+
+    const SUPPORTED_LOCALES = ["zh-Hans", "en", "es", "ja"];
+    const LOCALE_STORAGE_KEY = "guitarfret.locale";
+
+    function normalizeLocale(language) {
+      if (!language) return null;
+      const normalized = language.toLowerCase();
+      if (normalized.startsWith("en")) return "en";
+      if (normalized.startsWith("es")) return "es";
+      if (normalized.startsWith("ja")) return "ja";
+      if (normalized.startsWith("zh")) return "zh-Hans";
+      return null;
+    }
+
+    function storedLocale() {
+      try {
+        const value = localStorage.getItem(LOCALE_STORAGE_KEY);
+        return SUPPORTED_LOCALES.includes(value) ? value : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function saveLocale(locale) {
+      try {
+        localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+      } catch (error) {
+        // Local storage can be unavailable in private or embedded browser contexts.
+      }
+    }
+
+    function detectLocale() {
+      const queryLang = new URLSearchParams(window.location.search).get("lang");
+      const candidates = [queryLang, storedLocale(), ...(navigator.languages || []), navigator.language].filter(Boolean);
+      return candidates.map(normalizeLocale).find(Boolean) || "zh-Hans";
+    }
+
+    let locale = detectLocale();
+    let TEXT = I18N[locale] || I18N["zh-Hans"];
+
+    function joinList(items) {
+      return items.join(TEXT.listSeparator);
+    }
+
+    function stringLabel(stringIndex) {
+      const stringInfo = OPEN_STRINGS[stringIndex];
+      return TEXT.stringLabel(stringInfo.number, stringInfo.short);
+    }
+
+    function phoneStringLabel(stringIndex) {
+      const stringInfo = OPEN_STRINGS[stringIndex];
+      return TEXT.phoneStringLabel(stringInfo.number, stringInfo.short);
+    }
+
+    function fretDisplay(fret) {
+      return fret === 0 ? TEXT.openString : fret;
+    }
+
+    function positionLabel(stringIndex, fret) {
+      return TEXT.position(stringLabel(stringIndex), fret);
+    }
+
+    function qualityName(quality) {
+      return TEXT.qualityNames[quality.nameKey] || quality.nameKey;
+    }
+
+    function intervalName(interval) {
+      return TEXT.intervalNames[interval] || TEXT.intervalNames[0];
+    }
+
+    function localizedCopy(value) {
+      if (typeof value === "string") return value;
+      return value[locale] || value.en || value["zh-Hans"] || "";
+    }
+
     const OPEN_STRINGS = [
-      { label: "6弦 E", short: "E", pc: 4, midi: 40 },
-      { label: "5弦 A", short: "A", pc: 9, midi: 45 },
-      { label: "4弦 D", short: "D", pc: 2, midi: 50 },
-      { label: "3弦 G", short: "G", pc: 7, midi: 55 },
-      { label: "2弦 B", short: "B", pc: 11, midi: 59 },
-      { label: "1弦 E", short: "E", pc: 4, midi: 64 }
+      { number: 6, short: "E", pc: 4, midi: 40 },
+      { number: 5, short: "A", pc: 9, midi: 45 },
+      { number: 4, short: "D", pc: 2, midi: 50 },
+      { number: 3, short: "G", pc: 7, midi: 55 },
+      { number: 2, short: "B", pc: 11, midi: 59 },
+      { number: 1, short: "E", pc: 4, midi: 64 }
     ];
 
     const STRING_DISPLAY_ORDER = [5, 4, 3, 2, 1, 0];
@@ -1400,70 +1901,208 @@
     const FRET_ROW_HEIGHTS = [38, 56, 53, 50, 47, 45, 43, 41, 39, 37, 35, 34, 33];
 
     const QUALITIES = [
-      { suffix: "m7", name: "小七和弦", intervals: [0, 3, 7, 10], defining: [3, 10], priority: 12 },
-      { suffix: "maj7", name: "大七和弦", intervals: [0, 4, 7, 11], defining: [4, 11], priority: 11 },
-      { suffix: "7", name: "属七和弦", intervals: [0, 4, 7, 10], defining: [4, 10], priority: 10 },
-      { suffix: "m7b5", name: "半减七和弦", intervals: [0, 3, 6, 10], defining: [3, 6, 10], priority: 9 },
-      { suffix: "m", name: "小三和弦", intervals: [0, 3, 7], defining: [3], priority: 8 },
-      { suffix: "", name: "大三和弦", intervals: [0, 4, 7], defining: [4], priority: 8 },
-      { suffix: "dim", name: "减三和弦", intervals: [0, 3, 6], defining: [3, 6], priority: 7 },
-      { suffix: "aug", name: "增三和弦", intervals: [0, 4, 8], defining: [4, 8], priority: 7 },
-      { suffix: "sus2", name: "挂二和弦", intervals: [0, 2, 7], defining: [2, 7], priority: 6 },
-      { suffix: "sus4", name: "挂四和弦", intervals: [0, 5, 7], defining: [5, 7], priority: 6 },
-      { suffix: "6", name: "六和弦", intervals: [0, 4, 7, 9], defining: [4, 9], priority: 5 },
-      { suffix: "m6", name: "小六和弦", intervals: [0, 3, 7, 9], defining: [3, 9], priority: 5 },
-      { suffix: "add9", name: "加九和弦", intervals: [0, 2, 4, 7], defining: [2, 4], priority: 4 },
-      { suffix: "5", name: "五和弦", intervals: [0, 7], defining: [7], priority: 2 }
+      { suffix: "m7", nameKey: "minor7", intervals: [0, 3, 7, 10], defining: [3, 10], priority: 12 },
+      { suffix: "maj7", nameKey: "major7", intervals: [0, 4, 7, 11], defining: [4, 11], priority: 11 },
+      { suffix: "7", nameKey: "dominant7", intervals: [0, 4, 7, 10], defining: [4, 10], priority: 10 },
+      { suffix: "m7b5", nameKey: "halfDiminished7", intervals: [0, 3, 6, 10], defining: [3, 6, 10], priority: 9 },
+      { suffix: "m", nameKey: "minor", intervals: [0, 3, 7], defining: [3], priority: 8 },
+      { suffix: "", nameKey: "major", intervals: [0, 4, 7], defining: [4], priority: 8 },
+      { suffix: "dim", nameKey: "diminished", intervals: [0, 3, 6], defining: [3, 6], priority: 7 },
+      { suffix: "aug", nameKey: "augmented", intervals: [0, 4, 8], defining: [4, 8], priority: 7 },
+      { suffix: "sus2", nameKey: "sus2", intervals: [0, 2, 7], defining: [2, 7], priority: 6 },
+      { suffix: "sus4", nameKey: "sus4", intervals: [0, 5, 7], defining: [5, 7], priority: 6 },
+      { suffix: "6", nameKey: "six", intervals: [0, 4, 7, 9], defining: [4, 9], priority: 5 },
+      { suffix: "m6", nameKey: "minor6", intervals: [0, 3, 7, 9], defining: [3, 9], priority: 5 },
+      { suffix: "add9", nameKey: "add9", intervals: [0, 2, 4, 7], defining: [2, 4], priority: 4 },
+      { suffix: "5", nameKey: "power", intervals: [0, 7], defining: [7], priority: 2 }
     ];
-
-    const INTERVAL_NAMES = {
-      0: ["根音", "和弦中心"],
-      1: ["小二度", "紧张半音"],
-      2: ["大二度 / 九度", "延展色彩"],
-      3: ["小三度", "决定小调色彩"],
-      4: ["大三度", "决定大调色彩"],
-      5: ["纯四度", "悬挂感"],
-      6: ["减五度 / 增四度", "强张力"],
-      7: ["纯五度", "稳定骨架"],
-      8: ["小六度", "柔和张力"],
-      9: ["大六度", "明亮延展"],
-      10: ["小七度", "七和弦张力"],
-      11: ["大七度", "柔亮张力"]
-    };
 
     const VOICINGS = {
       Am7: [
-        { name: "开放把位", frets: [null, 0, 2, 0, 1, 0], hint: "最直接的 Am7，适合初学识别 A C E G。" },
-        { name: "五品横按", frets: [5, 7, 5, 5, 5, 5], hint: "同样是 A C E G，集中在五品区域。" },
-        { name: "省略五度", frets: [5, null, 5, 5, 5, null], hint: "保留 A C G E，声音更轻，适合高把位理解。" }
+        {
+          name: { "zh-Hans": "开放把位", en: "Open position", es: "Posición abierta", ja: "開放ポジション" },
+          frets: [null, 0, 2, 0, 1, 0],
+          hint: {
+            "zh-Hans": "最直接的 Am7，适合初学识别 A C E G。",
+            en: "The most direct Am7 shape, useful for seeing A C E G.",
+            es: "La forma más directa de Am7, útil para ver A C E G.",
+            ja: "A C E G を確認しやすい、もっとも直接的な Am7 です。"
+          }
+        },
+        {
+          name: { "zh-Hans": "五品横按", en: "Fifth-fret barre", es: "Cejilla en quinto traste", ja: "5フレットバレー" },
+          frets: [5, 7, 5, 5, 5, 5],
+          hint: {
+            "zh-Hans": "同样是 A C E G，集中在五品区域。",
+            en: "The same A C E G chord tones, clustered around the fifth fret.",
+            es: "Las mismas notas A C E G, concentradas alrededor del quinto traste.",
+            ja: "同じ A C E G を 5 フレット付近にまとめた形です。"
+          }
+        },
+        {
+          name: { "zh-Hans": "省略五度", en: "Omit the fifth", es: "Sin quinta", ja: "5度省略" },
+          frets: [5, null, 5, 5, 5, null],
+          hint: {
+            "zh-Hans": "保留 A C G E，声音更轻，适合高把位理解。",
+            en: "Keeps A C G E for a lighter voicing that is easy to inspect up the neck.",
+            es: "Mantiene A C G E para una sonoridad más ligera en posiciones altas.",
+            ja: "A C G E を残した軽い響きで、高いポジションの理解に向いています。"
+          }
+        }
       ],
       A: [
-        { name: "开放把位", frets: [null, 0, 2, 2, 2, 0], hint: "A C# E 的基础按法。" },
-        { name: "五品横按", frets: [5, 7, 7, 6, 5, 5], hint: "移动 E 型大三和弦到五品。" }
+        {
+          name: { "zh-Hans": "开放把位", en: "Open position", es: "Posición abierta", ja: "開放ポジション" },
+          frets: [null, 0, 2, 2, 2, 0],
+          hint: {
+            "zh-Hans": "A C# E 的基础按法。",
+            en: "A basic A C# E shape.",
+            es: "Una forma básica de A C# E.",
+            ja: "A C# E の基本フォームです。"
+          }
+        },
+        {
+          name: { "zh-Hans": "五品横按", en: "Fifth-fret barre", es: "Cejilla en quinto traste", ja: "5フレットバレー" },
+          frets: [5, 7, 7, 6, 5, 5],
+          hint: {
+            "zh-Hans": "移动 E 型大三和弦到五品。",
+            en: "Moves the E-shape major chord to the fifth fret.",
+            es: "Mueve la forma mayor de E al quinto traste.",
+            ja: "E 型メジャーを 5 フレットへ移動した形です。"
+          }
+        }
       ],
       Am: [
-        { name: "开放把位", frets: [null, 0, 2, 2, 1, 0], hint: "A C E 的基础按法。" },
-        { name: "五品横按", frets: [5, 7, 7, 5, 5, 5], hint: "移动 Em 型小三和弦到五品。" }
+        {
+          name: { "zh-Hans": "开放把位", en: "Open position", es: "Posición abierta", ja: "開放ポジション" },
+          frets: [null, 0, 2, 2, 1, 0],
+          hint: {
+            "zh-Hans": "A C E 的基础按法。",
+            en: "A basic A C E shape.",
+            es: "Una forma básica de A C E.",
+            ja: "A C E の基本フォームです。"
+          }
+        },
+        {
+          name: { "zh-Hans": "五品横按", en: "Fifth-fret barre", es: "Cejilla en quinto traste", ja: "5フレットバレー" },
+          frets: [5, 7, 7, 5, 5, 5],
+          hint: {
+            "zh-Hans": "移动 Em 型小三和弦到五品。",
+            en: "Moves the Em-shape minor chord to the fifth fret.",
+            es: "Mueve la forma menor de Em al quinto traste.",
+            ja: "Em 型マイナーを 5 フレットへ移動した形です。"
+          }
+        }
       ],
       C: [
-        { name: "开放把位", frets: [null, 3, 2, 0, 1, 0], hint: "C E G 的开放按法。" },
-        { name: "八品横按", frets: [8, 10, 10, 9, 8, 8], hint: "移动 E 型大三和弦到八品。" }
+        {
+          name: { "zh-Hans": "开放把位", en: "Open position", es: "Posición abierta", ja: "開放ポジション" },
+          frets: [null, 3, 2, 0, 1, 0],
+          hint: {
+            "zh-Hans": "C E G 的开放按法。",
+            en: "An open C E G voicing.",
+            es: "Una posición abierta de C E G.",
+            ja: "C E G の開放フォームです。"
+          }
+        },
+        {
+          name: { "zh-Hans": "八品横按", en: "Eighth-fret barre", es: "Cejilla en octavo traste", ja: "8フレットバレー" },
+          frets: [8, 10, 10, 9, 8, 8],
+          hint: {
+            "zh-Hans": "移动 E 型大三和弦到八品。",
+            en: "Moves the E-shape major chord to the eighth fret.",
+            es: "Mueve la forma mayor de E al octavo traste.",
+            ja: "E 型メジャーを 8 フレットへ移動した形です。"
+          }
+        }
       ],
       Cmaj7: [
-        { name: "开放把位", frets: [null, 3, 2, 0, 0, 0], hint: "C E G B，保留高音 B 的大七度。" },
-        { name: "八品横按", frets: [8, 10, 9, 9, 8, 8], hint: "高把位 Cmaj7，更容易看出 B 到 C 的关系。" }
+        {
+          name: { "zh-Hans": "开放把位", en: "Open position", es: "Posición abierta", ja: "開放ポジション" },
+          frets: [null, 3, 2, 0, 0, 0],
+          hint: {
+            "zh-Hans": "C E G B，保留高音 B 的大七度。",
+            en: "C E G B with the high B preserving the major seventh color.",
+            es: "C E G B, con el B agudo marcando la séptima mayor.",
+            ja: "高音 B がメジャー7度の色を残す C E G B です。"
+          }
+        },
+        {
+          name: { "zh-Hans": "八品横按", en: "Eighth-fret barre", es: "Cejilla en octavo traste", ja: "8フレットバレー" },
+          frets: [8, 10, 9, 9, 8, 8],
+          hint: {
+            "zh-Hans": "高把位 Cmaj7，更容易看出 B 到 C 的关系。",
+            en: "A higher Cmaj7 position that makes the B-to-C relationship easy to see.",
+            es: "Una posición alta de Cmaj7 que deja clara la relación de B con C.",
+            ja: "B と C の関係を見やすい高いポジションの Cmaj7 です。"
+          }
+        }
       ],
       Dm7: [
-        { name: "开放把位", frets: [null, null, 0, 2, 1, 1], hint: "D F A C 的小七结构。" },
-        { name: "十品横按", frets: [10, 12, 10, 10, 10, 10], hint: "移动 Am7 型到十品。" }
+        {
+          name: { "zh-Hans": "开放把位", en: "Open position", es: "Posición abierta", ja: "開放ポジション" },
+          frets: [null, null, 0, 2, 1, 1],
+          hint: {
+            "zh-Hans": "D F A C 的小七结构。",
+            en: "A D F A C minor seventh structure.",
+            es: "Una estructura menor séptima D F A C.",
+            ja: "D F A C のマイナー7th 構造です。"
+          }
+        },
+        {
+          name: { "zh-Hans": "十品横按", en: "Tenth-fret barre", es: "Cejilla en décimo traste", ja: "10フレットバレー" },
+          frets: [10, 12, 10, 10, 10, 10],
+          hint: {
+            "zh-Hans": "移动 Am7 型到十品。",
+            en: "Moves the Am7 shape to the tenth fret.",
+            es: "Mueve la forma de Am7 al décimo traste.",
+            ja: "Am7 型を 10 フレットへ移動した形です。"
+          }
+        }
       ],
       Emaj7: [
-        { name: "开放把位", frets: [0, 2, 1, 1, 0, 0], hint: "E G# B D#，大七度在 D#。" },
-        { name: "七品区域", frets: [null, 7, 6, 8, 9, 7], hint: "更集中地观察大七和弦色彩。" }
+        {
+          name: { "zh-Hans": "开放把位", en: "Open position", es: "Posición abierta", ja: "開放ポジション" },
+          frets: [0, 2, 1, 1, 0, 0],
+          hint: {
+            "zh-Hans": "E G# B D#，大七度在 D#。",
+            en: "E G# B D#, with D# carrying the major seventh.",
+            es: "E G# B D#, con D# como séptima mayor.",
+            ja: "D# がメジャー7度になる E G# B D# です。"
+          }
+        },
+        {
+          name: { "zh-Hans": "七品区域", en: "Seventh-fret area", es: "Zona del séptimo traste", ja: "7フレット周辺" },
+          frets: [null, 7, 6, 8, 9, 7],
+          hint: {
+            "zh-Hans": "更集中地观察大七和弦色彩。",
+            en: "A compact way to inspect the major seventh color.",
+            es: "Una forma compacta de ver el color de séptima mayor.",
+            ja: "メジャー7th の響きをまとまって確認できます。"
+          }
+        }
       ],
       G: [
-        { name: "开放把位", frets: [3, 2, 0, 0, 0, 3], hint: "G B D 的开放按法。" },
-        { name: "三品横按", frets: [3, 5, 5, 4, 3, 3], hint: "移动 E 型大三和弦到三品。" }
+        {
+          name: { "zh-Hans": "开放把位", en: "Open position", es: "Posición abierta", ja: "開放ポジション" },
+          frets: [3, 2, 0, 0, 0, 3],
+          hint: {
+            "zh-Hans": "G B D 的开放按法。",
+            en: "An open G B D voicing.",
+            es: "Una posición abierta de G B D.",
+            ja: "G B D の開放フォームです。"
+          }
+        },
+        {
+          name: { "zh-Hans": "三品横按", en: "Third-fret barre", es: "Cejilla en tercer traste", ja: "3フレットバレー" },
+          frets: [3, 5, 5, 4, 3, 3],
+          hint: {
+            "zh-Hans": "移动 E 型大三和弦到三品。",
+            en: "Moves the E-shape major chord to the third fret.",
+            es: "Mueve la forma mayor de E al tercer traste.",
+            ja: "E 型メジャーを 3 フレットへ移動した形です。"
+          }
+        }
       ]
     };
 
@@ -1490,8 +2129,44 @@
     const voicingTitle = document.getElementById("voicingTitle");
     const voicingList = document.getElementById("voicingList");
     const chordPlayBtn = document.getElementById("chordPlayBtn");
+    const chordPlayLabel = document.getElementById("chordPlayLabel");
     const toggleVoicings = document.getElementById("toggleVoicings");
+    const languageSelect = document.getElementById("languageSelect");
     let audioContext;
+
+    function applyStaticCopy() {
+      languageSelect.value = locale;
+      languageSelect.setAttribute("aria-label", TEXT.languageLabel);
+      document.documentElement.lang = TEXT.htmlLang;
+      document.title = TEXT.documentTitle;
+      document.getElementById("appShell").setAttribute("aria-label", TEXT.appLabel);
+      document.getElementById("appTitle").textContent = TEXT.appTitle;
+      document.getElementById("brandTagline").textContent = TEXT.tagline;
+      document.getElementById("toolbar").setAttribute("aria-label", TEXT.toolbarLabel);
+      document.getElementById("demoBtn").textContent = TEXT.demo;
+      document.getElementById("clearBtn").textContent = TEXT.clear;
+      document.getElementById("fretPanel").setAttribute("aria-label", TEXT.fretPanelLabel);
+      document.getElementById("fretTitle").textContent = TEXT.fretTitle;
+      document.getElementById("fretDescription").textContent = TEXT.fretDescription;
+      document.getElementById("tuningChip").textContent = TEXT.tuning;
+      phoneFretboard.setAttribute("aria-label", TEXT.phoneFretboardLabel);
+      selectedStrip.setAttribute("aria-label", TEXT.selectedStripLabel);
+      document.getElementById("analysisPanel").setAttribute("aria-label", TEXT.analysisLabel);
+      document.getElementById("resultCard").setAttribute("aria-label", TEXT.resultCardLabel);
+      chordPlayLabel.textContent = TEXT.playChord;
+      document.getElementById("intervalTitle").textContent = TEXT.intervalTitle;
+      voicingTitle.textContent = TEXT.voicingDefaultTitle;
+      toggleVoicings.textContent = TEXT.expand;
+    }
+
+    function setLocale(nextLocale) {
+      if (!SUPPORTED_LOCALES.includes(nextLocale)) return;
+      locale = nextLocale;
+      TEXT = I18N[locale] || I18N["zh-Hans"];
+      saveLocale(locale);
+      applyStaticCopy();
+      update();
+    }
 
     function mod(n, m) {
       return ((n % m) + m) % m;
@@ -1562,20 +2237,7 @@
     }
 
     function intervalShortLabel(interval) {
-      return {
-        0: "根",
-        1: "小2",
-        2: "大2",
-        3: "小3",
-        4: "大3",
-        5: "纯4",
-        6: "减5",
-        7: "纯5",
-        8: "小6",
-        9: "大6",
-        10: "小7",
-        11: "大7"
-      }[interval] || "";
+      return TEXT.intervalShort[interval] || "";
     }
 
     function intervalFor(pc, rootPc) {
@@ -1794,7 +2456,7 @@
             pc,
             midi: midiAt(stringIndex, fret),
             name: noteName(pc),
-            position: `${OPEN_STRINGS[stringIndex].label} · ${fret}品`
+            position: positionLabel(stringIndex, fret)
           };
         })
         .filter(Boolean);
@@ -1871,18 +2533,18 @@
       const messages = [];
 
       if (!candidate.missing.length && !candidate.extra.length) {
-        return "完整匹配";
+        return TEXT.completeMatch;
       }
 
       if (candidate.missing.length) {
-        messages.push(`省略了 ${candidate.missing.map((i) => INTERVAL_NAMES[i][0]).join("、")}`);
+        messages.push(TEXT.omitted(joinList(candidate.missing.map((i) => intervalName(i)[0]))));
       }
 
       if (candidate.extra.length) {
-        messages.push(`含 ${candidate.extra.map((i) => INTERVAL_NAMES[i][0]).join("、")} 延伸音`);
+        messages.push(TEXT.extensions(joinList(candidate.extra.map((i) => intervalName(i)[0]))));
       }
 
-      return messages.join("，");
+      return messages.join(TEXT.phraseSeparator);
     }
 
     function analyzeChord(notes) {
@@ -1893,12 +2555,12 @@
 
       if (pcs.length < 2) {
         return {
-          symbol: "选择更多音",
-          baseSymbol: "选择更多音",
-          quality: "尚未形成和弦",
+          symbol: TEXT.needMoreNotesSymbol,
+          baseSymbol: TEXT.needMoreNotesSymbol,
+          quality: TEXT.noChordQuality,
           rootPc: pcs[0] ?? null,
           intervals: [],
-          confidence: "需要至少 2 个不同音"
+          confidence: TEXT.needAtLeastTwo
         };
       }
 
@@ -1935,13 +2597,13 @@
 
       if (!candidates.length) {
         return {
-          symbol: "未识别组合",
-          baseSymbol: "未识别组合",
-          quality: "未匹配到常见和弦",
+          symbol: TEXT.unknownSymbol,
+          baseSymbol: TEXT.unknownSymbol,
+          quality: TEXT.noCommonChord,
           rootPc: null,
           bassPc,
           intervals: [],
-          confidence: "无法可靠判断根音"
+          confidence: TEXT.cannotFindRoot
         };
       }
 
@@ -1960,7 +2622,7 @@
       return {
         symbol: `${baseSymbol}${slash}`,
         baseSymbol,
-        quality: best.quality.name,
+        quality: qualityName(best.quality),
         rootPc: best.rootPc,
         bassPc,
         intervals: best.intervals,
@@ -2031,17 +2693,17 @@
       const numberRow = document.createElement("div");
       numberRow.className = "fret-numbers";
       const empty = document.createElement("span");
-      empty.textContent = "弦 / 品";
+      empty.textContent = TEXT.stringFretHeader;
       numberRow.appendChild(empty);
       for (let fret = 0; fret <= 12; fret += 1) {
         const number = document.createElement("span");
-        number.textContent = fret === 0 ? "空弦" : fret;
+        number.textContent = fretDisplay(fret);
         numberRow.appendChild(number);
       }
       fretboard.appendChild(numberRow);
 
       STRING_DISPLAY_ORDER.forEach((stringIndex) => {
-        const stringInfo = OPEN_STRINGS[stringIndex];
+        const translatedStringLabel = stringLabel(stringIndex);
         const row = document.createElement("div");
         row.className = "string-row";
         row.dataset.string = stringIndex;
@@ -2050,7 +2712,7 @@
 
         const label = document.createElement("div");
         label.className = "string-label";
-        label.textContent = stringInfo.label;
+        label.textContent = translatedStringLabel;
         row.appendChild(label);
 
         const wave = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -2075,7 +2737,14 @@
           cell.className = "string-cell";
           cell.dataset.string = stringIndex;
           cell.dataset.fret = fret;
-          cell.setAttribute("aria-label", mutedOpen ? `${stringInfo.label} X 不弹奏` : openSelected ? `${stringInfo.label} 空弦 ${noteName(pc)}` : `${stringInfo.label} ${fret}品 ${noteName(pc)}`);
+          cell.setAttribute(
+            "aria-label",
+            mutedOpen
+              ? TEXT.ariaMuted(translatedStringLabel)
+              : openSelected
+                ? TEXT.ariaOpen(translatedStringLabel, noteName(pc))
+                : TEXT.ariaFret(translatedStringLabel, fret, noteName(pc))
+          );
           if (mutedOpen) cell.classList.add("muted-open");
           if (selected) cell.classList.add("selected");
           if (openSelected) cell.classList.add("open-selected");
@@ -2104,12 +2773,11 @@
       const head = document.createElement("div");
       head.className = "phone-head";
       const corner = document.createElement("span");
-      corner.textContent = "品 / 弦";
+      corner.textContent = TEXT.fretStringHeader;
       head.appendChild(corner);
       STRING_DISPLAY_ORDER.forEach((stringIndex) => {
-        const stringInfo = OPEN_STRINGS[stringIndex];
         const label = document.createElement("span");
-        label.textContent = `${6 - stringIndex}${stringInfo.short}`;
+        label.textContent = phoneStringLabel(stringIndex);
         head.appendChild(label);
       });
       phoneFretboard.appendChild(head);
@@ -2122,11 +2790,11 @@
 
         const label = document.createElement("div");
         label.className = "phone-fret-label";
-        label.textContent = fret === 0 ? "空弦" : fret;
+        label.textContent = fretDisplay(fret);
         row.appendChild(label);
 
         STRING_DISPLAY_ORDER.forEach((stringIndex) => {
-          const stringInfo = OPEN_STRINGS[stringIndex];
+          const translatedStringLabel = stringLabel(stringIndex);
           const pc = noteAt(stringIndex, fret);
           const selected = state.selected[stringIndex] === fret;
           const mutedOpen = fret === 0 && state.selected[stringIndex] === null;
@@ -2136,7 +2804,14 @@
           cell.className = "phone-cell";
           cell.dataset.string = stringIndex;
           cell.dataset.fret = fret;
-          cell.setAttribute("aria-label", mutedOpen ? `${stringInfo.label} X 不弹奏` : openSelected ? `${stringInfo.label} 空弦 ${noteName(pc)}` : `${stringInfo.label} ${fret}品 ${noteName(pc)}`);
+          cell.setAttribute(
+            "aria-label",
+            mutedOpen
+              ? TEXT.ariaMuted(translatedStringLabel)
+              : openSelected
+                ? TEXT.ariaOpen(translatedStringLabel, noteName(pc))
+                : TEXT.ariaFret(translatedStringLabel, fret, noteName(pc))
+          );
           if (mutedOpen) cell.classList.add("muted-open");
           if (selected) cell.classList.add("selected");
           if (openSelected) cell.classList.add("open-selected");
@@ -2169,12 +2844,12 @@
 
     function renderSelected(notes, analysis) {
       selectedStrip.innerHTML = "";
-      selectionCount.textContent = `已选择 ${notes.length} 个音`;
+      selectionCount.textContent = TEXT.selectedCount(notes.length);
 
       if (!notes.length) {
         const empty = document.createElement("span");
         empty.className = "selected-note";
-        empty.textContent = "还没有选择音";
+        empty.textContent = TEXT.noNotes;
         selectedStrip.appendChild(empty);
         return;
       }
@@ -2182,7 +2857,7 @@
       notes.forEach((note) => {
         const interval = analysis.rootPc === null || analysis.rootPc === undefined
           ? ""
-          : INTERVAL_NAMES[mod(note.pc - analysis.rootPc, 12)][0];
+          : intervalName(mod(note.pc - analysis.rootPc, 12))[0];
         const item = document.createElement("span");
         item.className = "selected-note";
         item.innerHTML = `${note.position} · ${note.name}${interval ? ` · <b>${interval}</b>` : ""}`;
@@ -2195,53 +2870,59 @@
       chordName.textContent = analysis.symbol;
       chordName.classList.toggle("long-result", analysis.symbol.length > 4 || analysis.symbol.includes(" "));
       compactChord.textContent = analysis.symbol;
-      resultState.textContent = notes.length ? "实时识别" : "等待点按";
+      resultState.textContent = notes.length ? TEXT.resultLive : TEXT.resultWaiting;
       chordMeta.innerHTML = "";
-      compactMeta.textContent = unique.map((note) => note.name).join(" · ") || "暂无音";
+      compactMeta.textContent = unique.map((note) => note.name).join(" · ") || TEXT.noNotesShort;
       const canPlayChord = unique.length > 1 && analysis.rootPc !== null;
       chordPlayBtn.hidden = !canPlayChord;
       chordPlayBtn.disabled = !canPlayChord;
-      chordPlayBtn.setAttribute("aria-label", canPlayChord ? `播放 ${analysis.symbol} 和弦` : "当前没有可播放和弦");
+      chordPlayBtn.setAttribute("aria-label", canPlayChord ? TEXT.playChordAria(analysis.symbol) : TEXT.noPlayableChord);
 
       [
         analysis.quality,
         analysis.confidence,
-        unique.map((note) => note.name).join(" · ") || "暂无音"
+        unique.map((note) => note.name).join(" · ") || TEXT.noNotesShort
       ].forEach((text) => {
         const span = document.createElement("span");
         span.textContent = text;
         chordMeta.appendChild(span);
       });
 
-      whyTitle.textContent = `为什么是 ${analysis.symbol}`;
+      whyTitle.textContent = TEXT.whyTitle(analysis.symbol);
 
       if (!notes.length) {
-        whyCopy.textContent = "在左侧指板点按几个位置后，这里会解释当前音集合为什么构成某个和弦。";
+        whyCopy.textContent = TEXT.whyNoNotes;
         return;
       }
 
       if (unique.length < 2) {
-        whyCopy.textContent = "当前只有一个不同音，还不能判断和弦。至少再选一个三度或五度。";
+        whyCopy.textContent = TEXT.whyOneNote;
         return;
       }
 
       if (analysis.rootPc === null) {
-        whyCopy.textContent = "这组音没有清晰的三度、五度或七度骨架，系统暂时不强行指定根音。继续补充关键音程后会重新判断。";
+        whyCopy.textContent = TEXT.whyUnknown;
         return;
       }
 
       const intervalText = unique
         .map((note) => {
           const interval = mod(note.pc - analysis.rootPc, 12);
-          return `${note.name} 是 ${INTERVAL_NAMES[interval][0]}`;
+          return TEXT.noteIsInterval(note.name, intervalName(interval)[0]);
         })
-        .join("，");
+        .join(TEXT.phraseSeparator);
 
       const bassText = analysis.bassPc !== null && analysis.bassPc !== analysis.rootPc
-        ? `最低音是 ${noteName(analysis.bassPc)}，所以显示为 ${analysis.symbol}。`
+        ? TEXT.bassCopy(noteName(analysis.bassPc), analysis.symbol)
         : "";
 
-      whyCopy.textContent = `你选中的音是 ${unique.map((note) => note.name).join("、")}。以 ${noteName(analysis.rootPc)} 为根音，${intervalText}，所以系统识别为 ${analysis.quality}。${bassText}`;
+      whyCopy.textContent = TEXT.whyCopy({
+        notes: joinList(unique.map((note) => note.name)),
+        root: noteName(analysis.rootPc),
+        intervals: intervalText,
+        quality: analysis.quality,
+        bass: bassText
+      });
     }
 
     function renderIntervals(notes, analysis) {
@@ -2251,7 +2932,7 @@
       if (!unique.length) {
         const empty = document.createElement("div");
         empty.className = "empty";
-        empty.textContent = "选择音后会在这里显示每个音和根音之间的音程。";
+        empty.textContent = TEXT.intervalEmpty;
         intervalList.appendChild(empty);
         return;
       }
@@ -2259,7 +2940,7 @@
       if (analysis.rootPc === null) {
         const empty = document.createElement("div");
         empty.className = "empty";
-        empty.textContent = "当前音集合还不能可靠判断根音，因此暂不计算到根音的音程。";
+        empty.textContent = TEXT.intervalNoRoot;
         intervalList.appendChild(empty);
         return;
       }
@@ -2268,7 +2949,7 @@
         .sort((a, b) => mod(a.pc - analysis.rootPc, 12) - mod(b.pc - analysis.rootPc, 12))
         .forEach((note) => {
           const interval = mod(note.pc - analysis.rootPc, 12);
-          const [name, role] = INTERVAL_NAMES[interval];
+          const [name, role] = intervalName(interval);
           const row = document.createElement("div");
           row.className = "interval-row";
           if (interval === 0) row.classList.add("root-note");
@@ -2277,7 +2958,7 @@
             <span class="note-token">${note.name}</span>
             <span class="interval-copy">
               <b>${name}</b>
-              <span>${note.positions.join("、")}</span>
+              <span>${joinList(note.positions)}</span>
             </span>
             <span class="interval-badge">${role}</span>
           `;
@@ -2299,9 +2980,9 @@
         viewBox: "0 0 170 142",
         role: "img",
         "aria-label": frets.map((fret, stringIndex) => {
-          const stringLabel = `${6 - stringIndex}弦`;
-          return fret === null ? `${stringLabel}不弹` : `${stringLabel}${fret}品`;
-        }).join("，")
+          const stringNumber = 6 - stringIndex;
+          return fret === null ? TEXT.diagramMuted(stringNumber) : TEXT.diagramFret(stringNumber, fret);
+        }).join(TEXT.phraseSeparator)
       });
 
       const xStart = 34;
@@ -2412,15 +3093,15 @@
     function renderVoicings(analysis) {
       const voicingKey = analysis.baseSymbol || analysis.symbol;
       const options = VOICINGS[voicingKey] || [];
-      voicingTitle.textContent = `${voicingKey} 的其他按法`;
+      voicingTitle.textContent = TEXT.voicingTitle(voicingKey);
       voicingCard.classList.toggle("open", state.voicingsOpen);
-      toggleVoicings.textContent = state.voicingsOpen ? "收起" : "展开";
+      toggleVoicings.textContent = state.voicingsOpen ? TEXT.collapse : TEXT.expand;
       voicingList.innerHTML = "";
 
       if (!options.length) {
         const empty = document.createElement("div");
         empty.className = "empty";
-        empty.textContent = "这个和弦暂时没有收录其他按法。换一个常见和弦，或继续补全音程后再看。";
+        empty.textContent = TEXT.voicingEmpty;
         voicingList.appendChild(empty);
         return;
       }
@@ -2433,7 +3114,12 @@
 
         const copy = document.createElement("div");
         copy.className = "voicing-copy";
-        copy.innerHTML = `<h4>${option.name}</h4><p>${option.hint}</p>`;
+        const title = document.createElement("h4");
+        title.textContent = localizedCopy(option.name);
+        const hint = document.createElement("p");
+        hint.textContent = localizedCopy(option.hint);
+        copy.appendChild(title);
+        copy.appendChild(hint);
 
         const chart = createChordDiagram(option.frets, analysis.rootPc);
 
@@ -2483,6 +3169,11 @@
       playChord(selectedNotes());
     });
 
+    languageSelect.addEventListener("change", (event) => {
+      setLocale(event.target.value);
+    });
+
+    applyStaticCopy();
     update();
   </script>
 </body>
